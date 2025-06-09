@@ -1,89 +1,65 @@
 <template>
-  <div class="min-h-screen bg-green-800 flex items-center justify-center">
-    <div class="bg-white rounded-xl shadow-lg w-full max-w-md p-8">
+  <div
+    class="min-h-screen bg-[#2e6d56] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8"
+  >
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-md p-6">
       <!-- Logo Section -->
       <div class="text-center mb-6">
-        <h1 class="text-4xl font-bold text-green-800">SunFlex</h1>
-        <p class="text-green-700 font-semibold tracking-wide">
+        <h1 class="text-2xl font-semibold text-[#2e6d56]">SunFlex</h1>
+        <p class="text-[#2e6d56] font-medium tracking-wide text-sm">
           INFORMATION SYSTEM
         </p>
-        <p class="text-gray-600 text-sm mt-1">SunFlex(Cambodia) Co., Ltd.</p>
+        <p class="text-gray-600 text-xs mt-1">SunFlex(Cambodia) Co., Ltd.</p>
       </div>
 
       <!-- Login Form -->
-      <form @submit.prevent="login">
-        <div class="mb-4">
+      <form @submit.prevent="login" class="space-y-4">
+        <div>
           <label class="block text-sm font-medium text-gray-700"
             >Email <span class="text-red-500">*</span></label
           >
           <input
-            type="email"
             v-model="email"
-            class="w-full mt-1 p-3 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-700"
-            placeholder="Enter your email"
+            type="email"
             required
+            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2e6d56] transition text-sm"
+            placeholder="Enter your email"
           />
         </div>
 
-        <div class="mb-2">
+        <div>
           <label class="block text-sm font-medium text-gray-700"
             >Password <span class="text-red-500">*</span></label
           >
-          <div class="relative">
+          <div class="relative mt-1">
             <input
-              :type="showPassword ? 'text' : 'password'"
               v-model="password"
-              class="w-full mt-1 p-3 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-700"
-              placeholder="Enter your password"
+              :type="showPassword ? 'text' : 'password'"
               required
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2e6d56] transition text-sm"
+              placeholder="Enter your password"
             />
             <button
               type="button"
-              class="absolute right-3 top-4 text-gray-500"
+              class="absolute right-3 top-2.5 text-gray-500 focus:outline-none"
               @click="togglePassword"
             >
-              <svg
-                v-if="showPassword"
-                xmlns="http://www.w3.org/2000/svg"
-                class="h-5 w-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M13.875 18.825A10.05 10.05 0 0112 19c-5.523 0-10-4.477-10-10 0-.534.04-1.06.118-1.575M4.222 4.222L19.778 19.778M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                />
-              </svg>
-              <svg
-                v-else
-                xmlns="http://www.w3.org/2000/svg"
-                class="h-5 w-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0zm-6 0a6 6 0 1112 0 6 6 0 01-12 0z"
-                />
-              </svg>
+              <i v-if="showPassword" class="fas fa-eye-slash"></i>
+              <i v-else class="fas fa-eye"></i>
             </button>
           </div>
           <div class="text-right mt-1">
-            <a href="#" class="text-sm text-green-700 hover:underline"
-              >Forget password?</a
+            <RouterLink
+              to="/forgot-password"
+              class="text-sm text-[#2e6d56] hover:underline"
+              >Forget password?</RouterLink
             >
           </div>
         </div>
 
         <button
           type="submit"
-          class="w-full bg-green-700 text-white py-2 mt-4 rounded-md hover:bg-green-800 transition"
+          class="w-full bg-[#2e6d56] text-white py-2 rounded-md hover:bg-[#245c48] transition text-sm font-medium"
         >
           Login
         </button>
@@ -91,16 +67,17 @@
 
       <!-- Sign Up Link -->
       <div class="text-center mt-4 text-sm text-gray-700">
-        don't have an account?
-        <a href="#" class="text-green-700 font-medium hover:underline"
-          >Sign Up</a
+        Don’t have an account?
+        <RouterLink
+          to="/signup"
+          class="text-[#2e6d56] font-medium hover:underline"
+          >Sign Up</RouterLink
         >
       </div>
 
       <!-- Footer -->
       <div class="text-xs text-center text-gray-500 mt-6">
         ©2025 by SunFlex (Cambodia) Co., Ltd<br />
-        Best viewed with IE 9+, Firefox 16+, Safari 5.1, Chrome 23+
       </div>
     </div>
   </div>
@@ -108,16 +85,29 @@
 
 <script setup>
 import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 
 const email = ref('');
 const password = ref('');
 const showPassword = ref(false);
+const router = useRouter();
 
 const togglePassword = () => {
   showPassword.value = !showPassword.value;
 };
 
 const login = () => {
-  alert(`Email: ${email.value}\nPassword: ${password.value}`);
+  if (!email.value || !password.value) {
+    alert('Please fill in all required fields.');
+    return;
+  }
+  // Simulate login logic (replace with actual API call)
+  console.log('Login attempt:', {
+    email: email.value,
+    password: password.value
+  });
+  alert(`Logging in with email: ${email.value}`);
+  // Redirect to dashboard or home page on success (for demo)
+  router.push('/');
 };
 </script>

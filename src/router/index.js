@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import Login from '@/views/login';
 import SignUp from '@/views/signUp';
+import ForgotPassword from '@/views/forgot_password';
 import Dashboard from '@/views/Dashboard.vue';
 import Employees from '@/views/Employees.vue';
 // import Departments from '@/views/Department.vue';
@@ -20,11 +21,18 @@ import UserManagement from '@/views/user_management/users';
 const routes = [
   {
     path: '/login',
+    name: 'login',
     component: Login
   },
   {
-    path: '/sign-up',
+    path: '/signup',
+    name: 'signup',
     component: SignUp
+  },
+  {
+    path: '/forgot-password',
+    name: 'forgot-password',
+    component: ForgotPassword
   },
   {
     path: '/',

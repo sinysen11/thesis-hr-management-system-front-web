@@ -58,7 +58,11 @@ export default {
       }
     },
     handleLogOut() {
-      // Add logout logic
+      // Clear user data from localStorage, cookies, or Vuex store
+      localStorage.clear(); // or remove specific keys
+
+      // Redirect to login page using router
+      this.$router.push('/login');
     }
   }
 };
