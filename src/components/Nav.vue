@@ -199,7 +199,7 @@
             <i class="fas fa-building mr-3"></i>
             Department
           </router-link>
-
+          
           <router-link
             to="/users/user-management"
             class="flex items-center px-4 py-2 rounded-md"
