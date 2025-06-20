@@ -113,28 +113,7 @@ module.exports = {
       method: 'delete'
     }
   },
-  faq_khs: {
-    getAllFaqKhs: {
-      url: 'faq_khs',
-      method: 'get'
-    },
-    getOneFaqKhs: {
-      url: 'faq_khs',
-      method: 'get'
-    },
-    createFaqKhs: {
-      url: 'faq_khs',
-      method: 'post'
-    },
-    updateFaqKhs: {
-      url: 'faq_khs',
-      method: 'patch'
-    },
-    deleteFaqKhs: {
-      url: 'faq_khs',
-      method: 'delete'
-    }
-  },
+
   benefit_ens: {
     getAllBenefitEns: {
       url: 'benefit_ens',
@@ -154,28 +133,6 @@ module.exports = {
     },
     deleteBenefitEns: {
       url: 'benefit_ens',
-      method: 'delete'
-    }
-  },
-  benefit_khs: {
-    getAllBenefitKhs: {
-      url: 'benefit_khs',
-      method: 'get'
-    },
-    getOneBenefitKhs: {
-      url: 'benefit_khs',
-      method: 'get'
-    },
-    createBenefitKhs: {
-      url: 'benefit_khs',
-      method: 'post'
-    },
-    updateBenefitKhs: {
-      url: 'benefit_khs',
-      method: 'patch'
-    },
-    deleteBenefitKhs: {
-      url: 'benefit_khs',
       method: 'delete'
     }
   },
@@ -199,23 +156,23 @@ module.exports = {
   //     method: 'post'
   //   }
   // },
-  authentication: {
+  users: {
     signin: {
-      url: 'authentication/signin',
+      url: 'users/login',
       method: 'post'
     },
-    verifyToken: {
-      url: 'authentication/verify-token',
-      method: 'post'
-    },
-    refreshToken: {
-      url: 'authentication/refresh-token',
-      method: 'post'
-    },
-    verifyWebpage: {
-      url: 'authentication/verify-webpage',
-      method: 'post'
-    },
+    // verifyToken: {
+    //   url: 'users/verify-token',
+    //   method: 'post'
+    // },
+    // refreshToken: {
+    //   url: 'users/refresh-token',
+    //   method: 'post'
+    // },
+    // verifyWebpage: {
+    //   url: 'users/verify-webpage',
+    //   method: 'post'
+    // },
     getAllUserRole: {
       url: 'authorization/role/hr',
       method: 'get'

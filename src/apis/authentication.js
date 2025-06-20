@@ -17,14 +17,6 @@ export function signin(data) {
   });
 }
 
-export function verifyToken(data) {
-  return request({
-    url: authentication.verifyToken.url,
-    method: authentication.verifyToken.method,
-    data
-  });
-}
-
 export function refreshToken(data) {
   return request({
     url: authentication.refreshToken.url,

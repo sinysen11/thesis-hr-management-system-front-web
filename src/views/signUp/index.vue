@@ -42,7 +42,7 @@
             />
             <button
               type="button"
-              @click="showPassword = !showPassword"
+              @click="togglePassword"
               class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 focus:outline-none"
             >
               <i :class="showPassword ? 'fas fa-eye' : 'fas fa-eye-slash'"></i>
@@ -65,7 +65,7 @@
             />
             <button
               type="button"
-              @click="showConfirmPassword = !showConfirmPassword"
+              @click="toggleConfirmPassword"
               class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 focus:outline-none"
             >
               <i
@@ -100,21 +100,35 @@
   </div>
 </template>
 
-<script setup>
-import { ref } from 'vue';
-
-const email = ref('');
-const password = ref('');
-const confirmPassword = ref('');
-const showPassword = ref(false);
-const showConfirmPassword = ref(false);
-
-const handleRegister = () => {
-  if (password.value !== confirmPassword.value) {
-    alert('Passwords do not match!');
-    return;
+<script>
+export default {
+  data() {
+    return {
+      email: '',
+      password: '',
+      confirmPassword: '',
+      showPassword: false,
+      showConfirmPassword: false
+    };
+  },
+  methods: {
+    handleRegister() {
+      if (this.password !== this.confirmPassword) {
+        alert('Passwords do not match!');
+        return;
+      }
+      console.log({
+        email: this.email,
+        password: this.password
+      });
+      // Add real submit logic here
+    },
+    togglePassword() {
+      this.showPassword = !this.showPassword;
+    },
+    toggleConfirmPassword() {
+      this.showConfirmPassword = !this.showConfirmPassword;
+    }
   }
-  // Submit logic here (e.g., API call)
-  console.log({ email: email.value, password: password.value });
 };
 </script>
