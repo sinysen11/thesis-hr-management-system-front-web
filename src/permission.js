@@ -1,25 +1,28 @@
 import router from './router';
-import { getToken, removeAllToken } from '@/services/authentication'; // token from cookie
-// import store from './store';
-import { verifyWebpage, getMenuByRole } from '@/apis/authentication';
-// import { transformMenuUrl } from '@/services/util';
+import { getToken, removeAllToken } from '@/services/authentication';
+import { verifyWebpage, getMenuByRole } from '@/apis/auth';
 import NProgress from 'nprogress';
 import 'nprogress/nprogress.css';
 
 router.beforeEach(async (to, from, next) => {
   try {
     NProgress.start();
-
-    const token = (await getToken()) || '';
+    const token = await getToken(); // Ensure await is used
+    console.log('Navigation guard - Token:', token); // Debug token
     const isValidToken = !!token;
 
-    if (!isValidToken && to.name !== 'login') {
-      await removeAllToken(true);
+    if (to.meta.requiresAuth && !isValidToken) {
+      await removeAllToken();
       return next({ name: 'login' });
     }
 
-    if (isValidToken && to.name === 'login') {
-      return next({ path: from.path });
+    if (
+      isValidToken &&
+      (to.name === 'login' ||
+        to.name === 'signup' ||
+        to.name === 'forgot-password')
+    ) {
+      return next({ path: '/' });
     }
 
     if (to.meta.is_need_authorization) {
@@ -31,14 +34,12 @@ router.beforeEach(async (to, from, next) => {
           await removeAllToken();
           return next({ name: 'login' });
         } else {
-          if (isValidToken) {
-            const result = await getMenuByRole();
-            if (result && result.status === 200 && result.data) {
-              // const menu_items = await transformMenuUrl(result.data);
-              // return next({ name: menu_items[0].url_name });
-            }
+          const result = await getMenuByRole();
+          if (result && result.status === 200 && result.data) {
+            return next();
           } else {
-            return next({ path: from.fullPath });
+            console.error('Failed to fetch menu by role:', result);
+            return next({ path: '/' });
           }
         }
       }
@@ -48,11 +49,10 @@ router.beforeEach(async (to, from, next) => {
     next();
   } catch (error) {
     NProgress.done();
-    console.error(error.message);
-    next(false);
+    console.error('Navigation guard error:', error.message);
+    next({ name: 'login' });
   }
 });
-
 async function checkAuthorization(page_name) {
   try {
     const result = await verifyWebpage(page_name);
@@ -65,6 +65,7 @@ async function checkAuthorization(page_name) {
       )
     };
   } catch (error) {
-    throw new Error(error.message);
+    console.error('Authorization check failed:', error.message);
+    throw new Error('Authorization check failed');
   }
 }

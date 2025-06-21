@@ -13,7 +13,7 @@
       </div>
 
       <!-- Login Form -->
-      <form @submit.prevent="login" class="space-y-4">
+      <form @submit.prevent="handleLogin" class="space-y-4">
         <div>
           <label class="block text-sm font-medium text-gray-700"
             >Email <span class="text-red-500">*</span></label
@@ -82,10 +82,15 @@
     </div>
   </div>
 </template>
-
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import { login } from '@/apis/auth';
+import {
+  setToken,
+  setUserInfoCookie,
+  getToken
+} from '@/services/authentication';
 
 const email = ref('');
 const password = ref('');
@@ -96,18 +101,42 @@ const togglePassword = () => {
   showPassword.value = !showPassword.value;
 };
 
-const login = () => {
+const handleLogin = async () => {
   if (!email.value || !password.value) {
     alert('Please fill in all required fields.');
     return;
   }
-  // Simulate login logic (replace with actual API call)
-  console.log('Login attempt:', {
-    email: email.value,
-    password: password.value
-  });
-  alert(`Logging in with email: ${email.value}`);
-  // Redirect to dashboard or home page on success (for demo)
-  router.push('/');
+
+  try {
+    const response = await login({
+      email: email.value,
+      password: password.value
+    });
+
+    if (response.status === '1' && response.token && response.user) {
+      await setToken('token', response.token);
+      await setUserInfoCookie(response.user);
+      const storedToken = await getToken();
+      console.log('Stored token:', storedToken); // Debug stored token
+      alert('Login successful!');
+      router.push('/');
+    } else {
+      alert('Login failed: ' + (response.message || 'Invalid response format'));
+    }
+  } catch (error) {
+    console.error('Login error:', error.response || error.message);
+    alert(
+      'Login failed: ' +
+        (error.response?.data?.message || error.message || 'An error occurred')
+    );
+  }
 };
+
+onMounted(async () => {
+  const token = await getToken();
+  if (token) {
+    console.log('Existing token on mount:', token); // Debug existing token
+    router.push('/');
+  }
+});
 </script>

@@ -3,7 +3,8 @@ import Cookies from 'js-cookie';
 const TokenKey = 'token';
 const RefreshTokenKey = 'refresh_token';
 const UserInfoKey = 'userInfo';
-const token_domain = process.env.VUE_APP_TOKEN_DOMAIN || 'localhost';
+const token_domain =
+  process.env.VUE_APP_TOKEN_DOMAIN || 'http://localhost:3000/api';
 
 export async function getToken(tokenKey) {
   const TOKEN_KEY = tokenKey || TokenKey;
@@ -13,7 +14,7 @@ export async function getToken(tokenKey) {
 export function setToken(tokenKey, token, expires = 30) {
   const TOKEN_KEY = tokenKey || TokenKey;
   if (expires === 0) {
-    return Cookies.set(TOKEN_KEY, token);
+    return Cookies.set(TOKEN_KEY, token, { domain: token_domain });
   }
   return Cookies.set(TOKEN_KEY, token, { expires, domain: token_domain });
 }
@@ -30,8 +31,7 @@ export function getUserInfoCookie() {
 }
 
 export function removeUserInfoCookie() {
-  const { cookieKey } = cookieParams(UserInfoKey);
-  return Cookies.remove(cookieKey, { domain: token_domain });
+  return Cookies.remove(UserInfoKey, { domain: token_domain });
 }
 
 export function removeToken(key) {
@@ -39,8 +39,7 @@ export function removeToken(key) {
 }
 
 export function removeAuthToken() {
-  Cookies.remove(RefreshTokenKey, { domain: token_domain });
-  return;
+  return Cookies.remove(RefreshTokenKey, { domain: token_domain });
 }
 
 export function removeAllToken() {
@@ -55,7 +54,7 @@ function cookieParams(key) {
   const { hostname } = window.location;
   const cookieKey = key || TokenKey;
 
-  if (hostname.indexOf('localhost') === -1) {
+  if (hostname !== 'localhost') {
     domain = process.env.VUE_APP_TOKEN_DOMAIN || 'localhost';
   }
 

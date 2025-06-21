@@ -22,80 +22,107 @@ const routes = [
   {
     path: '/login',
     name: 'login',
-    component: Login
+    component: Login,
+    meta: { requiresAuth: false } // Explicitly mark as public
   },
   {
     path: '/signup',
     name: 'signup',
-    component: SignUp
+    component: SignUp,
+    meta: { requiresAuth: false } // Explicitly mark as public
   },
   {
     path: '/forgot-password',
     name: 'forgot-password',
-    component: ForgotPassword
+    component: ForgotPassword,
+    meta: { requiresAuth: false } // Explicitly mark as public
   },
   {
     path: '/',
     component: MainLayout,
+    meta: { requiresAuth: true }, // Mark as protected
     children: [
       {
         path: '',
         name: 'Dashboard',
-        component: Dashboard
+        component: Dashboard,
+        meta: { requiresAuth: true } // Mark as protected
       },
       {
         path: '/applicant',
         name: 'Applicant',
-        component: Applicant
+        component: Applicant,
+        meta: { requiresAuth: true }
       },
       {
         path: '/jobs/job_posting',
         name: 'job_posting',
-        component: JobPosting
+        component: JobPosting,
+        meta: { requiresAuth: true }
       },
       {
         path: '/jobs/job_title',
         name: 'job_title',
-        component: JobTitle
+        component: JobTitle,
+        meta: { requiresAuth: true }
       },
       {
         path: '/jobs/job_category',
         name: 'job_category',
-        component: JobCategory
+        component: JobCategory,
+        meta: { requiresAuth: true }
       },
       {
         path: '/request-leave',
         name: 'request-leave',
-        component: LeaveRequest
+        component: LeaveRequest,
+        meta: { requiresAuth: true }
       },
       {
         path: '/employee/employees-list',
         name: 'employees-list',
-        component: EmployeesList
+        component: EmployeesList,
+        meta: { requiresAuth: true }
       },
       {
         path: '/employee/position-categories',
         name: 'position-categories',
-        component: PositionCategory
+        component: PositionCategory,
+        meta: { requiresAuth: true }
       },
       {
         path: '/users/department',
         name: 'department',
-        component: Department
+        component: Department,
+        meta: { requiresAuth: true }
       },
       {
         path: '/users/roles',
         name: 'roles',
-        component: Roles
+        component: Roles,
+        meta: { requiresAuth: true }
       },
       {
         path: '/users/user-management',
         name: 'user-management',
-        component: UserManagement
+        component: UserManagement,
+        meta: { requiresAuth: true }
       },
-      { path: '/employees', component: Employees },
-      // { path: '/departments', component: Departments },
-      { path: '/profile', component: Profile }
+      {
+        path: '/employees',
+        component: Employees,
+        meta: { requiresAuth: true }
+      },
+      // {
+      //   path: '/departments',
+      //   component: Departments,
+      //   meta: { requiresAuth: true }
+      // },
+      {
+        path: '/profile',
+        component: Profile,
+        meta: { requiresAuth: true }
+      }
     ]
   }
 ];

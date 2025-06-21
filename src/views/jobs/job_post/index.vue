@@ -22,7 +22,7 @@
             type="text"
             v-model="searchQuery"
             class="border border-gray-300 rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
-            placeholder="Search by title or department"
+            placeholder="Search by title or type"
           />
         </div>
         <div class="flex items-end gap-4">
@@ -69,19 +69,19 @@
                 {{ index + 1 + (currentPage - 1) * itemsPerPage }}
               </td>
               <td class="px-4 py-3">{{ job.title }}</td>
-              <td class="px-4 py-3">{{ job.department }}</td>
-              <td class="px-4 py-3">{{ job.location }}</td>
-              <td class="px-4 py-3">{{ job.postedDate }}</td>
+              <td class="px-4 py-3">{{ job.type }}</td>
+              <td class="px-4 py-3">{{ job.salary }}</td>
+              <td class="px-4 py-3">{{ job.description }}</td>
               <td class="px-4 py-3">
                 <span
                   :class="[
                     'px-2 py-1 rounded-full text-xs font-medium',
-                    job.status === 'Open'
+                    job.responsible === 'Open'
                       ? 'bg-green-100 text-green-800'
                       : 'bg-red-100 text-red-800'
                   ]"
                 >
-                  {{ job.status }}
+                  {{ job.responsible }}
                 </span>
               </td>
               <td class="px-4 py-3 flex gap-2">
@@ -191,7 +191,7 @@
                   >Department</label
                 >
                 <p class="text-gray-900 font-medium">
-                  {{ selectedJob.department }}
+                  {{ selectedJob.type }}
                 </p>
               </div>
               <div>
@@ -199,7 +199,7 @@
                   >Location</label
                 >
                 <p class="text-gray-900 font-medium">
-                  {{ selectedJob.location }}
+                  {{ selectedJob.salary }}
                 </p>
               </div>
               <div>
@@ -207,7 +207,7 @@
                   >Posted Date</label
                 >
                 <p class="text-gray-900 font-medium">
-                  {{ selectedJob.postedDate }}
+                  {{ selectedJob.description }}
                 </p>
               </div>
               <div>
@@ -217,12 +217,12 @@
                 <p
                   :class="[
                     'text-sm font-medium',
-                    selectedJob.status === 'Open'
+                    selectedJob.responsible === 'Open'
                       ? 'text-green-800'
                       : 'text-red-800'
                   ]"
                 >
-                  {{ selectedJob.status }}
+                  {{ selectedJob.responsible }}
                 </p>
               </div>
             </div>
@@ -278,10 +278,10 @@
                 >Department</label
               >
               <input
-                v-model="form.department"
+                v-model="form.type"
                 type="text"
                 class="border border-gray-300 rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
-                placeholder="Enter department"
+                placeholder="Enter type"
               />
             </div>
             <div>
@@ -289,10 +289,10 @@
                 >Location</label
               >
               <input
-                v-model="form.location"
+                v-model="form.salary"
                 type="text"
                 class="border border-gray-300 rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
-                placeholder="Enter location"
+                placeholder="Enter salary"
               />
             </div>
             <div>
@@ -300,7 +300,7 @@
                 >Posted Date</label
               >
               <flat-pickr
-                v-model="form.postedDate"
+                v-model="form.description"
                 class="border border-gray-300 rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
                 placeholder="Select date"
                 :config="flatpickrConfig"
@@ -309,7 +309,7 @@
             <div>
               <label class="text-sm font-semibold text-gray-600">Status</label>
               <select
-                v-model="form.status"
+                v-model="form.responsible"
                 class="border border-gray-300 rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
               >
                 <option value="Open">Open</option>
@@ -342,6 +342,7 @@
 import FlatPickr from 'vue-flatpickr-component';
 import 'flatpickr/dist/flatpickr.css';
 import { v4 as uuidv4 } from 'uuid';
+import { getAllJob } from '@/apis/jobs';
 
 export default {
   components: {
@@ -359,10 +360,10 @@ export default {
       form: {
         id: null,
         title: '',
-        department: '',
-        location: '',
-        postedDate: '',
-        status: 'Open'
+        type: '',
+        salary: '',
+        description: '',
+        responsible: 'Open'
       },
       flatpickrConfig: {
         dateFormat: 'd-M-Y',
@@ -370,40 +371,7 @@ export default {
         altFormat: 'd-M-Y',
         allowInput: true
       },
-      jobs: [
-        {
-          id: uuidv4(),
-          title: 'Database Administrator',
-          department: 'Information Technology',
-          location: 'Phnom Penh',
-          postedDate: '06-Jun-2025',
-          status: 'Open'
-        },
-        {
-          id: uuidv4(),
-          title: 'Assistant Manager',
-          department: 'Accounting and Finance',
-          location: 'Siem Reap',
-          postedDate: '04-Jun-2025',
-          status: 'Open'
-        },
-        {
-          id: uuidv4(),
-          title: 'Senior Infrastructure Engineer',
-          department: 'Information Technology',
-          location: 'Phnom Penh',
-          postedDate: '03-Jun-2025',
-          status: 'Closed'
-        },
-        {
-          id: uuidv4(),
-          title: 'Credit Control Intern',
-          department: 'Credit Control',
-          location: 'Battambang',
-          postedDate: '03-Jun-2025',
-          status: 'Open'
-        }
-      ]
+      jobs: []
     };
   },
   computed: {
@@ -412,7 +380,7 @@ export default {
         const matchSearch =
           this.searchQuery === '' ||
           job.title.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-          job.department.toLowerCase().includes(this.searchQuery.toLowerCase());
+          job.type.toLowerCase().includes(this.searchQuery.toLowerCase());
         return matchSearch;
       });
     },
@@ -425,7 +393,26 @@ export default {
       return Math.ceil(this.filteredJobs.length / this.itemsPerPage);
     }
   },
+  mounted() {
+    this.getAllJobs();
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        if (this.showCreateModal) {
+          this.closeCreateModal();
+        }
+        if (this.showViewModal) {
+          this.closeViewModal();
+        }
+      }
+    });
+  },
   methods: {
+    getAllJobs() {
+      const result = getAllJob();
+      if (result && result.status === 200) {
+        this.jobs = result && result.data ? result.data : [];
+      }
+    },
     filterData() {
       this.currentPage = 1; // Reset to first page on filter
     },
@@ -438,10 +425,10 @@ export default {
       this.form = {
         id: null,
         title: '',
-        department: '',
-        location: '',
-        postedDate: '',
-        status: 'Open'
+        type: '',
+        salary: '',
+        description: '',
+        responsible: 'Open'
       };
       this.showCreateModal = true;
     },
@@ -460,10 +447,10 @@ export default {
       this.form = {
         id: null,
         title: '',
-        department: '',
-        location: '',
-        postedDate: '',
-        status: 'Open'
+        type: '',
+        salary: '',
+        description: '',
+        responsible: 'Open'
       };
     },
     closeViewModal() {
@@ -473,9 +460,9 @@ export default {
     saveJob() {
       if (
         !this.form.title ||
-        !this.form.department ||
-        !this.form.location ||
-        !this.form.postedDate
+        !this.form.type ||
+        !this.form.salary ||
+        !this.form.description
       ) {
         alert('Please fill in all required fields.');
         return;
@@ -511,18 +498,6 @@ export default {
     goToPage(page) {
       this.currentPage = page;
     }
-  },
-  mounted() {
-    window.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-        if (this.showCreateModal) {
-          this.closeCreateModal();
-        }
-        if (this.showViewModal) {
-          this.closeViewModal();
-        }
-      }
-    });
   }
 };
 </script>

@@ -5,7 +5,7 @@ module.exports = {
       method: 'post'
     },
     getAllJob: {
-      url: 'jobs',
+      url: 'post-job',
       method: 'get'
     },
     getOneJob: {
@@ -113,7 +113,6 @@ module.exports = {
       method: 'delete'
     }
   },
-
   benefit_ens: {
     getAllBenefitEns: {
       url: 'benefit_ens',
@@ -150,29 +149,19 @@ module.exports = {
       method: 'post'
     }
   },
-  // utils: {
-  //   downloadFile: {
-  //     url: 'utils/download',
-  //     method: 'post'
-  //   }
-  // },
   users: {
     signin: {
       url: 'users/login',
       method: 'post'
     },
-    // verifyToken: {
-    //   url: 'users/verify-token',
-    //   method: 'post'
-    // },
-    // refreshToken: {
-    //   url: 'users/refresh-token',
-    //   method: 'post'
-    // },
-    // verifyWebpage: {
-    //   url: 'users/verify-webpage',
-    //   method: 'post'
-    // },
+    verifyWebpage: {
+      url: 'users/verify-webpage',
+      method: 'post'
+    },
+    refreshToken: {
+      url: 'users/refresh-token',
+      method: 'post'
+    },
     getAllUserRole: {
       url: 'authorization/role/hr',
       method: 'get'

@@ -54,7 +54,6 @@
               <th class="px-4 py-3 text-left">ID</th>
               <th class="px-4 py-3 text-left">Name</th>
               <th class="px-4 py-3 text-left">Description</th>
-              <th class="px-4 py-3 text-left">Employee ID</th>
               <th class="px-4 py-3 text-left">Actions</th>
             </tr>
           </thead>
@@ -70,7 +69,6 @@
               <td class="px-4 py-3">{{ role.id }}</td>
               <td class="px-4 py-3">{{ role.name }}</td>
               <td class="px-4 py-3">{{ role.description }}</td>
-              <td class="px-4 py-3">{{ role.employeeId }}</td>
               <td class="px-4 py-3 flex gap-2">
                 <button
                   @click="openViewModal(role)"

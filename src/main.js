@@ -6,7 +6,7 @@ import router from './router';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import '@fortawesome/fontawesome-free/css/all.min.css';
-import './permission'; // permission control`
+// import './permission'; // permission control`
 import {
   faUser,
   faCog,
