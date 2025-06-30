@@ -1,3 +1,4 @@
+
 module.exports = {
   jobs: {
     createJob: {
@@ -152,6 +153,10 @@ module.exports = {
   users: {
     signin: {
       url: 'users/login',
+      method: 'post'
+    },
+    verifyToken: {
+      url: 'users/verify-token',
       method: 'post'
     },
     verifyWebpage: {

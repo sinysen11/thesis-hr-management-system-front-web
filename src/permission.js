@@ -7,13 +7,12 @@ import 'nprogress/nprogress.css';
 router.beforeEach(async (to, from, next) => {
   try {
     NProgress.start();
-    const token = await getToken(); // Ensure await is used
-    console.log('Navigation guard - Token:', token); // Debug token
+    const token = await getToken();
     const isValidToken = !!token;
-
-    if (to.meta.requiresAuth && !isValidToken) {
-      await removeAllToken();
-      return next({ name: 'login' });
+    const isAuthenticated = !!token;
+    if (to.matched.some((record) => record.meta.requiresAuth) && !isAuthenticated) {
+    removeAllToken();
+    return next({ name: 'login' });
     }
 
     if (

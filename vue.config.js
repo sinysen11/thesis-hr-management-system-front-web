@@ -1,8 +1,10 @@
 const { defineConfig } = require('@vue/cli-service');
+
 const output_format = (config) => {
   config.output.filename = 'js/[name].[contenthash:8].min.js';
   config.output.chunkFilename = 'js/[name].[contenthash:8].min.js';
 };
+
 module.exports = defineConfig({
   chainWebpack: (config) => {
     config.plugin('html').tap((args) => {
@@ -10,11 +12,16 @@ module.exports = defineConfig({
       return args;
     });
   },
+
   configureWebpack:
     process.env.NODE_ENV === 'local' ? (config) => {} : output_format,
 
   devServer: {
-    port: 8080,
-    open: true
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3000',
+        changeOrigin: true
+      }
+    }
   }
 });

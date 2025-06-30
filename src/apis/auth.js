@@ -1,5 +1,19 @@
 import request from '@/services/request';
 import { users } from '@/constants/apis';
+import axios from 'axios';
+
+export const verifyToken = async (token) => {
+  const response = await axios.post(
+    'http://localhost:3000/api/users/verify-token',
+    { token: token },
+    {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    }
+  );
+  return response.data;
+};
 
 export function signin(data) {
   return request({

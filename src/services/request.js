@@ -21,10 +21,11 @@ const service = axios.create({
 service.interceptors.request.use(
   async (config) => {
     const token = (await getToken()) || '';
+    console.log('Token::', token)
+    console.log('Config::', config)
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-    console.log('Request config:', config); // Debug request headers
     return config;
   },
   (error) => {

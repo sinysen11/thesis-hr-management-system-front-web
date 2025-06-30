@@ -91,6 +91,7 @@ import {
   setUserInfoCookie,
   getToken
 } from '@/services/authentication';
+import { verifyToken, signin, verifyTokenTest } from '@/apis/auth';
 
 const email = ref('');
 const password = ref('');
@@ -108,20 +109,25 @@ const handleLogin = async () => {
   }
 
   try {
-    const response = await login({
+    const response = await signin({
       email: email.value,
       password: password.value
     });
-
     if (response.status === '1' && response.token && response.user) {
       await setToken('token', response.token);
       await setUserInfoCookie(response.user);
-      const storedToken = await getToken();
-      console.log('Stored token:', storedToken); // Debug stored token
-      alert('Login successful!');
-      router.push('/');
+
+      const verifyRes = await verifyToken(response.token);
+      console.log('hththththththththt', response.token);
+
+      if (verifyRes.valid) {
+        alert('Login successful! Token verified.');
+        router.push('/');
+      } else {
+        alert('Login failed: Token invalid after login.');
+      }
     } else {
-      alert('Login failed: ' + (response.message || 'Invalid response format'));
+      alert('Login failed: ' + (response.message || 'Invalid login response'));
     }
   } catch (error) {
     console.error('Login error:', error.response || error.message);
@@ -132,11 +138,58 @@ const handleLogin = async () => {
   }
 };
 
+// const handleLogin = async () => {
+//   if (!email.value || !password.value) {
+//     alert('Please fill in all required fields.');
+//     return;
+//   }
+
+//   try {
+//     const response = await signin({
+//       email: email.value,
+//       password: password.value
+//     });
+
+//     console.log('Login response:', response);
+
+//     if (response.status === '1' && response.token && response.user) {
+//       await setToken('token', response.token);
+//       await setUserInfoCookie(response.user);
+
+//       console.log('Stored token:', await getToken());
+
+//       alert('Login successful!');
+//       router.push('/');
+//     } else {
+//       alert('Login failed: ' + (response.message || 'Invalid login response'));
+//     }
+//   } catch (error) {
+//     console.error('Login error:', error.response || error.message);
+//     alert(
+//       'Login failed: ' +
+//       (error.response?.data?.message || error.message || 'An error occurred')
+//     );
+//   }
+// };
+
+// Optional: auto-login if already has valid token
 onMounted(async () => {
   const token = await getToken();
   if (token) {
-    console.log('Existing token on mount:', token); // Debug existing token
-    router.push('/');
+    try {
+      const res = await verifyToken(token);
+      if (res.valid) {
+        console.log('Token valid, redirecting...');
+        router.push('/');
+      } else {
+        console.log('Token invalid:', res.message);
+      }
+    } catch (err) {
+      console.log(
+        'Token verification failed:',
+        err.response?.data || err.message
+      );
+    }
   }
 });
 </script>

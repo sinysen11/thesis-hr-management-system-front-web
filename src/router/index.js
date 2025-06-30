@@ -124,6 +124,10 @@ const routes = [
         meta: { requiresAuth: true }
       }
     ]
+  },
+  {
+    path: '/*',
+    redirect: '/login'
   }
 ];
 
