@@ -1,5 +1,4 @@
 <template>
-  <!-- <div class="min-h-screen bg-gray-50 flex flex-col"> -->
   <div class="w-full">
     <div class="flex justify-between items-center mb-6">
       <h2 class="text-3xl font-extrabold text-gray-900">Job Positions</h2>
@@ -54,25 +53,25 @@
               <th class="px-4 py-3 text-left">Position ID</th>
               <th class="px-4 py-3 text-left">Title</th>
               <th class="px-4 py-3 text-left">Department ID</th>
-              <th class="px-4 py-3 text-left">Reports To</th>
+              <th class="px-4 py-3 text-left">Description</th>
+              <th class="px-4 py-3 text-left">Created At</th>
               <th class="px-4 py-3 text-left">Actions</th>
             </tr>
           </thead>
           <tbody class="text-gray-700">
             <tr
               v-for="(position, index) in paginatedPositions"
-              :key="position.id"
+              :key="position._id"
               class="hover:bg-gray-50 transition border-b border-gray-200"
             >
               <td class="px-4 py-3">
                 {{ index + 1 + (currentPage - 1) * itemsPerPage }}
               </td>
-              <td class="px-4 py-3">{{ position.positionId }}</td>
+              <td class="px-4 py-3">{{ position._id }}</td>
               <td class="px-4 py-3">{{ position.title }}</td>
-              <td class="px-4 py-3">{{ position.departmentId }}</td>
-              <td class="px-4 py-3">
-                {{ position.reportToPositionId || 'N/A' }}
-              </td>
+              <td class="px-4 py-3">{{ position.department }}</td>
+              <td class="px-4 py-3">{{ position.description }}</td>
+              <td class="px-4 py-3">{{ formatDate(position.createdAt) }}</td>
               <td class="px-4 py-3 flex gap-2">
                 <button
                   @click="openViewModal(position)"
@@ -89,7 +88,7 @@
                   <i class="fas fa-edit"></i>
                 </button>
                 <button
-                  @click="deletePosition(position.id)"
+                  @click="deletePosition(position._id)"
                   class="text-red-600 hover:text-red-800 p-2 rounded-full hover:bg-red-100 transition"
                   title="Delete Position"
                 >
@@ -172,7 +171,7 @@
                   >Position ID</label
                 >
                 <p class="text-gray-900 font-medium">
-                  {{ selectedPosition.positionId }}
+                  {{ selectedPosition._id }}
                 </p>
               </div>
               <div>
@@ -186,15 +185,23 @@
                   >Department ID</label
                 >
                 <p class="text-gray-900 font-medium">
-                  {{ selectedPosition.departmentId }}
+                  {{ selectedPosition.department }}
                 </p>
               </div>
               <div>
                 <label class="text-sm font-semibold text-gray-600"
-                  >Reports To</label
+                  >Description</label
                 >
                 <p class="text-gray-900 font-medium">
-                  {{ selectedPosition.reportToPositionId || 'N/A' }}
+                  {{ selectedPosition.description }}
+                </p>
+              </div>
+              <div>
+                <label class="text-sm font-semibold text-gray-600"
+                  >Created At</label
+                >
+                <p class="text-gray-900 font-medium">
+                  {{ formatDate(selectedPosition.createdAt) }}
                 </p>
               </div>
             </div>
@@ -235,17 +242,6 @@
           </div>
           <div class="space-y-5 border-t border-gray-200 pt-5">
             <div>
-              <label class="text-sm font-semibold text-gray-600"
-                >Position ID</label
-              >
-              <input
-                v-model.number="form.positionId"
-                type="number"
-                class="border border-gray-300 rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
-                placeholder="Enter position ID"
-              />
-            </div>
-            <div>
               <label class="text-sm font-semibold text-gray-600">Title</label>
               <input
                 v-model="form.title"
@@ -259,22 +255,22 @@
                 >Department ID</label
               >
               <input
-                v-model.number="form.departmentId"
-                type="number"
+                v-model="form.department"
+                type="text"
                 class="border border-gray-300 rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
                 placeholder="Enter department ID"
               />
             </div>
             <div>
               <label class="text-sm font-semibold text-gray-600"
-                >Reports To Position ID</label
+                >Description</label
               >
-              <input
-                v-model.number="form.reportToPositionId"
-                type="number"
+              <textarea
+                v-model="form.description"
                 class="border border-gray-300 rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
-                placeholder="Enter reports to position ID (optional)"
-              />
+                placeholder="Enter description"
+                rows="4"
+              ></textarea>
             </div>
           </div>
           <div class="mt-8 flex justify-end gap-4">
@@ -295,11 +291,15 @@
       </div>
     </transition>
   </div>
-  <!-- </div> -->
 </template>
 
 <script>
-import { v4 as uuidv4 } from 'uuid';
+import {
+  getAllPosition,
+  createPosition,
+  updatePosition,
+  deletePosition
+} from '@/apis/employees';
 
 export default {
   data() {
@@ -312,42 +312,13 @@ export default {
       isEditing: false,
       selectedPosition: null,
       form: {
-        id: null,
-        positionId: null,
+        _id: null,
         title: '',
-        departmentId: null,
-        reportToPositionId: null
+        department: '',
+        description: '',
+        createdAt: null
       },
-      positions: [
-        {
-          id: uuidv4(),
-          positionId: 101,
-          title: 'Software Engineer',
-          departmentId: 1,
-          reportToPositionId: 201
-        },
-        {
-          id: uuidv4(),
-          positionId: 102,
-          title: 'Accountant',
-          departmentId: 2,
-          reportToPositionId: 202
-        },
-        {
-          id: uuidv4(),
-          positionId: 103,
-          title: 'HR Manager',
-          departmentId: 3,
-          reportToPositionId: null
-        },
-        {
-          id: uuidv4(),
-          positionId: 104,
-          title: 'Marketing Specialist',
-          departmentId: 4,
-          reportToPositionId: 203
-        }
-      ]
+      positions: []
     };
   },
   computed: {
@@ -355,7 +326,7 @@ export default {
       return this.positions.filter((position) => {
         const matchSearch =
           this.searchQuery === '' ||
-          position.positionId.toString().includes(this.searchQuery) ||
+          position._id.includes(this.searchQuery) ||
           position.title.toLowerCase().includes(this.searchQuery.toLowerCase());
         return matchSearch;
       });
@@ -370,21 +341,98 @@ export default {
     }
   },
   methods: {
+    async handleGetAllPosition() {
+      try {
+        const result = await getAllPosition();
+        if (result && result.status === 200 && result.positions) {
+          this.positions = result.positions;
+        } else {
+          console.warn('Unexpected response:', result);
+        }
+      } catch (error) {
+        console.error('Failed to fetch positions:', error);
+        alert('Failed to load positions. Please try again.');
+      }
+    },
+    async savePosition() {
+      if (!this.form.title || !this.form.department || !this.form.description) {
+        alert(
+          'Please fill in all required fields (Title, Department ID, Description).'
+        );
+        return;
+      }
+
+      try {
+        if (this.isEditing) {
+          const response = await updatePosition(this.form._id, {
+            title: this.form.title,
+            department: this.form.department,
+            description: this.form.description
+          });
+          if (response.status === 200) {
+            const index = this.positions.findIndex(
+              (position) => position._id === this.form._id
+            );
+            if (index !== -1) {
+              this.positions[index] = {
+                ...this.form,
+                updatedAt: new Date().toISOString()
+              };
+            }
+          }
+        } else {
+          const response = await createPosition({
+            title: this.form.title,
+            department: this.form.department,
+            description: this.form.description
+          });
+          if (response.status === 200) {
+            this.positions.push({
+              ...response.data,
+              _id: response.data._id,
+              createdAt: new Date().toISOString()
+            });
+          }
+        }
+        this.closeCreateModal();
+      } catch (error) {
+        console.error('Failed to save position:', error);
+        alert('Failed to save position. Please try again.');
+      }
+    },
+    async deletePosition(id) {
+      if (confirm('Are you sure you want to delete this job position?')) {
+        try {
+          const response = await deletePosition(id);
+          if (response.status === 200) {
+            this.positions = this.positions.filter(
+              (position) => position._id !== id
+            );
+          }
+        } catch (error) {
+          console.error('Failed to delete position:', error);
+          alert('Failed to delete position. Please try again.');
+        }
+      }
+    },
+    formatDate(date) {
+      return date ? new Date(date).toLocaleDateString() : 'N/A';
+    },
     filterData() {
-      this.currentPage = 1; // Reset to first page on filter
+      this.currentPage = 1;
     },
     resetFilters() {
       this.searchQuery = '';
-      this.currentPage = 1; // Reset to first page on reset
+      this.currentPage = 1;
     },
     openCreateModal() {
       this.isEditing = false;
       this.form = {
-        id: null,
-        positionId: null,
+        _id: null,
         title: '',
-        departmentId: null,
-        reportToPositionId: null
+        department: '',
+        description: '',
+        createdAt: null
       };
       this.showCreateModal = true;
     },
@@ -401,49 +449,16 @@ export default {
       this.showCreateModal = false;
       this.isEditing = false;
       this.form = {
-        id: null,
-        positionId: null,
+        _id: null,
         title: '',
-        departmentId: null,
-        reportToPositionId: null
+        department: '',
+        description: '',
+        createdAt: null
       };
     },
     closeViewModal() {
       this.showViewModal = false;
       this.selectedPosition = null;
-    },
-    savePosition() {
-      if (
-        !this.form.positionId ||
-        !this.form.title ||
-        !this.form.departmentId
-      ) {
-        alert(
-          'Please fill in all required fields (Position ID, Title, Department ID).'
-        );
-        return;
-      }
-      if (this.isEditing) {
-        const index = this.positions.findIndex(
-          (position) => position.id === this.form.id
-        );
-        if (index !== -1) {
-          this.positions[index] = { ...this.form };
-        }
-      } else {
-        this.positions.push({
-          ...this.form,
-          id: uuidv4()
-        });
-      }
-      this.closeCreateModal();
-    },
-    deletePosition(id) {
-      if (confirm('Are you sure you want to delete this job position?')) {
-        this.positions = this.positions.filter(
-          (position) => position.id !== id
-        );
-      }
     },
     prevPage() {
       if (this.currentPage > 1) {
@@ -460,6 +475,7 @@ export default {
     }
   },
   mounted() {
+    this.handleGetAllPosition();
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
         if (this.showCreateModal) {
@@ -475,14 +491,12 @@ export default {
 </script>
 
 <style scoped>
-/* Ensure table headers and cells align properly */
 th,
 td {
   text-align: left;
   white-space: nowrap;
 }
 
-/* Modal transition */
 .modal-enter-active,
 .modal-leave-active {
   transition: opacity 0.3s ease;

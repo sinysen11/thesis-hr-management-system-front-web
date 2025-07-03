@@ -61,23 +61,3 @@ export function getMenuByRole() {
     method: users.getMenuByRole.method
   });
 }
-// export function signin(data) {
-//   console.log('Signin payload:', data);
-//   return Promise.resolve({
-//     status: '1',
-//     message: 'Login successful',
-//     token: 'mock-jwt-token',
-//     user: {
-//       id: '6839619da4edc6a873072812',
-//       first_name_kh: 'លីនតា',
-//       last_name_en: 'Va',
-//       first_name_en: 'Linta',
-//       email: data.email,
-//       role: 'admin',
-//       department: '6836719c19f5d7315fb5a519',
-//       position: '683823f4124641c4bb0c5334',
-//       gender: 'female',
-//       perminssions: []
-//     }
-//   });
-// }

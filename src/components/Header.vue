@@ -18,7 +18,7 @@
         aria-label="User menu"
       >
         <img
-          :src="userAvatar"
+          src="https://sm.ign.com/ign_nordic/cover/a/avatar-gen/avatar-generations_prsz.jpg"
           alt="User Avatar"
           class="h-10 w-10 rounded-full object-cover"
           @error="handleImageError"

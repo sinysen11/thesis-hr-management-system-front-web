@@ -3,9 +3,9 @@ import Cookies from 'js-cookie';
 const TokenKey = 'token';
 const RefreshTokenKey = 'refresh_token';
 const UserInfoKey = 'userInfo';
-const token_domain =
-  process.env.VUE_APP_TOKEN_DOMAIN || 'http://localhost:3000/api';
 const exipre_token = 4 / 24;
+const token_domain = window.location.hostname;
+
 export async function getToken(tokenKey) {
   const TOKEN_KEY = tokenKey || TokenKey;
   return Cookies.get(TOKEN_KEY);
@@ -16,15 +16,29 @@ export function setToken(tokenKey, token, expires = exipre_token) {
   if (expires === 0) {
     return Cookies.set(TOKEN_KEY, token, { domain: token_domain, path: '/' });
   }
-  return Cookies.set(TOKEN_KEY, token, { expires, domain: token_domain, path: '/' });
+  return Cookies.set(TOKEN_KEY, token, {
+    expires,
+    domain: token_domain,
+    path: '/'
+  });
 }
-
 export function setUserInfoCookie(data) {
   if (data) {
     data = JSON.stringify(data);
   }
-  return Cookies.set(UserInfoKey, data, { expires: 30, domain: token_domain });
+  return Cookies.set(UserInfoKey, data, {
+    expires: 30,
+    path: '/',
+    domain: token_domain // ✅ Now valid
+  });
 }
+
+// export function setUserInfoCookie(data) {
+//   if (data) {
+//     data = JSON.stringify(data);
+//   }
+//   return Cookies.set(UserInfoKey, data, { expires: 30, domain: token_domain });
+// }
 
 export function getUserInfoCookie() {
   return Cookies.get(UserInfoKey);

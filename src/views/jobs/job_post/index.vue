@@ -52,17 +52,18 @@
             <tr>
               <th class="px-4 py-3 text-left">No</th>
               <th class="px-4 py-3 text-left">Job Title</th>
-              <th class="px-4 py-3 text-left">Department</th>
-              <th class="px-4 py-3 text-left">Location</th>
-              <th class="px-4 py-3 text-left">Posted Date</th>
-              <th class="px-4 py-3 text-left">Status</th>
+              <th class="px-4 py-3 text-left">Type</th>
+              <th class="px-4 py-3 text-left">Salary</th>
+              <th class="px-4 py-3 text-left">Description</th>
+              <th class="px-4 py-3 text-left">Responsible</th>
+              <th class="px-4 py-3 text-left">Requirement</th>
               <th class="px-4 py-3 text-left">Actions</th>
             </tr>
           </thead>
           <tbody class="text-gray-700">
             <tr
               v-for="(job, index) in paginatedJobs"
-              :key="job.id"
+              :key="job._id"
               class="hover:bg-gray-50 transition border-b border-gray-200"
             >
               <td class="px-4 py-3">
@@ -72,18 +73,8 @@
               <td class="px-4 py-3">{{ job.type }}</td>
               <td class="px-4 py-3">{{ job.salary }}</td>
               <td class="px-4 py-3">{{ job.description }}</td>
-              <td class="px-4 py-3">
-                <span
-                  :class="[
-                    'px-2 py-1 rounded-full text-xs font-medium',
-                    job.responsible === 'Open'
-                      ? 'bg-green-100 text-green-800'
-                      : 'bg-red-100 text-red-800'
-                  ]"
-                >
-                  {{ job.responsible }}
-                </span>
-              </td>
+              <td class="px-4 py-3">{{ job.responsible }}</td>
+              <td class="px-4 py-3">{{ job.requirement }}</td>
               <td class="px-4 py-3 flex gap-2">
                 <button
                   @click="openViewModal(job)"
@@ -100,7 +91,7 @@
                   <i class="fas fa-edit"></i>
                 </button>
                 <button
-                  @click="deleteJob(job.id)"
+                  @click="deleteJob(job._id)"
                   class="text-red-600 hover:text-red-800 p-2 rounded-full hover:bg-red-100 transition"
                   title="Delete Job"
                 >
@@ -407,10 +398,16 @@ export default {
     });
   },
   methods: {
-    getAllJobs() {
-      const result = getAllJob();
-      if (result && result.status === 200) {
-        this.jobs = result && result.data ? result.data : [];
+    async getAllJobs() {
+      try {
+        const result = await getAllJob(); // Await the async API call
+        if (result && result.status === 200 && result.jobs) {
+          this.jobs = result.jobs;
+        } else {
+          console.warn('Unexpected response:', result);
+        }
+      } catch (error) {
+        console.error('Failed to fetch jobs:', error);
       }
     },
     filterData() {

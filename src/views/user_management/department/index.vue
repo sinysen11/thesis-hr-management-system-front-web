@@ -22,7 +22,7 @@
             type="text"
             v-model="searchQuery"
             class="border border-gray-300 rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
-            placeholder="Search by name or ID"
+            placeholder="Search by description or ID"
           />
         </div>
         <div class="flex items-end gap-4">
@@ -66,9 +66,9 @@
               <td class="px-4 py-3">
                 {{ index + 1 + (currentPage - 1) * itemsPerPage }}
               </td>
-              <td class="px-4 py-3">{{ department.departmentId }}</td>
-              <td class="px-4 py-3">{{ department.name }}</td>
-              <td class="px-4 py-3">{{ department.managerId || 'N/A' }}</td>
+              <td class="px-4 py-3">{{ department.name_kh }}</td>
+              <td class="px-4 py-3">{{ department.description }}</td>
+              <td class="px-4 py-3">{{ department.name_en || 'N/A' }}</td>
               <td class="px-4 py-3 flex gap-2">
                 <button
                   @click="openViewModal(department)"
@@ -137,7 +137,7 @@
     </div>
 
     <!-- Modal for View Department -->
-    <transition name="modal">
+    <transition description="modal">
       <div
         v-if="showViewModal"
         class="fixed inset-0 bg-gray-900 bg-opacity-60 flex items-center justify-center z-50"
@@ -166,13 +166,13 @@
                   >Department ID</label
                 >
                 <p class="text-gray-900 font-medium">
-                  {{ selectedDepartment.departmentId }}
+                  {{ selectedDepartment.name_kh }}
                 </p>
               </div>
               <div>
                 <label class="text-sm font-semibold text-gray-600">Name</label>
                 <p class="text-gray-900 font-medium">
-                  {{ selectedDepartment.name }}
+                  {{ selectedDepartment.description }}
                 </p>
               </div>
               <div>
@@ -180,7 +180,7 @@
                   >Manager ID</label
                 >
                 <p class="text-gray-900 font-medium">
-                  {{ selectedDepartment.managerId || 'N/A' }}
+                  {{ selectedDepartment.name_en || 'N/A' }}
                 </p>
               </div>
             </div>
@@ -198,7 +198,7 @@
     </transition>
 
     <!-- Modal for Create/Update Department -->
-    <transition name="modal">
+    <transition description="modal">
       <div
         v-if="showCreateModal"
         class="fixed inset-0 bg-gray-900 bg-opacity-60 flex items-center justify-center z-50"
@@ -225,7 +225,7 @@
                 >Department ID</label
               >
               <input
-                v-model.number="form.departmentId"
+                v-model.number="form.name_kh"
                 type="number"
                 class="border border-gray-300 rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
                 placeholder="Enter department ID"
@@ -234,10 +234,10 @@
             <div>
               <label class="text-sm font-semibold text-gray-600">Name</label>
               <input
-                v-model="form.name"
+                v-model="form.description"
                 type="text"
                 class="border border-gray-300 rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
-                placeholder="Enter name"
+                placeholder="Enter description"
               />
             </div>
             <div>
@@ -245,7 +245,7 @@
                 >Manager ID</label
               >
               <input
-                v-model.number="form.managerId"
+                v-model.number="form.name_en"
                 type="number"
                 class="border border-gray-300 rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
                 placeholder="Enter manager ID (optional)"
@@ -275,6 +275,7 @@
 
 <script>
 import { v4 as uuidv4 } from 'uuid';
+import { getAllDepartment } from '@/apis/department';
 
 export default {
   data() {
@@ -288,36 +289,11 @@ export default {
       selectedDepartment: null,
       form: {
         id: null,
-        departmentId: null,
-        name: '',
-        managerId: null
+        name_kh: null,
+        description: '',
+        name_en: null
       },
-      departments: [
-        {
-          id: uuidv4(),
-          departmentId: 1,
-          name: 'IT',
-          managerId: 1001
-        },
-        {
-          id: uuidv4(),
-          departmentId: 2,
-          name: 'Finance',
-          managerId: 1002
-        },
-        {
-          id: uuidv4(),
-          departmentId: 3,
-          name: 'HR',
-          managerId: null
-        },
-        {
-          id: uuidv4(),
-          departmentId: 4,
-          name: 'Marketing',
-          managerId: 1003
-        }
-      ]
+      departments: []
     };
   },
   computed: {
@@ -325,8 +301,8 @@ export default {
       return this.departments.filter((department) => {
         const matchSearch =
           this.searchQuery === '' ||
-          department.departmentId.toString().includes(this.searchQuery) ||
-          department.name
+          department.name_kh.toString().includes(this.searchQuery) ||
+          department.description
             .toLowerCase()
             .includes(this.searchQuery.toLowerCase());
         return matchSearch;
@@ -342,6 +318,18 @@ export default {
     }
   },
   methods: {
+    async handleGetAllDepartment() {
+      try {
+        const result = await getAllDepartment(); // Await the async API call
+        if (result && result.status === 200 && result.departments) {
+          this.departments = result.departments;
+        } else {
+          console.warn('Unexpected response:', result);
+        }
+      } catch (error) {
+        console.error('Failed to fetch departments:', error);
+      }
+    },
     filterData() {
       this.currentPage = 1;
     },
@@ -353,9 +341,9 @@ export default {
       this.isEditing = false;
       this.form = {
         id: null,
-        departmentId: null,
-        name: '',
-        managerId: null
+        name_kh: null,
+        description: '',
+        name_en: null
       };
       this.showCreateModal = true;
     },
@@ -373,9 +361,9 @@ export default {
       this.isEditing = false;
       this.form = {
         id: null,
-        departmentId: null,
-        name: '',
-        managerId: null
+        name_kh: null,
+        description: '',
+        name_en: null
       };
     },
     closeViewModal() {
@@ -383,7 +371,7 @@ export default {
       this.selectedDepartment = null;
     },
     saveDepartment() {
-      if (!this.form.departmentId || !this.form.name) {
+      if (!this.form.name_kh || !this.form.description) {
         alert('Please fill in all required fields (Department ID, Name).');
         return;
       }
@@ -420,6 +408,7 @@ export default {
     }
   },
   mounted() {
+    this.handleGetAllDepartment();
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
         if (this.showCreateModal) this.closeCreateModal();

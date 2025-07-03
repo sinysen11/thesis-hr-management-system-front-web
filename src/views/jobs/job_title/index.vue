@@ -22,7 +22,7 @@
             type="text"
             v-model="searchQuery"
             class="border border-gray-300 rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
-            placeholder="Search by title or department"
+            placeholder="Search by des_kh or des_en"
           />
         </div>
         <div class="flex items-end gap-4">
@@ -67,9 +67,9 @@
               <td class="px-4 py-3">
                 {{ index + 1 + (currentPage - 1) * itemsPerPage }}
               </td>
-              <td class="px-4 py-3">{{ jobTitle.title }}</td>
+              <td class="px-4 py-3">{{ jobTitle.des_kh }}</td>
+              <td class="px-4 py-3">{{ jobTitle.des_en }}</td>
               <td class="px-4 py-3">{{ jobTitle.department }}</td>
-              <td class="px-4 py-3">{{ jobTitle.description }}</td>
               <td class="px-4 py-3">
                 <span
                   :class="[
@@ -86,21 +86,21 @@
                 <button
                   @click="openViewModal(jobTitle)"
                   class="text-indigo-600 hover:text-indigo-800 p-2 rounded-full hover:bg-indigo-100 transition"
-                  title="View Job Title"
+                  des_kh="View Job Title"
                 >
                   <i class="fas fa-eye"></i>
                 </button>
                 <button
                   @click="openEditModal(jobTitle)"
                   class="text-indigo-600 hover:text-indigo-800 p-2 rounded-full hover:bg-indigo-100 transition"
-                  title="Edit Job Title"
+                  des_kh="Edit Job Title"
                 >
                   <i class="fas fa-edit"></i>
                 </button>
                 <button
                   @click="deleteJobTitle(jobTitle.id)"
                   class="text-red-600 hover:text-red-800 p-2 rounded-full hover:bg-red-100 transition"
-                  title="Delete Job Title"
+                  des_kh="Delete Job Title"
                 >
                   <i class="fas fa-trash"></i>
                 </button>
@@ -164,7 +164,7 @@
             <button
               @click="closeViewModal"
               class="text-gray-500 hover:text-gray-700 p-2 rounded-full hover:bg-gray-100 transition"
-              title="Close"
+              des_kh="Close"
             >
               <i class="fas fa-times"></i>
             </button>
@@ -179,7 +179,7 @@
                   >Job Title</label
                 >
                 <p class="text-gray-900 font-medium">
-                  {{ selectedJobTitle.title }}
+                  {{ selectedJobTitle.des_kh }}
                 </p>
               </div>
               <div>
@@ -187,7 +187,7 @@
                   >Department</label
                 >
                 <p class="text-gray-900 font-medium">
-                  {{ selectedJobTitle.department }}
+                  {{ selectedJobTitle.des_en }}
                 </p>
               </div>
               <div class="sm:col-span-2">
@@ -195,7 +195,7 @@
                   >Description</label
                 >
                 <p class="text-gray-900 font-medium">
-                  {{ selectedJobTitle.description }}
+                  {{ selectedJobTitle.department }}
                 </p>
               </div>
               <div>
@@ -244,7 +244,7 @@
             <button
               @click="closeCreateModal"
               class="text-gray-500 hover:text-gray-700 p-2 rounded-full hover:bg-gray-100 transition"
-              title="Close"
+              des_kh="Close"
             >
               <i class="fas fa-times"></i>
             </button>
@@ -255,10 +255,10 @@
                 >Job Title</label
               >
               <input
-                v-model="form.title"
+                v-model="form.des_kh"
                 type="text"
                 class="border border-gray-300 rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
-                placeholder="Enter job title"
+                placeholder="Enter job des_kh"
               />
             </div>
             <div>
@@ -266,10 +266,10 @@
                 >Department</label
               >
               <input
-                v-model="form.department"
+                v-model="form.des_en"
                 type="text"
                 class="border border-gray-300 rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
-                placeholder="Enter department"
+                placeholder="Enter des_en"
               />
             </div>
             <div>
@@ -277,9 +277,9 @@
                 >Description</label
               >
               <textarea
-                v-model="form.description"
+                v-model="form.department"
                 class="border border-gray-300 rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
-                placeholder="Enter description"
+                placeholder="Enter department"
                 rows="4"
               ></textarea>
             </div>
@@ -318,6 +318,7 @@
 <script>
 import { v4 as uuidv4 } from 'uuid';
 
+import { getAllJobTitle } from '@/apis/jobs';
 export default {
   data() {
     return {
@@ -330,41 +331,12 @@ export default {
       selectedJobTitle: null,
       form: {
         id: null,
-        title: '',
+        des_kh: '',
+        des_en: '',
         department: '',
-        description: '',
         status: 'Active'
       },
-      jobTitles: [
-        {
-          id: uuidv4(),
-          title: 'Database Administrator',
-          department: 'Information Technology',
-          description: 'Manages and maintains database systems.',
-          status: 'Active'
-        },
-        {
-          id: uuidv4(),
-          title: 'Assistant Manager',
-          department: 'Accounting and Finance',
-          description: 'Assists in financial planning and reporting.',
-          status: 'Active'
-        },
-        {
-          id: uuidv4(),
-          title: 'Senior Infrastructure Engineer',
-          department: 'Information Technology',
-          description: 'Oversees IT infrastructure and network systems.',
-          status: 'Inactive'
-        },
-        {
-          id: uuidv4(),
-          title: 'Credit Control Intern',
-          department: 'Credit Control',
-          description: 'Supports credit management and collections.',
-          status: 'Active'
-        }
-      ]
+      jobTitles: []
     };
   },
   computed: {
@@ -372,10 +344,10 @@ export default {
       return this.jobTitles.filter((jobTitle) => {
         const matchSearch =
           this.searchQuery === '' ||
-          jobTitle.title
+          jobTitle.des_kh
             .toLowerCase()
             .includes(this.searchQuery.toLowerCase()) ||
-          jobTitle.department
+          jobTitle.des_en
             .toLowerCase()
             .includes(this.searchQuery.toLowerCase());
         return matchSearch;
@@ -391,6 +363,20 @@ export default {
     }
   },
   methods: {
+    async getAllJobs() {
+      try {
+        debugger;
+
+        const result = await getAllJobTitle(); // Await the async API call
+        if (result && result.status === 200 && result.jobs) {
+          this.jobTitles = result.jobs;
+        } else {
+          console.warn('Unexpected response:', result);
+        }
+      } catch (error) {
+        console.error('Failed to fetch jobs:', error);
+      }
+    },
     filterData() {
       this.currentPage = 1; // Reset to first page on filter
     },
@@ -402,9 +388,9 @@ export default {
       this.isEditing = false;
       this.form = {
         id: null,
-        title: '',
+        des_kh: '',
+        des_en: '',
         department: '',
-        description: '',
         status: 'Active'
       };
       this.showCreateModal = true;
@@ -423,9 +409,9 @@ export default {
       this.isEditing = false;
       this.form = {
         id: null,
-        title: '',
+        des_kh: '',
+        des_en: '',
         department: '',
-        description: '',
         status: 'Active'
       };
     },
@@ -434,7 +420,7 @@ export default {
       this.selectedJobTitle = null;
     },
     saveJobTitle() {
-      if (!this.form.title || !this.form.department) {
+      if (!this.form.des_kh || !this.form.des_en) {
         alert('Please fill in all required fields (Job Title and Department).');
         return;
       }
@@ -454,7 +440,7 @@ export default {
       this.closeCreateModal();
     },
     deleteJobTitle(id) {
-      if (confirm('Are you sure you want to delete this job title?')) {
+      if (confirm('Are you sure you want to delete this job des_kh?')) {
         this.jobTitles = this.jobTitles.filter(
           (jobTitle) => jobTitle.id !== id
         );
@@ -475,6 +461,7 @@ export default {
     }
   },
   mounted() {
+    this.getAllJobs();
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
         if (this.showCreateModal) {
