@@ -151,7 +151,7 @@
     <transition name="modal">
       <div
         v-if="showViewModal"
-        class="fixed inset-0 bg-gray-900 bg-opacity-60 flex items-center justify-center z-50"
+        class="fixed inset-0 bg-gray-50 bg-opacity-60 flex items-center justify-center z-50"
         @click.self="closeViewModal"
       >
         <div
@@ -223,7 +223,7 @@
     <transition name="modal">
       <div
         v-if="showCreateModal"
-        class="fixed inset-0 bg-gray-900 bg-opacity-60 flex items-center justify-center z-50"
+        class="fixed inset-0 bg-gray-50 bg-opacity-60 flex items-center justify-center z-50"
         @click.self="closeCreateModal"
       >
         <div

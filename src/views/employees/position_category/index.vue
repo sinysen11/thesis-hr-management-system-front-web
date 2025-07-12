@@ -62,7 +62,7 @@
             <tr
               v-for="(position, index) in paginatedPositions"
               :key="position._id"
-              class="hover:bg-gray-50 transition border-b border-gray-200"
+              class="hover:bg-gray-900 transition border-b border-gray-200"
             >
               <td class="px-4 py-3">
                 {{ index + 1 + (currentPage - 1) * itemsPerPage }}

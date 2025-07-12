@@ -1,5 +1,5 @@
 <template>
-  <!-- <div class="min-h-screen bg-gray-50 flex flex-col"> -->
+  <!-- <div class="min-h-screen bg-gray-500 flex flex-col"> -->
   <div class="w-full">
     <div class="flex justify-between items-center mb-6">
       <h2 class="text-3xl font-extrabold text-gray-900">Job Titles</h2>
@@ -54,7 +54,6 @@
               <th class="px-4 py-3 text-left">Job Title</th>
               <th class="px-4 py-3 text-left">Department</th>
               <th class="px-4 py-3 text-left">Description</th>
-              <th class="px-4 py-3 text-left">Status</th>
               <th class="px-4 py-3 text-left">Actions</th>
             </tr>
           </thead>
@@ -62,7 +61,7 @@
             <tr
               v-for="(jobTitle, index) in paginatedJobTitles"
               :key="jobTitle.id"
-              class="hover:bg-gray-50 transition border-b border-gray-200"
+              class="hover:bg-gray-500 transition border-b border-gray-200"
             >
               <td class="px-4 py-3">
                 {{ index + 1 + (currentPage - 1) * itemsPerPage }}
@@ -70,18 +69,6 @@
               <td class="px-4 py-3">{{ jobTitle.des_kh }}</td>
               <td class="px-4 py-3">{{ jobTitle.des_en }}</td>
               <td class="px-4 py-3">{{ jobTitle.department }}</td>
-              <td class="px-4 py-3">
-                <span
-                  :class="[
-                    'px-2 py-1 rounded-full text-xs font-medium',
-                    jobTitle.status === 'Active'
-                      ? 'bg-green-100 text-green-800'
-                      : 'bg-red-100 text-red-800'
-                  ]"
-                >
-                  {{ jobTitle.status }}
-                </span>
-              </td>
               <td class="px-4 py-3 flex gap-2">
                 <button
                   @click="openViewModal(jobTitle)"
@@ -153,7 +140,7 @@
     <transition name="modal">
       <div
         v-if="showViewModal"
-        class="fixed inset-0 bg-gray-900 bg-opacity-60 flex items-center justify-center z-50"
+        class="fixed inset-0 bg-gray-500 bg-opacity-60 flex items-center justify-center z-50"
         @click.self="closeViewModal"
       >
         <div
@@ -198,21 +185,6 @@
                   {{ selectedJobTitle.department }}
                 </p>
               </div>
-              <div>
-                <label class="text-sm font-semibold text-gray-600"
-                  >Status</label
-                >
-                <p
-                  :class="[
-                    'text-sm font-medium',
-                    selectedJobTitle.status === 'Active'
-                      ? 'text-green-800'
-                      : 'text-red-800'
-                  ]"
-                >
-                  {{ selectedJobTitle.status }}
-                </p>
-              </div>
             </div>
           </div>
           <div class="mt-8 flex justify-end">
@@ -231,7 +203,7 @@
     <transition name="modal">
       <div
         v-if="showCreateModal"
-        class="fixed inset-0 bg-gray-900 bg-opacity-60 flex items-center justify-center z-50"
+        class="fixed inset-0 bg-gray-500 bg-opacity-60 flex items-center justify-center z-50"
         @click.self="closeCreateModal"
       >
         <div
@@ -282,16 +254,6 @@
                 placeholder="Enter department"
                 rows="4"
               ></textarea>
-            </div>
-            <div>
-              <label class="text-sm font-semibold text-gray-600">Status</label>
-              <select
-                v-model="form.status"
-                class="border border-gray-300 rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
-              >
-                <option value="Active">Active</option>
-                <option value="Inactive">Inactive</option>
-              </select>
             </div>
           </div>
           <div class="mt-8 flex justify-end gap-4">
@@ -365,8 +327,6 @@ export default {
   methods: {
     async getAllJobs() {
       try {
-        debugger;
-
         const result = await getAllJobTitle(); // Await the async API call
         if (result && result.status === 200 && result.jobs) {
           this.jobTitles = result.jobs;

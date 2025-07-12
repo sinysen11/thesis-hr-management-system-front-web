@@ -6,9 +6,6 @@
     <!-- Logo -->
     <div class="mb-10 text-center">
       <img src="../assets/logo.png" alt="Logo" class="h-12 mx-auto" />
-      <p class="text-green-800 font-bold leading-tight">SunFlex</p>
-      <p class="text-xs text-gray-600">INFORMATION SYSTEM</p>
-      <p class="text-xs text-gray-600">SunFlex (Cambodia) Co., Ltd.</p>
     </div>
 
     <!-- Menu -->
@@ -199,7 +196,7 @@
             <i class="fas fa-building mr-3"></i>
             Department
           </router-link>
-          
+
           <router-link
             to="/users/user-management"
             class="flex items-center px-4 py-2 rounded-md"

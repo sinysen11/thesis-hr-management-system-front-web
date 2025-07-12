@@ -3,7 +3,7 @@
     <Nav />
     <div class="flex-1 flex flex-col">
       <Header />
-      <main class="p-6 flex-1 overflow-auto">
+      <main class="container flex-1 overflow-auto">
         <router-view />
       </main>
     </div>

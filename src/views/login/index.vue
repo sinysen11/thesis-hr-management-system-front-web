@@ -121,7 +121,6 @@ const handleLogin = async () => {
       console.log('hththththththththt', response.token);
 
       if (verifyRes.valid) {
-        alert('Login successful! Token verified.');
         router.push('/');
       } else {
         alert('Login failed: Token invalid after login.');

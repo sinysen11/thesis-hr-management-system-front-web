@@ -1,5 +1,5 @@
 <template>
-  <!-- <div class="min-h-screen bg-gray-50 flex flex-col"> -->
+  <!-- <div class="min-h-screen bg-gray-900 flex flex-col"> -->
   <div class="w-full">
     <div class="flex justify-between items-center mb-6">
       <h2 class="text-3xl font-extrabold text-gray-900">User Management</h2>
@@ -64,7 +64,7 @@
             <tr
               v-for="(user, index) in paginatedUsers"
               :key="user.id"
-              class="hover:bg-gray-50 transition border-b border-gray-200"
+              class="hover:bg-gray-900 transition border-b border-gray-200"
             >
               <td class="px-4 py-3">
                 {{ index + 1 + (currentPage - 1) * itemsPerPage }}
