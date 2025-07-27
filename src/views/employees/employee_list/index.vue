@@ -1,41 +1,29 @@
 <template>
-  <!-- <div class="min-h-screen bg-gray-900 flex flex-col"> -->
   <div class="w-full">
     <div class="flex justify-between items-center mb-6">
       <h2 class="text-3xl font-extrabold text-gray-900">Employees List</h2>
-      <button
-        @click="openCreateModal"
-        class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-medium transition duration-200"
-      >
+      <button @click="openModal(false)"
+        class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-medium transition duration-200">
         Create Employee
       </button>
     </div>
 
     <!-- Filter Section -->
     <div class="bg-white shadow-sm rounded-lg p-6 mb-8">
-      <div class="flex flex-col sm:flex-row gap-4">
-        <div class="flex-1">
-          <label class="text-sm font-medium text-gray-700 mb-2"
-            >Search Employees</label
-          >
-          <input
-            type="text"
-            v-model="searchQuery"
-            class="border border-gray-300 rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
-            placeholder="Search by name, email, or ID"
-          />
+      <div class="flex flex-col sm:flex-row items-end gap-4">
+        <div>
+          <label class="text-sm font-medium text-gray-700 mb-2 block">Search Employees</label>
+          <input type="text" v-model="searchQuery"
+            class="border border-gray-300 rounded-lg px-4 py-2 w-[300px] focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
+            placeholder="Search by name, email, or ID" />
         </div>
-        <div class="flex items-end gap-4">
-          <button
-            @click="filterData"
-            class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-medium transition duration-200"
-          >
+        <div class="flex gap-4">
+          <button @click="filterData"
+            class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-medium transition duration-200">
             Search
           </button>
-          <button
-            @click="resetFilters"
-            class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-6 py-2 rounded-lg font-medium transition duration-200"
-          >
+          <button @click="resetFilters"
+            class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-6 py-2 rounded-lg font-medium transition duration-200">
             Reset
           </button>
         </div>
@@ -46,9 +34,7 @@
     <div class="bg-white shadow-sm rounded-lg overflow-hidden">
       <div class="overflow-x-auto">
         <table class="min-w-full table-auto text-sm">
-          <thead
-            class="bg-gray-100 text-gray-600 uppercase text-xs font-semibold"
-          >
+          <thead class="bg-gray-100 text-gray-600 uppercase text-xs font-semibold">
             <tr>
               <th class="px-4 py-3 text-left">No</th>
               <th class="px-4 py-3 text-left">Employee ID</th>
@@ -62,11 +48,8 @@
             </tr>
           </thead>
           <tbody class="text-gray-700">
-            <tr
-              v-for="(employee, index) in paginatedEmployees"
-              :key="employee.id"
-              class="hover:bg-gray-900 transition border-b border-gray-200"
-            >
+            <tr v-for="(employee, index) in paginatedEmployees" :key="employee.id"
+              class="hover:bg-gray-50 transition border-b border-gray-200">
               <td class="px-4 py-3">
                 {{ index + 1 + (currentPage - 1) * itemsPerPage }}
               </td>
@@ -80,25 +63,19 @@
               <td class="px-4 py-3">{{ employee.phone }}</td>
               <td class="px-4 py-3">{{ employee.doa }}</td>
               <td class="px-4 py-3 flex gap-2">
-                <button
-                  @click="openViewModal(employee)"
+                <button @click="openModal(true, employee)"
                   class="text-indigo-600 hover:text-indigo-800 p-2 rounded-full hover:bg-indigo-100 transition"
-                  title="View Employee"
-                >
+                  title="View Employee">
                   <i class="fas fa-eye"></i>
                 </button>
-                <button
-                  @click="openEditModal(employee)"
+                <button @click="openModal(false, employee)"
                   class="text-indigo-600 hover:text-indigo-800 p-2 rounded-full hover:bg-indigo-100 transition"
-                  title="Edit Employee"
-                >
+                  title="Edit Employee">
                   <i class="fas fa-edit"></i>
                 </button>
-                <button
-                  @click="deleteEmployee(employee.id)"
+                <button @click="deleteEmployee(employee.id)"
                   class="text-red-600 hover:text-red-800 p-2 rounded-full hover:bg-red-100 transition"
-                  title="Delete Employee"
-                >
+                  title="Delete Employee">
                   <i class="fas fa-trash"></i>
                 </button>
               </td>
@@ -116,220 +93,68 @@
         of {{ filteredEmployees.length }} employees
       </div>
       <div class="flex gap-2">
-        <button
-          @click="prevPage"
-          :disabled="currentPage === 1"
-          class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-300 transition duration-200"
-        >
+        <button @click="prevPage" :disabled="currentPage === 1"
+          class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-300 transition duration-200">
           Previous
         </button>
-        <button
-          v-for="page in totalPages"
-          :key="page"
-          @click="goToPage(page)"
-          :class="[
-            'px-4 py-2 rounded-lg transition duration-200',
-            currentPage === page
-              ? 'bg-indigo-600 text-white'
-              : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
-          ]"
-        >
+        <button v-for="page in totalPages" :key="page" @click="goToPage(page)" :class="[
+          'px-4 py-2 rounded-lg transition duration-200',
+          currentPage === page
+            ? 'bg-indigo-600 text-white'
+            : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
+        ]">
           {{ page }}
         </button>
-        <button
-          @click="nextPage"
-          :disabled="currentPage === totalPages"
-          class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-300 transition duration-200"
-        >
+        <button @click="nextPage" :disabled="currentPage === totalPages"
+          class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-300 transition duration-200">
           Next
         </button>
       </div>
     </div>
 
-    <!-- Modal for View Employee -->
+    <!-- Unified Modal for View/Edit/Create -->
     <transition name="modal">
-      <div
-        v-if="showViewModal"
-        class="fixed inset-0 bg-gray-900 bg-opacity-60 flex items-center justify-center z-50"
-        @click.self="closeViewModal"
-      >
-        <div
-          class="bg-white rounded-xl shadow-2xl p-8 w-full max-w-lg mx-4 transform transition-all"
-        >
-          <div class="flex justify-between items-center mb-6">
-            <h3 class="text-2xl font-bold text-gray-900">Employee Details</h3>
-            <button
-              @click="closeViewModal"
-              class="text-gray-500 hover:text-gray-700 p-2 rounded-full hover:bg-gray-100 transition"
-              title="Close"
-            >
-              <i class="fas fa-times"></i>
-            </button>
-          </div>
-          <div
-            v-if="selectedEmployee"
-            class="space-y-5 border-t border-gray-200 pt-5"
-          >
-            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div>
-                <label class="text-sm font-semibold text-gray-600"
-                  >Employee ID</label
-                >
-                <p class="text-gray-900 font-medium">
-                  {{ selectedEmployee.employeeId }}
-                </p>
-              </div>
-              <div>
-                <label class="text-sm font-semibold text-gray-600"
-                  >Full Name</label
-                >
-                <p class="text-gray-900 font-medium">
-                  {{
-                    `${selectedEmployee.firstName} ${selectedEmployee.lastName}`
-                  }}
-                </p>
-              </div>
-              <div>
-                <label class="text-sm font-semibold text-gray-600">DOB</label>
-                <p class="text-gray-900 font-medium">
-                  {{ selectedEmployee.dob }}
-                </p>
-              </div>
-              <div>
-                <label class="text-sm font-semibold text-gray-600"
-                  >Gender</label
-                >
-                <p class="text-gray-900 font-medium">
-                  {{ selectedEmployee.gender }}
-                </p>
-              </div>
-              <div class="sm:col-span-2">
-                <label class="text-sm font-semibold text-gray-600">Email</label>
-                <p class="text-gray-900 font-medium">
-                  {{ selectedEmployee.email }}
-                </p>
-              </div>
-              <div>
-                <label class="text-sm font-semibold text-gray-600">Phone</label>
-                <p class="text-gray-900 font-medium">
-                  {{ selectedEmployee.phone }}
-                </p>
-              </div>
-              <div>
-                <label class="text-sm font-semibold text-gray-600"
-                  >Emergency Contact ID</label
-                >
-                <p class="text-gray-900 font-medium">
-                  {{ selectedEmployee.emergencyContactId }}
-                </p>
-              </div>
-              <div>
-                <label class="text-sm font-semibold text-gray-600"
-                  >Department ID</label
-                >
-                <p class="text-gray-900 font-medium">
-                  {{ selectedEmployee.departmentId }}
-                </p>
-              </div>
-              <div>
-                <label class="text-sm font-semibold text-gray-600"
-                  >Position ID</label
-                >
-                <p class="text-gray-900 font-medium">
-                  {{ selectedEmployee.positionId }}
-                </p>
-              </div>
-              <div>
-                <label class="text-sm font-semibold text-gray-600">DOA</label>
-                <p class="text-gray-900 font-medium">
-                  {{ selectedEmployee.doa }}
-                </p>
-              </div>
-            </div>
-          </div>
-          <div class="mt-8 flex justify-end">
-            <button
-              @click="closeViewModal"
-              class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-medium transition duration-200"
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      </div>
-    </transition>
-
-    <!-- Modal for Create/Update Employee -->
-    <transition name="modal">
-      <div
-        v-if="showCreateModal"
-        class="fixed inset-0 bg-gray-900 bg-opacity-60 flex items-center justify-center z-50"
-        @click.self="closeCreateModal"
-      >
-        <div
-          class="bg-white rounded-xl shadow-2xl p-8 w-full max-w-lg mx-4 transform transition-all"
-        >
-          <div class="flex justify-between items-center mb-6">
+      <div v-if="showModal" style="background-color: rgb(0 0 0 / 0.5);"
+        class="fixed inset-0 bg-gray-600 bg-opacity-40 flex items-center justify-center z-50" @click.self="closeModal">
+        <div class="bg-white rounded-xl shadow-2xl p-8 w-full max-w-lg mx-4 transform transition-all">
+          <div class="flex justify-between items-center mb-6 border-b border-gray-200 pb-2">
             <h3 class="text-2xl font-bold text-gray-900">
-              {{ isEditing ? 'Edit Employee' : 'Create Employee' }}
+              {{ isViewMode ? 'Employee Details' : isEditing ? 'Edit Employee' : 'Create Employee' }}
             </h3>
-            <button
-              @click="closeCreateModal"
-              class="text-gray-500 hover:text-gray-700 p-2 rounded-full hover:bg-gray-100 transition"
-              title="Close"
-            >
+            <button @click="closeModal"
+              class="text-gray-500 hover:text-gray-700 p-2 rounded-full hover:bg-gray-100 transition" title="Close">
               <i class="fas fa-times"></i>
             </button>
           </div>
-          <div class="space-y-5 border-t border-gray-200 pt-5">
+          <div class="space-y-5 border-t border-gray-200 pt-5 max-h-[60vh] overflow-y-auto">
             <div>
-              <label class="text-sm font-semibold text-gray-600"
-                >Employee ID</label
-              >
-              <input
-                v-model.number="form.employeeId"
-                type="number"
+              <label class="text-sm font-semibold text-gray-600">Employee ID</label>
+              <input v-model.number="form.employeeId" type="number" :disabled="isViewMode"
                 class="border border-gray-300 rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
-                placeholder="Enter employee ID"
-              />
+                placeholder="Enter employee ID" />
             </div>
             <div>
-              <label class="text-sm font-semibold text-gray-600"
-                >First Name</label
-              >
-              <input
-                v-model="form.firstName"
-                type="text"
+              <label class="text-sm font-semibold text-gray-600">First Name</label>
+              <input v-model="form.firstName" type="text" :disabled="isViewMode"
                 class="border border-gray-300 rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
-                placeholder="Enter first name"
-              />
+                placeholder="Enter first name" />
             </div>
             <div>
-              <label class="text-sm font-semibold text-gray-600"
-                >Last Name</label
-              >
-              <input
-                v-model="form.lastName"
-                type="text"
+              <label class="text-sm font-semibold text-gray-600">Last Name</label>
+              <input v-model="form.lastName" type="text" :disabled="isViewMode"
                 class="border border-gray-300 rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
-                placeholder="Enter last name"
-              />
+                placeholder="Enter last name" />
             </div>
             <div>
               <label class="text-sm font-semibold text-gray-600">DOB</label>
-              <flat-pickr
-                v-model="form.dob"
+              <flat-pickr v-model="form.dob" :disabled="isViewMode"
                 class="border border-gray-300 rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
-                placeholder="Select date of birth"
-                :config="flatpickrConfig"
-              ></flat-pickr>
+                placeholder="Select date of birth" :config="flatpickrConfig"></flat-pickr>
             </div>
             <div>
               <label class="text-sm font-semibold text-gray-600">Gender</label>
-              <select
-                v-model="form.gender"
-                class="border border-gray-300 rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
-              >
+              <select v-model="form.gender" :disabled="isViewMode"
+                class="border border-gray-300 rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
                 <option value="Male">Male</option>
                 <option value="Female">Female</option>
                 <option value="Other">Other</option>
@@ -337,86 +162,60 @@
             </div>
             <div>
               <label class="text-sm font-semibold text-gray-600">Email</label>
-              <input
-                v-model="form.email"
-                type="email"
+              <input v-model="form.email" type="email" :disabled="isViewMode"
                 class="border border-gray-300 rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
-                placeholder="Enter email"
-              />
+                placeholder="Enter email" />
             </div>
             <div>
               <label class="text-sm font-semibold text-gray-600">Phone</label>
-              <input
-                v-model.number="form.phone"
-                type="number"
+              <input v-model.number="form.phone" type="number" :disabled="isViewMode"
                 class="border border-gray-300 rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
-                placeholder="Enter phone number"
-              />
+                placeholder="Enter phone number" />
             </div>
             <div>
-              <label class="text-sm font-semibold text-gray-600"
-                >Emergency Contact ID</label
-              >
-              <input
-                v-model.number="form.emergencyContactId"
-                type="number"
+              <label class="text-sm font-semibold text-gray-600">Emergency Contact ID</label>
+              <input v-model.number="form.emergencyContactId" type="number" :disabled="isViewMode"
                 class="border border-gray-300 rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
-                placeholder="Enter emergency contact ID"
-              />
+                placeholder="Enter emergency contact ID" />
             </div>
             <div>
-              <label class="text-sm font-semibold text-gray-600"
-                >Department ID</label
-              >
-              <input
-                v-model.number="form.departmentId"
-                type="number"
+              <label class="text-sm font-semibold text-gray-600">Department ID</label>
+              <input v-model.number="form.departmentId" type="number" :disabled="isViewMode"
                 class="border border-gray-300 rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
-                placeholder="Enter department ID"
-              />
+                placeholder="Enter department ID" />
             </div>
             <div>
-              <label class="text-sm font-semibold text-gray-600"
-                >Position ID</label
-              >
-              <input
-                v-model.number="form.positionId"
-                type="number"
+              <label class="text-sm font-semibold text-gray-600">Position ID</label>
+              <input v-model.number="form.positionId" type="number" :disabled="isViewMode"
                 class="border border-gray-300 rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
-                placeholder="Enter position ID"
-              />
+                placeholder="Enter position ID" />
             </div>
             <div>
               <label class="text-sm font-semibold text-gray-600">DOA</label>
-              <flat-pickr
-                v-model="form.doa"
+              <flat-pickr v-model="form.doa" :disabled="isViewMode"
                 class="border border-gray-300 rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
-                placeholder="Select date of appointment"
-                :config="flatpickrConfig"
-              ></flat-pickr>
+                placeholder="Select date of appointment" :config="flatpickrConfig"></flat-pickr>
             </div>
           </div>
           <div class="mt-8 flex justify-end gap-4">
-            <button
-              @click="closeCreateModal"
-              class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-6 py-2 rounded-lg font-medium transition duration-200"
-            >
+            <button v-if="!isViewMode" @click="closeModal"
+              class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-6 py-2 rounded-lg font-medium transition duration-200">
               Cancel
             </button>
-            <button
-              @click="saveEmployee"
-              class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-medium transition duration-200"
-            >
+            <button v-if="!isViewMode" @click="saveEmployee"
+              class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-medium transition duration-200">
               {{ isEditing ? 'Update' : 'Create' }}
+            </button>
+            <button v-if="isViewMode" @click="closeModal"
+              class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-medium transition duration-200">
+              Close
             </button>
           </div>
         </div>
       </div>
     </transition>
-    <!-- </div> -->
   </div>
 </template>
-
 <script>
 import FlatPickr from 'vue-flatpickr-component';
 import 'flatpickr/dist/flatpickr.css';
@@ -431,8 +230,8 @@ export default {
       searchQuery: '',
       currentPage: 1,
       itemsPerPage: 10,
-      showCreateModal: false,
-      showViewModal: false,
+      showModal: false,
+      isViewMode: false,
       isEditing: false,
       selectedEmployee: null,
       form: {
@@ -539,60 +338,53 @@ export default {
   },
   methods: {
     filterData() {
-      this.currentPage = 1; // Reset to first page on filter
+      this.currentPage = 1;
     },
     resetFilters() {
       this.searchQuery = '';
-      this.currentPage = 1; // Reset to first page on reset
+      this.currentPage = 1;
     },
-    openCreateModal() {
+    openModal(isViewMode, employee = null) {
+      this.isViewMode = isViewMode;
+      this.isEditing = !isViewMode && !!employee;
+      this.selectedEmployee = employee ? { ...employee } : null;
+      this.form = employee
+        ? { ...employee }
+        : {
+          id: null,
+          employeeId: null,
+          firstName: '',
+          lastName: '',
+          dob: '',
+          gender: 'Male',
+          email: '',
+          phone: null,
+          emergencyContactId: null,
+          departmentId: null,
+          positionId: null,
+          doa: ''
+        };
+      this.showModal = true;
+    },
+    closeModal() {
+      this.showModal = false;
+      this.isViewMode = false;
       this.isEditing = false;
-      this.form = {
-        id: null,
-        employeeId: null,
-        firstName: '',
-        lastName: '',
-        dob: '',
-        gender: 'Male',
-        email: '',
-        phone: null,
-        emergencyContactId: null,
-        departmentId: null,
-        positionId: null,
-        doa: ''
-      };
-      this.showCreateModal = true;
-    },
-    openEditModal(employee) {
-      this.isEditing = true;
-      this.form = { ...employee };
-      this.showCreateModal = true;
-    },
-    openViewModal(employee) {
-      this.selectedEmployee = { ...employee };
-      this.showViewModal = true;
-    },
-    closeCreateModal() {
-      this.showCreateModal = false;
-      this.isEditing = false;
-      this.form = {
-        id: null,
-        employeeId: null,
-        firstName: '',
-        lastName: '',
-        dob: '',
-        gender: 'Male',
-        email: '',
-        phone: null,
-        emergencyContactId: null,
-        departmentId: null,
-        positionId: null,
-        doa: ''
-      };
-    },
-    closeViewModal() {
-      this.showViewModal = false;
       this.selectedEmployee = null;
+      this.form = {
+        id: null,
+        employeeId: null,
+        firstName: '',
+        lastName: '',
+        dob: '',
+        gender: 'Male',
+        email: '',
+        phone: null,
+        emergencyContactId: null,
+        departmentId: null,
+        positionId: null,
+        doa: ''
+      };
     },
     saveEmployee() {
       if (
@@ -620,24 +412,18 @@ export default {
           id: uuidv4()
         });
       }
-      this.closeCreateModal();
+      this.closeModal();
     },
     deleteEmployee(id) {
       if (confirm('Are you sure you want to delete this employee?')) {
-        this.employees = this.employees.filter(
-          (employee) => employee.id !== id
-        );
+        this.employees = this.employees.filter((employee) => employee.id !== id);
       }
     },
     prevPage() {
-      if (this.currentPage > 1) {
-        this.currentPage--;
-      }
+      if (this.currentPage > 1) this.currentPage--;
     },
     nextPage() {
-      if (this.currentPage < this.totalPages) {
-        this.currentPage++;
-      }
+      if (this.currentPage < this.totalPages) this.currentPage++;
     },
     goToPage(page) {
       this.currentPage = page;
@@ -645,19 +431,13 @@ export default {
   },
   mounted() {
     window.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-        if (this.showCreateModal) {
-          this.closeCreateModal();
-        }
-        if (this.showViewModal) {
-          this.closeViewModal();
-        }
+      if (e.key === 'Escape' && this.showModal) {
+        this.closeModal();
       }
     });
   }
 };
 </script>
-
 <style scoped>
 /* Ensure table headers and cells align properly */
 th,
@@ -690,5 +470,37 @@ td {
 /* Flatpickr styles */
 .flatpickr-input {
   background-color: white;
+}
+
+/* Disable input styling */
+input:disabled,
+select:disabled,
+.flatpickr-input:disabled {
+  background-color: #f9fafb;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* Custom scrollbar for modal */
+.max-h-\[60vh\] {
+  scrollbar-width: thin;
+  scrollbar-color: #888 #f1f1f1;
+}
+
+.max-h-\[60vh\]::-webkit-scrollbar {
+  width: 6px;
+}
+
+.max-h-\[60vh\]::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.max-h-\[60vh\]::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 3px;
+}
+
+.max-h-\[60vh\]::-webkit-scrollbar-thumb:hover {
+  background: #555;
 }
 </style>

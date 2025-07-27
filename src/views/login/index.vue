@@ -1,6 +1,6 @@
 <template>
   <div
-    class="min-h-screen bg-[#2e6d56] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8"
+    class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8"
   >
     <div class="bg-white rounded-xl shadow-2xl w-full max-w-md p-6">
       <!-- Logo Section -->
