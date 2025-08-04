@@ -1,3 +1,4 @@
+```vue
 <template>
   <div class="w-full">
     <div class="flex justify-between items-center mb-6">
@@ -15,16 +16,16 @@
           <label class="text-sm font-medium text-gray-700 mb-2 block">Search</label>
           <input type="text" v-model="searchQuery"
             class="border border-gray-300 rounded-lg px-4 py-2 w-[300px] focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
-            placeholder="Search by employee ID or reason" />
+            placeholder="Search by employee name, leave type, or reason" />
         </div>
         <div>
           <label class="text-sm font-medium text-gray-700 mb-2 block">Status</label>
           <select v-model="filterStatus"
             class="border border-gray-300 rounded-lg px-4 py-2 w-[200px] focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
             <option value="">All Statuses</option>
-            <option value="Pending">Pending</option>
-            <option value="Approved">Approved</option>
-            <option value="Rejected">Rejected</option>
+            <option value="PENDING">Pending</option>
+            <option value="APPROVED">Approved</option>
+            <option value="REJECTED">Rejected</option>
           </select>
         </div>
         <div class="flex gap-4">
@@ -40,7 +41,7 @@
       </div>
     </div>
 
-    <!-- Loading State (Optional, kept for future API use) -->
+    <!-- Loading State -->
     <div v-if="isLoading" class="text-center py-4">
       <i class="fas fa-spinner fa-spin text-indigo-600 text-2xl"></i>
     </div>
@@ -52,50 +53,55 @@
           <thead class="bg-gray-100 text-gray-600 uppercase text-xs font-semibold">
             <tr>
               <th class="px-4 py-3 text-left">No</th>
-              <th class="px-4 py-3 text-left">Employee ID</th>
-              <th class="px-4 py-3 text-left">Leave Type ID</th>
+              <th class="px-4 py-3 text-left">Employee Name</th>
+              <th class="px-4 py-3 text-left">Department</th>
+              <th class="px-4 py-3 text-left">Leave Type</th>
               <th class="px-4 py-3 text-left">Start Date</th>
               <th class="px-4 py-3 text-left">End Date</th>
+              <th class="px-4 py-3 text-left">Approver</th>
               <th class="px-4 py-3 text-left">Status</th>
               <th class="px-4 py-3 text-left">Reason</th>
               <th class="px-4 py-3 text-left">Actions</th>
             </tr>
           </thead>
           <tbody class="text-gray-700">
+            <tr v-if="paginatedRequests.length === 0">
+              <td colspan="10" class="px-4 py-3 text-center">No leave requests found.</td>
+            </tr>
             <tr v-for="(request, index) in paginatedRequests" :key="request.id"
               class="hover:bg-gray-50 transition border-b border-gray-200">
               <td class="px-4 py-3">
                 {{ index + 1 + (currentPage - 1) * itemsPerPage }}
               </td>
-              <td class="px-4 py-3">{{ request.employeeId }}</td>
-              <td class="px-4 py-3">{{ request.leaveTypeId }}</td>
+              <td class="px-4 py-3">{{ request.employeeName }}</td>
+              <td class="px-4 py-3">{{ request.departmentId }}</td>
+              <td class="px-4 py-3">{{ request.leaveTypeName }}</td>
               <td class="px-4 py-3">{{ request.startDate }}</td>
               <td class="px-4 py-3">{{ request.endDate }}</td>
+              <td class="px-4 py-3">{{ request.approverName }}</td>
               <td class="px-4 py-3">
                 <span :class="[
                   'px-2 py-1 rounded-full text-xs font-medium',
-                  request.status === 'Approved'
-                    ? 'bg-green-100 text-green-800'
-                    : request.status === 'Pending'
-                      ? 'bg-yellow-100 text-yellow-800'
-                      : 'bg-red-100 text-red-800'
+                  request.status === 'APPROVED' ? 'bg-green-100 text-green-800' :
+                    request.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
+                      'bg-red-100 text-red-800'
                 ]">
                   {{ request.status }}
                 </span>
               </td>
-              <td class="px-4 py-3">{{ request.reason }}</td>
+              <td class="px-4 py-3">{{ request.reason || 'No reason provided' }}</td>
               <td class="px-4 py-3 flex gap-2">
                 <button @click="openViewModal(request)"
                   class="text-indigo-600 hover:text-indigo-800 p-2 rounded-full hover:bg-indigo-100 transition"
                   title="View Request" aria-label="View Request">
                   <i class="fas fa-eye"></i>
                 </button>
-                <button v-if="isAdmin && request.status === 'Pending'" @click="approveRequest(request.id)"
+                <button v-if="isAdmin && request.status === 'PENDING'" @click="approveRequest(request.id)"
                   class="text-green-600 hover:text-green-800 p-2 rounded-full hover:bg-green-100 transition"
                   title="Approve Request" aria-label="Approve Request">
                   <i class="fas fa-check"></i>
                 </button>
-                <button v-if="isAdmin && request.status === 'Pending'" @click="rejectRequest(request.id)"
+                <button v-if="isAdmin && request.status === 'PENDING'" @click="rejectRequest(request.id)"
                   class="text-red-600 hover:text-red-800 p-2 rounded-full hover:bg-red-100 transition"
                   title="Reject Request" aria-label="Reject Request">
                   <i class="fas fa-times"></i>
@@ -105,7 +111,7 @@
                   title="Edit Request" aria-label="Edit Request">
                   <i class="fas fa-edit"></i>
                 </button>
-                <button v-if="isAdmin" @click="deleteRequest(request.id)"
+                <button v-if="isAdmin" @click="openDeleteModal(request.id)"
                   class="text-red-600 hover:text-red-800 p-2 rounded-full hover:bg-red-100 transition"
                   title="Delete Request" aria-label="Delete Request">
                   <i class="fas fa-trash"></i>
@@ -160,12 +166,20 @@
           <div v-if="selectedRequest" class="space-y-5 border-t border-gray-200 pt-5">
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
-                <label class="text-sm font-semibold text-gray-600">Employee ID</label>
-                <p class="text-gray-900 font-medium">{{ selectedRequest.employeeId }}</p>
+                <label class="text-sm font-semibold text-gray-600">Employee Name</label>
+                <p class="text-gray-900 font-medium">{{ selectedRequest.employeeName }}</p>
               </div>
               <div>
-                <label class="text-sm font-semibold text-gray-600">Leave Type ID</label>
-                <p class="text-gray-900 font-medium">{{ selectedRequest.leaveTypeId }}</p>
+                <label class="text-sm font-semibold text-gray-600">Department</label>
+                <p class="text-gray-900 font-medium">{{ selectedRequest.departmentId }}</p>
+              </div>
+              <div>
+                <label class="text-sm font-semibold text-gray-600">Leave Type</label>
+                <p class="text-gray-900 font-medium">{{ selectedRequest.leaveTypeName }}</p>
+              </div>
+              <div>
+                <label class="text-sm font-semibold text-gray-600">Approver</label>
+                <p class="text-gray-900 font-medium">{{ selectedRequest.approverName }}</p>
               </div>
               <div>
                 <label class="text-sm font-semibold text-gray-600">Start Date</label>
@@ -179,25 +193,25 @@
                 <label class="text-sm font-semibold text-gray-600">Status</label>
                 <p :class="[
                   'text-sm font-medium',
-                  selectedRequest.status === 'Approved' ? 'text-green-800' :
-                    selectedRequest.status === 'Pending' ? 'text-yellow-800' : 'text-red-800'
+                  selectedRequest.status === 'APPROVED' ? 'text-green-800' :
+                    selectedRequest.status === 'PENDING' ? 'text-yellow-800' : 'text-red-800'
                 ]">
                   {{ selectedRequest.status }}
                 </p>
               </div>
               <div class="sm:col-span-2">
                 <label class="text-sm font-semibold text-gray-600">Reason</label>
-                <p class="text-gray-900 font-medium">{{ selectedRequest.reason }}</p>
+                <p class="text-gray-900 font-medium">{{ selectedRequest.reason || 'No reason provided' }}</p>
               </div>
             </div>
           </div>
           <div class="mt-8 flex justify-end gap-4">
-            <button v-if="isAdmin && selectedRequest.status === 'Pending'" @click="approveRequest(selectedRequest.id)"
+            <button v-if="isAdmin && selectedRequest.status === 'PENDING'" @click="approveRequest(selectedRequest.id)"
               class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-medium transition duration-200"
               aria-label="Approve Request">
               Approve
             </button>
-            <button v-if="isAdmin && selectedRequest.status === 'Pending'" @click="rejectRequest(selectedRequest.id)"
+            <button v-if="isAdmin && selectedRequest.status === 'PENDING'" @click="rejectRequest(selectedRequest.id)"
               class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg font-medium transition duration-200"
               aria-label="Reject Request">
               Reject
@@ -258,16 +272,16 @@
               <label class="text-sm font-semibold text-gray-600">Status</label>
               <select v-model="form.status"
                 class="border border-gray-300 rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
-                <option value="Pending">Pending</option>
-                <option value="Approved">Approved</option>
-                <option value="Rejected">Rejected</option>
+                <option value="PENDING">Pending</option>
+                <option value="APPROVED">Approved</option>
+                <option value="REJECTED">Rejected</option>
               </select>
             </div>
             <div>
-              <label class="text-sm font-semibold text-gray-600">Reason</label>
+              <label class="text-sm font-semibold text-gray-600">Reason (Optional)</label>
               <textarea v-model="form.reason"
                 class="border border-gray-300 rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
-                placeholder="Enter reason" rows="4"></textarea>
+                placeholder="Enter reason (optional)" rows="4"></textarea>
             </div>
           </div>
           <div class="mt-8 flex justify-end gap-4">
@@ -285,13 +299,46 @@
         </div>
       </div>
     </transition>
+
+    <!-- Modal for Delete Confirmation -->
+    <transition name="modal">
+      <div style="background-color: rgb(0 0 0 / 0.5);" v-if="showDeleteModal"
+        class="fixed inset-0 bg-opacity-60 flex items-center justify-center z-50" @click.self="closeDeleteModal">
+        <div class="bg-white rounded-xl shadow-2xl p-8 w-full max-w-md mx-4 transform transition-all">
+          <div class="flex justify-between items-center mb-6">
+            <h3 class="text-2xl font-bold text-gray-900">Confirm Delete</h3>
+            <button @click="closeDeleteModal"
+              class="text-gray-500 hover:text-gray-700 p-2 rounded-full hover:bg-gray-100 transition" title="Close"
+              aria-label="Close Modal">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          <div class="space-y-5 border-t border-gray-200 pt-5">
+            <p class="text-gray-700">Are you sure you want to delete this leave request? This action cannot be undone.</p>
+          </div>
+          <div class="mt-8 flex justify-end gap-4">
+            <button @click="closeDeleteModal"
+              class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-6 py-2 rounded-lg font-medium transition duration-200"
+              aria-label="Cancel">
+              Cancel
+            </button>
+            <button @click="confirmDeleteRequest"
+              class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg font-medium transition duration-200"
+              aria-label="Confirm Delete">
+              Delete
+            </button>
+          </div>
+        </div>
+      </div>
+    </transition>
   </div>
 </template>
 
 <script>
 import FlatPickr from 'vue-flatpickr-component';
 import 'flatpickr/dist/flatpickr.css';
-import { v4 as uuidv4 } from 'uuid';
+import moment from 'moment';
+import { getAllLeaveRequest, getOneLeaveRequest, createLeaveRequest, updateLeaveRequest, deleteLeaveRequest, approveLeaveRequest, rejectLeaveRequest } from '@/apis/leave-request';
 
 export default {
   components: {
@@ -305,10 +352,12 @@ export default {
       itemsPerPage: 10,
       showCreateModal: false,
       showViewModal: false,
+      showDeleteModal: false,
+      deleteRequestId: null,
       isEditing: false,
       isLoading: false,
-      isAdmin: true, // Toggle to false for user role testing
-      currentUserId: 1001, // Dummy user ID for testing
+      isAdmin: true, // Temporary: Set to true for debugging to bypass user filtering
+      currentUserId: null, // Temporary: Set to null for debugging to bypass user filtering
       selectedRequest: null,
       form: {
         id: null,
@@ -316,7 +365,7 @@ export default {
         leaveTypeId: null,
         startDate: '',
         endDate: '',
-        status: 'Pending',
+        status: 'PENDING',
         reason: ''
       },
       flatpickrConfig: {
@@ -325,137 +374,134 @@ export default {
         altFormat: 'd-M-Y',
         allowInput: true
       },
-      leaveRequests: [
-        {
-          id: uuidv4(),
-          employeeId: 1001,
-          leaveTypeId: 1,
-          startDate: '10-Jun-2025',
-          endDate: '12-Jun-2025',
-          status: 'Pending',
-          reason: 'Personal vacation'
-        },
-        {
-          id: uuidv4(),
-          employeeId: 1001,
-          leaveTypeId: 2,
-          startDate: '15-Jun-2025',
-          endDate: '16-Jun-2025',
-          status: 'Approved',
-          reason: 'Medical leave'
-        },
-        {
-          id: uuidv4(),
-          employeeId: 1002,
-          leaveTypeId: 1,
-          startDate: '20-Jun-2025',
-          endDate: '22-Jun-2025',
-          status: 'Rejected',
-          reason: 'Insufficient notice'
-        },
-        {
-          id: uuidv4(),
-          employeeId: 1002,
-          leaveTypeId: 3,
-          startDate: '25-Jun-2025',
-          endDate: '27-Jun-2025',
-          status: 'Pending',
-          reason: 'Family emergency'
-        },
-        {
-          id: uuidv4(),
-          employeeId: 1003,
-          leaveTypeId: 1,
-          startDate: '01-Jul-2025',
-          endDate: '03-Jul-2025',
-          status: 'Pending',
-          reason: 'Annual leave'
-        }
-      ]
+      leaveRequests: []
     };
   },
   computed: {
     filteredRequests() {
-      return this.leaveRequests.filter((request) => {
+      const filtered = this.leaveRequests.filter((request) => {
         const matchSearch =
           this.searchQuery === '' ||
-          request.employeeId.toString().includes(this.searchQuery) ||
-          request.reason.toLowerCase().includes(this.searchQuery.toLowerCase());
+          request.employeeName.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+          request.leaveTypeName.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+          (request.reason && request.reason.toLowerCase().includes(this.searchQuery.toLowerCase()));
         const matchStatus = this.filterStatus === '' || request.status === this.filterStatus;
         const matchUser = this.isAdmin ? true : request.employeeId === this.currentUserId;
+        console.log('Filtering request:', { request, matchSearch, matchStatus, matchUser });
         return matchSearch && matchStatus && matchUser;
       });
+      console.log('filteredRequests:', filtered);
+      return filtered;
     },
     paginatedRequests() {
       const start = (this.currentPage - 1) * this.itemsPerPage;
       const end = start + this.itemsPerPage;
-      return this.filteredRequests.slice(start, end);
+      const paginated = this.filteredRequests.slice(start, end);
+      console.log('paginatedRequests:', paginated);
+      return paginated;
     },
     totalPages() {
-      return Math.ceil(this.filteredRequests.length / this.itemsPerPage);
+      const pages = Math.ceil(this.filteredRequests.length / this.itemsPerPage) || 1;
+      console.log('totalPages:', pages);
+      return pages;
     }
   },
   methods: {
-    filterData() {
-      this.currentPage = 1;
-    },
-    resetFilters() {
-      this.searchQuery = '';
-      this.filterStatus = '';
-      this.currentPage = 1;
-    },
-    openCreateModal() {
-      this.isEditing = false;
-      this.form = {
-        id: null,
-        employeeId: this.isAdmin ? null : this.currentUserId,
-        leaveTypeId: null,
-        startDate: '',
-        endDate: '',
-        status: 'Pending',
-        reason: ''
-      };
-      this.showCreateModal = true;
-    },
-    openEditModal(request) {
-      if (this.isAdmin || request.employeeId === this.currentUserId) {
-        this.isEditing = true;
-        this.form = { ...request };
-        this.showCreateModal = true;
-      } else {
-        this.showNotification('Unauthorized to edit this request.', 'error');
+    handleEscape(e) {
+      if (e.key === 'Escape') {
+        if (this.showCreateModal) this.closeCreateModal();
+        if (this.showViewModal) this.closeViewModal();
+        if (this.showDeleteModal) this.closeDeleteModal();
       }
     },
-    openViewModal(request) {
-      this.selectedRequest = { ...request };
-      this.showViewModal = true;
+
+    showNotification(message, type) {
+      if (type === 'success') {
+        this.$toast.success(message, { timeout: 3000 });
+      } else {
+        this.$toast.error(message, { timeout: 3000 });
+      }
     },
-    closeCreateModal() {
-      this.showCreateModal = false;
-      this.isEditing = false;
-      this.form = {
-        id: null,
-        employeeId: this.isAdmin ? null : this.currentUserId,
-        leaveTypeId: null,
-        startDate: '',
-        endDate: '',
-        status: 'Pending',
-        reason: ''
-      };
+
+    formatDate(date) {
+      console.log('Formatting date:', date);
+      return date ? moment(date).format('DD-MMM-YYYY') : '';
     },
-    closeViewModal() {
-      this.showViewModal = false;
-      this.selectedRequest = null;
+
+    async getAllLeaveRequests() {
+      this.isLoading = true;
+      try {
+        const result = await getAllLeaveRequest();
+        console.log('getAllLeaveRequest response:', result);
+        if (result && result.status === 1 && Array.isArray(result.leaveRequests)) {
+          this.leaveRequests = result.leaveRequests.map(request => ({
+            id: request._id,
+            employeeId: request.user?._id || '',
+            employeeName: `${request.user?.first_name_en || ''} ${request.user?.last_name_en || ''}`.trim(),
+            departmentId: request.user?.department || '',
+            leaveTypeId: request.type?._id || '',
+            leaveTypeName: request.type?.name || '',
+            startDate: this.formatDate(request.fromDate),
+            endDate: this.formatDate(request.toDate),
+            approverName: `${request.approver?.first_name_en || ''} ${request.approver?.last_name_en || ''}`.trim(),
+            status: request.status || 'PENDING',
+            reason: request.reason || 'No reason provided'
+          }));
+          console.log('Mapped leaveRequests:', this.leaveRequests);
+        } else {
+          console.error('Invalid response format:', result);
+          this.showNotification('Failed to load leave requests. Invalid response format.', 'error');
+          this.leaveRequests = [];
+        }
+      } catch (error) {
+        console.error('Error fetching leave requests:', error);
+        this.showNotification('Error fetching leave requests: ' + error.message, 'error');
+        this.leaveRequests = [];
+      } finally {
+        this.isLoading = false;
+      }
     },
-    saveRequest() {
+
+    async getOneLeaveRequest(id) {
+      this.isLoading = true;
+      try {
+        const result = await getOneLeaveRequest(id);
+        console.log('getOneLeaveRequest response:', result);
+        if (result && result.status === 1 && result.leaveRequest) {
+          return {
+            id: result.leaveRequest._id,
+            employeeId: result.leaveRequest.user?._id || '',
+            employeeName: `${result.leaveRequest.user?.first_name_en || ''} ${result.leaveRequest.user?.last_name_en || ''}`.trim(),
+            departmentId: result.leaveRequest.user?.department || '',
+            leaveTypeId: result.leaveRequest.type?._id || '',
+            leaveTypeName: result.leaveRequest.type?.name || '',
+            startDate: this.formatDate(result.leaveRequest.fromDate),
+            endDate: this.formatDate(result.leaveRequest.toDate),
+            approverName: `${result.leaveRequest.approver?.first_name_en || ''} ${result.leaveRequest.approver?.last_name_en || ''}`.trim(),
+            status: result.leaveRequest.status || 'PENDING',
+            reason: result.leaveRequest.reason || 'No reason provided'
+          };
+        } else {
+          this.showNotification('Failed to fetch leave request. Invalid response format.', 'error');
+          return null;
+        }
+      } catch (error) {
+        console.error('Error fetching leave request:', error);
+        this.showNotification('Error fetching leave request: ' + error.message, 'error');
+        return null;
+      } finally {
+        this.isLoading = false;
+      }
+    },
+
+    async saveRequest() {
       if (
         !this.form.employeeId ||
         !this.form.leaveTypeId ||
         !this.form.startDate ||
-        !this.form.endDate ||
-        !this.form.reason
+        !this.form.endDate
       ) {
-        this.showNotification('Please fill in all required fields.', 'error');
+        this.showNotification('Please fill in all required fields (Employee ID, Leave Type ID, Start Date, End Date).', 'error');
         return;
       }
       const startDate = new Date(this.form.startDate);
@@ -468,89 +514,257 @@ export default {
         this.showNotification('You can only create requests for yourself.', 'error');
         return;
       }
-      if (this.isEditing) {
-        const index = this.leaveRequests.findIndex(
-          (request) => request.id === this.form.id
-        );
-        if (index !== -1 && (this.isAdmin || this.leaveRequests[index].employeeId === this.currentUserId)) {
-          this.leaveRequests[index] = { ...this.form };
-          this.showNotification('Leave request updated successfully', 'success');
+      try {
+        this.isLoading = true;
+        const payload = {
+          user: this.form.employeeId,
+          type: this.form.leaveTypeId,
+          fromDate: moment(this.form.startDate, 'DD-MMM-YYYY').toISOString(),
+          toDate: moment(this.form.endDate, 'DD-MMM-YYYY').toISOString(),
+          status: this.isAdmin ? this.form.status : 'PENDING',
+          reason: this.form.reason || undefined
+        };
+        if (this.isEditing) {
+          const result = await updateLeaveRequest(this.form.id, payload);
+          console.log('updateLeaveRequest response:', result);
+          if (result && result.status === 1) {
+            await this.getAllLeaveRequests();
+            this.showNotification('Leave request updated successfully', 'success');
+          } else {
+            this.showNotification('Failed to update leave request. Please try again.', 'error');
+          }
         } else {
-          this.showNotification('Unauthorized to edit this request', 'error');
-          return;
+          const result = await createLeaveRequest(payload);
+          console.log('createLeaveRequest response:', result);
+          if (result && result.status === 1) {
+            await this.getAllLeaveRequests();
+            this.showNotification('Leave request created successfully', 'success');
+          } else {
+            this.showNotification('Failed to create leave request. Please try again.', 'error');
+          }
         }
-      } else {
-        this.leaveRequests.push({
-          ...this.form,
-          id: uuidv4()
-        });
-        this.showNotification('Leave request created successfully', 'success');
+        this.closeCreateModal();
+      } catch (error) {
+        console.error('Error saving leave request:', error);
+        this.showNotification('Error saving leave request: ' + error.message, 'error');
+      } finally {
+        this.isLoading = false;
       }
-      this.closeCreateModal();
     },
-    approveRequest(id) {
+
+    async approveRequest(id) {
       if (!this.isAdmin) {
         this.showNotification('Unauthorized action.', 'error');
         return;
       }
-      const request = this.leaveRequests.find(r => r.id === id);
-      if (request) {
-        request.status = 'Approved';
-        this.showNotification('Leave request approved successfully', 'success');
-        this.$forceUpdate();
-        if (this.showViewModal) this.closeViewModal();
+      try {
+        this.isLoading = true;
+        const result = await approveLeaveRequest(id);
+        console.log('approveLeaveRequest response:', result);
+        if (result && result.status === 1) {
+          await this.getAllLeaveRequests();
+          this.showNotification('Leave request approved successfully', 'success');
+          if (this.showViewModal) this.closeViewModal();
+        } else {
+          this.showNotification('Failed to approve leave request. Please try again.', 'error');
+        }
+      } catch (error) {
+        console.error('Error approving leave request:', error);
+        this.showNotification('Error approving leave request: ' + error.message, 'error');
+      } finally {
+        this.isLoading = false;
       }
     },
-    rejectRequest(id) {
+
+    async rejectRequest(id) {
       if (!this.isAdmin) {
         this.showNotification('Unauthorized action.', 'error');
         return;
       }
-      const request = this.leaveRequests.find(r => r.id === id);
-      if (request) {
-        request.status = 'Rejected';
-        this.showNotification('Leave request rejected successfully', 'success');
-        this.$forceUpdate();
-        if (this.showViewModal) this.closeViewModal();
+      try {
+        this.isLoading = true;
+        const result = await rejectLeaveRequest(id);
+        console.log('rejectLeaveRequest response:', result);
+        if (result && result.status === 1) {
+          await this.getAllLeaveRequests();
+          this.showNotification('Leave request rejected successfully', 'success');
+          if (this.showViewModal) this.closeViewModal();
+        } else {
+          this.showNotification('Failed to reject leave request. Please try again.', 'error');
+        }
+      } catch (error) {
+        console.error('Error rejecting leave request:', error);
+        this.showNotification('Error rejecting leave request: ' + error.message, 'error');
+      } finally {
+        this.isLoading = false;
       }
     },
-    deleteRequest(id) {
+
+    async deleteRequest(id) {
       if (!this.isAdmin) {
         this.showNotification('Unauthorized action.', 'error');
         return;
       }
-      if (confirm('Are you sure you want to delete this leave request?')) {
-        this.leaveRequests = this.leaveRequests.filter(
-          (request) => request.id !== id
-        );
-        this.showNotification('Leave request deleted successfully', 'success');
+      try {
+        this.isLoading = true;
+        const result = await deleteLeaveRequest(id);
+        console.log('deleteLeaveRequest response:', result);
+        if (result && result.status === 1) {
+          await this.getAllLeaveRequests();
+          this.showNotification('Leave request deleted successfully', 'success');
+        } else {
+          this.showNotification('Failed to delete leave request. Please try again.', 'error');
+        }
+      } catch (error) {
+        console.error('Error deleting leave request:', error);
+        this.showNotification('Error deleting leave request: ' + error.message, 'error');
+      } finally {
+        this.isLoading = false;
       }
     },
+
+    openDeleteModal(id) {
+      this.deleteRequestId = id;
+      this.showDeleteModal = true;
+    },
+
+    async confirmDeleteRequest() {
+      await this.deleteRequest(this.deleteRequestId);
+      this.closeDeleteModal();
+    },
+
+    closeDeleteModal() {
+      this.showDeleteModal = false;
+      this.deleteRequestId = null;
+    },
+
+    async openEditModal(request) {
+      if (!this.isAdmin && request.employeeId !== this.currentUserId) {
+        this.showNotification('Unauthorized to edit this request.', 'error');
+        return;
+      }
+      try {
+        this.isLoading = true;
+        const leaveRequest = await this.getOneLeaveRequest(request.id);
+        if (leaveRequest) {
+          this.isEditing = true;
+          this.form = {
+            id: leaveRequest.id,
+            employeeId: leaveRequest.employeeId,
+            leaveTypeId: leaveRequest.leaveTypeId,
+            startDate: leaveRequest.startDate,
+            endDate: leaveRequest.endDate,
+            status: leaveRequest.status,
+            reason: leaveRequest.reason
+          };
+          this.showCreateModal = true;
+        }
+      } catch (error) {
+        console.error('Error opening edit modal:', error);
+        this.showNotification('Error opening edit modal: ' + error.message, 'error');
+      } finally {
+        this.isLoading = false;
+      }
+    },
+
+    async openViewModal(request) {
+      try {
+        this.isLoading = true;
+        const leaveRequest = await this.getOneLeaveRequest(request.id);
+        if (leaveRequest) {
+          this.selectedRequest = { ...leaveRequest };
+          this.showViewModal = true;
+        }
+      } catch (error) {
+        console.error('Error opening view modal:', error);
+        this.showNotification('Error opening view modal: ' + error.message, 'error');
+      } finally {
+        this.isLoading = false;
+      }
+    },
+
+    filterData() {
+      console.log('Applying filters:', {
+        searchQuery: this.searchQuery,
+        filterStatus: this.filterStatus,
+        currentUserId: this.currentUserId
+      });
+      this.currentPage = 1;
+    },
+
+    resetFilters() {
+      this.searchQuery = '';
+      this.filterStatus = '';
+      this.currentPage = 1;
+      console.log('Filters reset:', {
+        searchQuery: this.searchQuery,
+        filterStatus: this.filterStatus,
+        currentUserId: this.currentUserId
+      });
+    },
+
+    openCreateModal() {
+      this.isEditing = false;
+      this.form = {
+        id: null,
+        employeeId: this.isAdmin ? null : this.currentUserId,
+        leaveTypeId: null,
+        startDate: '',
+        endDate: '',
+        status: 'PENDING',
+        reason: ''
+      };
+      this.showCreateModal = true;
+    },
+
+    closeCreateModal() {
+      this.showCreateModal = false;
+      this.isEditing = false;
+      this.form = {
+        id: null,
+        employeeId: this.isAdmin ? null : this.currentUserId,
+        leaveTypeId: null,
+        startDate: '',
+        endDate: '',
+        status: 'PENDING',
+        reason: ''
+      };
+    },
+
+    closeViewModal() {
+      this.showViewModal = false;
+      this.selectedRequest = null;
+    },
+
     prevPage() {
       if (this.currentPage > 1) {
         this.currentPage--;
       }
     },
+
     nextPage() {
       if (this.currentPage < this.totalPages) {
         this.currentPage++;
       }
     },
+
     goToPage(page) {
       this.currentPage = page;
-    },
-    showNotification(message, type) {
-      // Replace with Vue Toastification or similar in production
-      alert(`${type.toUpperCase()}: ${message}`);
+      console.log('Navigated to page:', page);
     }
   },
   mounted() {
-    window.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-        if (this.showCreateModal) this.closeCreateModal();
-        if (this.showViewModal) this.closeViewModal();
-      }
-    });
+    this.isAdmin = true; // Temporary: For debugging
+    this.currentUserId = null; // Temporary: For debugging
+    // this.isAdmin = this.$store?.state?.user?.role === 'admin' || false;
+    // this.currentUserId = this.$store?.state?.user?._id || null;
+    console.log('Mounted - isAdmin:', this.isAdmin, 'currentUserId:', this.currentUserId);
+    this.resetFilters();
+    this.getAllLeaveRequests();
+    window.addEventListener('keydown', this.handleEscape);
+  },
+  beforeUnmount() {
+    window.removeEventListener('keydown', this.handleEscape);
   }
 };
 </script>
@@ -586,3 +800,4 @@ td {
   background-color: white;
 }
 </style>
+```

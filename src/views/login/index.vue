@@ -82,16 +82,16 @@
     </div>
   </div>
 </template>
+
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { login } from '@/apis/auth';
+import { signin } from '@/apis/auth';
 import {
   setToken,
   setUserInfoCookie,
   getToken
 } from '@/services/authentication';
-import { verifyToken, signin, verifyTokenTest } from '@/apis/auth';
 
 const email = ref('');
 const password = ref('');
@@ -113,23 +113,24 @@ const handleLogin = async () => {
       email: email.value,
       password: password.value
     });
-    if (response.status === '1' && response.token && response.user) {
+    console.log('Login response:', response);
+    // Check if status is 1 (number) and token/user exist
+    if (response.status === 1 && response.token && response.user) {
       await setToken('token', response.token);
       await setUserInfoCookie(response.user);
-
-      const verifyRes = await verifyToken(response.token);
-      console.log('hththththththththt', response.token);
-
-      if (verifyRes.valid) {
-        router.push('/');
-      } else {
-        alert('Login failed: Token invalid after login.');
-      }
+      console.log('Stored token:', await getToken());
+      console.log('Redirecting to /');
+      router.push('/');
     } else {
+      console.log('Login failed condition:', {
+        status: response.status,
+        token: !!response.token,
+        user: !!response.user
+      });
       alert('Login failed: ' + (response.message || 'Invalid login response'));
     }
   } catch (error) {
-    console.error('Login error:', error.response || error.message);
+    console.error('Login error:', error.response || error);
     alert(
       'Login failed: ' +
         (error.response?.data?.message || error.message || 'An error occurred')
@@ -137,58 +138,12 @@ const handleLogin = async () => {
   }
 };
 
-// const handleLogin = async () => {
-//   if (!email.value || !password.value) {
-//     alert('Please fill in all required fields.');
-//     return;
-//   }
-
-//   try {
-//     const response = await signin({
-//       email: email.value,
-//       password: password.value
-//     });
-
-//     console.log('Login response:', response);
-
-//     if (response.status === '1' && response.token && response.user) {
-//       await setToken('token', response.token);
-//       await setUserInfoCookie(response.user);
-
-//       console.log('Stored token:', await getToken());
-
-//       alert('Login successful!');
-//       router.push('/');
-//     } else {
-//       alert('Login failed: ' + (response.message || 'Invalid login response'));
-//     }
-//   } catch (error) {
-//     console.error('Login error:', error.response || error.message);
-//     alert(
-//       'Login failed: ' +
-//       (error.response?.data?.message || error.message || 'An error occurred')
-//     );
-//   }
-// };
-
-// Optional: auto-login if already has valid token
 onMounted(async () => {
   const token = await getToken();
+  console.log('onMounted token:', token);
   if (token) {
-    try {
-      const res = await verifyToken(token);
-      if (res.valid) {
-        console.log('Token valid, redirecting...');
-        router.push('/');
-      } else {
-        console.log('Token invalid:', res.message);
-      }
-    } catch (err) {
-      console.log(
-        'Token verification failed:',
-        err.response?.data || err.message
-      );
-    }
+    console.log('Token found, redirecting to /');
+    router.push('/');
   }
 });
 </script>

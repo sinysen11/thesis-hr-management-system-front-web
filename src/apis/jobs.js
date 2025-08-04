@@ -39,9 +39,39 @@ export function deleteJob(id, data) {
     data
   });
 }
+
+// JOB TITLES
 export function getAllJobTitle() {
   return request({
     url: jobs.getAllJobTitle.url,
     method: jobs.getAllJobTitle.method
+  });
+}
+export function getOneJobTitle(data) {
+  return request({
+    url: `${jobs.getOneJobTitle.url}/${data}`,
+    method: jobs.getOneJobTitle.method
+  });
+}
+export function createJobTitle(data) {
+  return request({
+    url: jobs.createJobTitle.url,
+    method: jobs.createJobTitle.method,
+    data
+  });
+}
+
+export function updateJobTitle(id, data) {
+  return request({
+    url: `${jobs.updateJobTitle.url}/${id}`,
+    method: jobs.updateJobTitle.method,
+    data
+  });
+}
+
+export function deleteJobTitle(id) {
+  return request({
+    url: `${jobs.deleteJobTitle.url}/${id}`,
+    method: jobs.deleteJobTitle.method
   });
 }

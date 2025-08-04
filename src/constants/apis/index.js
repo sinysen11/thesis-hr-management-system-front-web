@@ -1,96 +1,168 @@
 module.exports = {
-  jobs: {
-    createJob: {
-      url: 'jobs',
-      method: 'post'
+    jobs: {
+        createJob: {
+            url: 'post-job',
+            method: 'post'
+        },
+        getAllJob: {
+            url: 'post-job',
+            method: 'get'
+        },
+        getOneJob: {
+            url: 'post-job',
+            method: 'get'
+        },
+        updateJob: {
+            url: 'post-job',
+            method: 'put'
+        },
+        deleteJob: {
+            url: 'post-job',
+            method: 'delete'
+        },
+        // Job Title
+        getAllJobTitle: {
+            url: 'job-title',
+            method: 'get'
+        },
+        createJobTitle: {
+            url: 'job-title',
+            method: 'post'
+        },
+        getOneJobTitle: {
+            url: 'job-title',
+            method: 'get'
+        },
+        updateJobTitle: {
+            url: 'job-title',
+            method: 'put'
+        },
+        deleteJobTitle: {
+            url: 'job-title',
+            method: 'delete'
+        }
     },
-    getAllJob: {
-      url: 'post-job',
-      method: 'get'
+    employee: {
+        getAllPosition: {
+            url: 'position',
+            method: 'get'
+        }
     },
-    getOneJob: {
-      url: 'jobs',
-      method: 'get'
+    department: {
+        getAllDepartment: {
+            url: 'departments',
+            method: 'get'
+        },
+        getOneDepartment: {
+            url: 'departments',
+            method: 'get'
+        },
+        createDepartment: {
+            url: 'departments',
+            method: 'post'
+        },
+        updateDepartment: {
+            url: 'departments',
+            method: 'put' // Changed from 'get' to 'put'
+        },
+        deleteDepartment: {
+            url: 'departments',
+            method: 'delete' // Changed from 'get' to 'delete'
+        }
     },
-    updateJob: {
-      url: 'jobs',
-      method: 'patch'
+    leaveRequest: {
+        getAllLeaveRequest: {
+            url: 'leave-requests',
+            method: 'get'
+        },
+        getOneLeaveRequest: {
+            url: 'leave-requests',
+            method: 'get'
+        },
+        createLeaveRequest: {
+            url: 'leave-requests',
+            method: 'post'
+        },
+        updateLeaveRequest: {
+            url: 'leave-requests',
+            method: 'put' // Changed from 'get' to 'put'
+        },
+        deleteLeaveRequest: {
+            url: 'leave-requests',
+            method: 'delete' // Changed from 'get' to 'delete'
+        }
     },
-    deleteJob: {
-      url: 'jobs',
-      method: 'delete'
+    users: {
+        signin: {
+            url: 'users/login',
+            method: 'post'
+        },
+        verifyToken: {
+            url: 'users/verify-token',
+            method: 'post'
+        },
+        verifyWebpage: {
+            url: 'users/verify-webpage',
+            method: 'post'
+        },
+        refreshToken: {
+            url: 'users/refresh-token',
+            method: 'post'
+        },
+        getAllUserRole: {
+            url: 'authorization/role/hr',
+            method: 'get'
+        },
+        getOneCreditUserRole: {
+            url: 'authorization/role/credit',
+            method: 'get'
+        },
+        getMenuByRole: {
+            url: 'menu/get-menu-by-role',
+            method: 'get'
+        }
     },
-    getAllJobTitle: {
-      url: 'job-title',
-      method: 'get'
+    user: {
+        getAllUser: {
+            url: 'users',
+            method: 'get'
+        },
+        getOneUser: {
+            url: 'user',
+            method: 'get'
+        },
+        createUser: {
+            url: 'users/create',
+            method: 'post'
+        },
+        updateUser: {
+            url: 'users',
+            method: 'put' // Changed from 'get' to 'put'
+        },
+        deleteUser: {
+            url: 'users',
+            method: 'delete' // Changed from 'get' to 'delete'
+        },
+        // Role
+        getAllRole: {
+            url: 'roles',
+            method: 'get'
+        },
+        getOneRole: {
+            url: 'roles',
+            method: 'get'
+        },
+        createRole: {
+            url: 'roles',
+            method: 'post'
+        },
+        updateRole: {
+            url: 'roles',
+            method: 'put' // Changed from 'get' to 'put'
+        },
+        deleteRole: {
+            url: 'roles',
+            method: 'delete' // Changed from 'get' to 'delete'
+        }
     }
-  },
-  employee: {
-    getAllPosition: {
-      url: 'position',
-      method: 'get'
-    }
-  },
-  department: {
-    getAllDepartment: {
-      url: 'departments',
-      method: 'get'
-    }
-  },
-  users: {
-    signin: {
-      url: 'users/login',
-      method: 'post'
-    },
-    verifyToken: {
-      url: 'users/verify-token',
-      method: 'post'
-    },
-    verifyWebpage: {
-      url: 'users/verify-webpage',
-      method: 'post'
-    },
-    refreshToken: {
-      url: 'users/refresh-token',
-      method: 'post'
-    },
-    getAllUserRole: {
-      url: 'authorization/role/hr',
-      method: 'get'
-    },
-    getOneCreditUserRole: {
-      url: 'authorization/role/credit',
-      method: 'get'
-    },
-    getMenuByRole: {
-      url: 'menu/get-menu-by-role',
-      method: 'get'
-    }
-  },
-  user: {
-    getAllExistingUsers: {
-      url: 'user/hr',
-      method: 'get'
-    },
-    getOneExistingUser: {
-      url: 'user/hr',
-      method: 'get'
-    },
-    getAllUserAD: {
-      url: 'user_ad/hr',
-      method: 'get'
-    },
-    getOneUserAD: {
-      url: 'user_ad/hr',
-      method: 'get'
-    },
-    addOneUser: {
-      url: 'user/hr',
-      method: 'post'
-    },
-    updateOneExistingUser: {
-      url: 'user/hr',
-      method: 'patch'
-    }
-  }
 };
