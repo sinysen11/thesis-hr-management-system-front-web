@@ -1,10 +1,10 @@
 <template>
   <div class="w-full">
     <div class="flex justify-between items-center mb-6">
-      <h2 class="text-3xl font-extrabold text-gray-900">Employees List</h2>
+      <h2 class="text-3xl font-extrabold text-gray-900">Leave Report</h2>
       <button @click="openModal(false)"
         class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-medium transition duration-200">
-        Create Employee
+        Create Leave 
       </button>
     </div>
 
@@ -37,7 +37,7 @@
           <thead class="bg-gray-100 text-gray-600 uppercase text-xs font-semibold">
             <tr>
               <th class="px-4 py-3 text-left">No</th>
-              <th class="px-4 py-3 text-left">Employee ID</th>
+              <th class="px-4 py-3 text-left">Leave  ID</th>
               <th class="px-4 py-3 text-left">Full Name</th>
               <th class="px-4 py-3 text-left">DOB</th>
               <th class="px-4 py-3 text-left">Gender</th>
@@ -65,17 +65,17 @@
               <td class="px-4 py-3 flex gap-2">
                 <button @click="openModal(true, employee)"
                   class="text-indigo-600 hover:text-indigo-800 p-2 rounded-full hover:bg-indigo-100 transition"
-                  title="View Employee">
+                  title="View Leave ">
                   <i class="fas fa-eye"></i>
                 </button>
                 <button @click="openModal(false, employee)"
                   class="text-indigo-600 hover:text-indigo-800 p-2 rounded-full hover:bg-indigo-100 transition"
-                  title="Edit Employee">
+                  title="Edit Leave ">
                   <i class="fas fa-edit"></i>
                 </button>
                 <button @click="deleteEmployee(employee.id)"
                   class="text-red-600 hover:text-red-800 p-2 rounded-full hover:bg-red-100 transition"
-                  title="Delete Employee">
+                  title="Delete Leave ">
                   <i class="fas fa-trash"></i>
                 </button>
               </td>
@@ -119,7 +119,7 @@
         <div class="bg-white rounded-xl shadow-2xl p-8 w-full max-w-lg mx-4 transform transition-all">
           <div class="flex justify-between items-center mb-6 border-b border-gray-200 pb-2">
             <h3 class="text-2xl font-bold text-gray-900">
-              {{ isViewMode ? 'Employee Details' : isEditing ? 'Edit Employee' : 'Create Employee' }}
+              {{ isViewMode ? 'Leave  Details' : isEditing ? 'Edit Leave ' : 'Create Leave ' }}
             </h3>
             <button @click="closeModal"
               class="text-gray-500 hover:text-gray-700 p-2 rounded-full hover:bg-gray-100 transition" title="Close">
@@ -128,7 +128,7 @@
           </div>
           <div class="space-y-5 border-t border-gray-200 pt-5 max-h-[60vh] overflow-y-auto">
             <div>
-              <label class="text-sm font-semibold text-gray-600">Employee ID</label>
+              <label class="text-sm font-semibold text-gray-600">Leave  ID</label>
               <input v-model.number="form.employeeId" type="number" :disabled="isViewMode"
                 class="border border-gray-300 rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
                 placeholder="Enter employee ID" />
@@ -395,7 +395,7 @@ export default {
         !this.form.doa
       ) {
         alert(
-          'Please fill in all required fields (Employee ID, First Name, Last Name, DOB, DOA).'
+          'Please fill in all required fields (Leave  ID, First Name, Last Name, DOB, DOA).'
         );
         return;
       }

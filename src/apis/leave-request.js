@@ -2,39 +2,78 @@
 import request from '@/services/request';
 import { leaveRequest } from '@/constants/apis';
 
-export function getAllLeaveRequest() {
+export function getAllLeaveRequestForAdmin(id) {
   return request({
-    url: leaveRequest.getAllLeaveRequest.url,
-    method: leaveRequest.getAllLeaveRequest.method
+    url: `${leaveRequest.getAllLeaveRequestForAdmin.url}/${id}`,
+    method: leaveRequest.getAllLeaveRequestForAdmin.method
   });
 }
 
-export function getOneLeaveRequest(id) {
+export function getOneLeaveRequestForAdmin(id) {
   return request({
-    url: `${leaveRequest.getOneLeaveRequest.url}/${id}`,
-    method: leaveRequest.getOneLeaveRequest.method
+    url: `${leaveRequest.getOneLeaveRequestForAdmin.url}/${id}`,
+    method: leaveRequest.getOneLeaveRequestForAdmin.method
   });
 }
 
-export function createLeaveRequest(data) {
+export function createLeaveRequestForAdmin(data) {
   return request({
-    url: leaveRequest.createLeaveRequest.url,
-    method: leaveRequest.createLeaveRequest.method,
+    url: leaveRequest.createLeaveRequestForAdmin.url,
+    method: leaveRequest.createLeaveRequestForAdmin.method,
     data
   });
 }
 
-export function updateLeaveRequest(id, data) {
+export function updateLeaveRequestForAdmin(id, data) {
   return request({
-    url: `${leaveRequest.updateLeaveRequest.url}/${id}`,
-    method: leaveRequest.updateLeaveRequest.method,
+    url: `${leaveRequest.updateLeaveRequestForAdmin.url}/${id}`,
+    method: leaveRequest.updateLeaveRequestForAdmin.method,
     data
   });
 }
 
-export function deleteLeaveRequest(id) {
+export function deleteLeaveRequestForAdmin(id) {
   return request({
-    url: `${leaveRequest.deleteLeaveRequest.url}/${id}`,
-    method: leaveRequest.deleteLeaveRequest.method
+    url: `${leaveRequest.deleteLeaveRequestForAdmin.url}/${id}`,
+    method: leaveRequest.deleteLeaveRequestForAdmin.method
+  });
+}
+
+// For staff
+
+export function getAllLeaveRequestForStaff() {
+  return request({
+    url: leaveRequest.getAllLeaveRequestForStaff.url,
+    method: leaveRequest.getAllLeaveRequestForStaff.method
+  });
+}
+
+export function getOneLeaveRequestForStaff(id) {
+  return request({
+    url: `${leaveRequest.getOneLeaveRequestForStaff.url}/${id}`,
+    method: leaveRequest.getOneLeaveRequestForStaff.method
+  });
+}
+
+export function createLeaveRequestForStaff(data) {
+  return request({
+    url: leaveRequest.createLeaveRequestForStaff.url,
+    method: leaveRequest.createLeaveRequestForStaff.method,
+    data
+  });
+}
+
+export function updateLeaveRequestForStaff(id, data) {
+  return request({
+    url: `${leaveRequest.updateLeaveRequestForStaff.url}/${id}`,
+    method: leaveRequest.updateLeaveRequestForStaff.method,
+    data
+  });
+}
+
+export function deleteLeaveRequestForStaff(id) {
+  return request({
+    url: `${leaveRequest.deleteLeaveRequestForStaff.url}/${id}`,
+    method: leaveRequest.deleteLeaveRequestForStaff.method
   });
 }

@@ -1,3 +1,4 @@
+
 module.exports = {
     jobs: {
         createJob: {
@@ -42,10 +43,26 @@ module.exports = {
             method: 'delete'
         }
     },
-    employee: {
+    position: {
         getAllPosition: {
             url: 'position',
             method: 'get'
+        },
+        getOnePosition: {
+            url: 'position',
+            method: 'get'
+        },
+        createPostion: {
+            url: 'position',
+            method: 'post'
+        },
+        updatePosition: {
+            url: 'position',
+            method: 'put' // Changed from 'get' to 'put'
+        },
+        deletePosition: {
+            url: 'position',
+            method: 'delete' // Changed from 'get' to 'delete'
         }
     },
     department: {
@@ -71,23 +88,45 @@ module.exports = {
         }
     },
     leaveRequest: {
-        getAllLeaveRequest: {
+        // For Admin
+        getAllLeaveRequestForAdmin: {
+            url: 'leave-requests/approver',
+            method: 'get'
+        },
+        getOneLeaveRequestForAdmin: {
+            url: 'leave-requests/approver',
+            method: 'get'
+        },
+        createLeaveRequestForAdmin: {
+            url: 'leave-requests/approver',
+            method: 'post'
+        },
+        updateLeaveRequestForAdmin: {
+            url: 'leave-requests/approver',
+            method: 'put' // Changed from 'get' to 'put'
+        },
+        deleteLeaveRequestForAdmin: {
+            url: 'leave-requests/approver',
+            method: 'delete' // Changed from 'get' to 'delete'
+        },
+        // For Staff
+        getAllLeaveRequestForStaff: {
             url: 'leave-requests',
             method: 'get'
         },
-        getOneLeaveRequest: {
+        getOneLeaveRequestForStaff: {
             url: 'leave-requests',
             method: 'get'
         },
-        createLeaveRequest: {
+        createLeaveRequestForStaff: {
             url: 'leave-requests',
             method: 'post'
         },
-        updateLeaveRequest: {
+        updateLeaveRequestForStaff: {
             url: 'leave-requests',
             method: 'put' // Changed from 'get' to 'put'
         },
-        deleteLeaveRequest: {
+        deleteLeaveRequestForStaff: {
             url: 'leave-requests',
             method: 'delete' // Changed from 'get' to 'delete'
         }

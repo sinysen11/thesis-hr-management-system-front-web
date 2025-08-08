@@ -314,7 +314,8 @@
             </button>
           </div>
           <div class="space-y-5 border-t border-gray-200 pt-5">
-            <p class="text-gray-700">Are you sure you want to delete this leave request? This action cannot be undone.</p>
+            <p class="text-gray-700">Are you sure you want to delete this leave request? This action cannot be undone.
+            </p>
           </div>
           <div class="mt-8 flex justify-end gap-4">
             <button @click="closeDeleteModal"
@@ -338,7 +339,7 @@
 import FlatPickr from 'vue-flatpickr-component';
 import 'flatpickr/dist/flatpickr.css';
 import moment from 'moment';
-import { getAllLeaveRequest, getOneLeaveRequest, createLeaveRequest, updateLeaveRequest, deleteLeaveRequest, approveLeaveRequest, rejectLeaveRequest } from '@/apis/leave-request';
+import { getAllLeaveRequestForAdmin, getOneLeaveRequestForAdmin, createLeaveRequestForAdmin, updateLeaveRequestForAdmin, deleteLeaveRequestForAdmin, approveLeaveRequestForAdmin, rejectLeaveRequestForAdmin } from '@/apis/leave-request';
 
 export default {
   components: {
@@ -428,11 +429,13 @@ export default {
       return date ? moment(date).format('DD-MMM-YYYY') : '';
     },
 
-    async getAllLeaveRequests() {
+    async getAllLeaveRequestForAdmin() {
       this.isLoading = true;
       try {
-        const result = await getAllLeaveRequest();
-        console.log('getAllLeaveRequest response:', result);
+        const myId = '683829e073f8b8659e2c0963';
+        const result = await getAllLeaveRequestForAdmin(myId);
+        debugger
+        console.log('getAllLeaveRequestForAdmin response:', result);
         if (result && result.status === 1 && Array.isArray(result.leaveRequests)) {
           this.leaveRequests = result.leaveRequests.map(request => ({
             id: request._id,
@@ -462,11 +465,11 @@ export default {
       }
     },
 
-    async getOneLeaveRequest(id) {
+    async getOneLeaveRequestForAdmin(id) {
       this.isLoading = true;
       try {
-        const result = await getOneLeaveRequest(id);
-        console.log('getOneLeaveRequest response:', result);
+        const result = await getOneLeaveRequestForAdmin(id);
+        console.log('getOneLeaveRequestForAdmin response:', result);
         if (result && result.status === 1 && result.leaveRequest) {
           return {
             id: result.leaveRequest._id,
@@ -525,19 +528,19 @@ export default {
           reason: this.form.reason || undefined
         };
         if (this.isEditing) {
-          const result = await updateLeaveRequest(this.form.id, payload);
-          console.log('updateLeaveRequest response:', result);
+          const result = await updateLeaveRequestForAdmin(this.form.id, payload);
+          console.log('updateLeaveRequestForAdmin response:', result);
           if (result && result.status === 1) {
-            await this.getAllLeaveRequests();
+            await this.getAllLeaveRequestForAdmin();
             this.showNotification('Leave request updated successfully', 'success');
           } else {
             this.showNotification('Failed to update leave request. Please try again.', 'error');
           }
         } else {
-          const result = await createLeaveRequest(payload);
-          console.log('createLeaveRequest response:', result);
+          const result = await createLeaveRequestForAdmin(payload);
+          console.log('createLeaveRequestForAdmin response:', result);
           if (result && result.status === 1) {
-            await this.getAllLeaveRequests();
+            await this.getAllLeaveRequestForAdmin();
             this.showNotification('Leave request created successfully', 'success');
           } else {
             this.showNotification('Failed to create leave request. Please try again.', 'error');
@@ -559,10 +562,10 @@ export default {
       }
       try {
         this.isLoading = true;
-        const result = await approveLeaveRequest(id);
-        console.log('approveLeaveRequest response:', result);
+        const result = await approveLeaveRequestForAdmin(id);
+        console.log('approveLeaveRequestForAdmin response:', result);
         if (result && result.status === 1) {
-          await this.getAllLeaveRequests();
+          await this.getAllLeaveRequestForAdmin();
           this.showNotification('Leave request approved successfully', 'success');
           if (this.showViewModal) this.closeViewModal();
         } else {
@@ -583,10 +586,10 @@ export default {
       }
       try {
         this.isLoading = true;
-        const result = await rejectLeaveRequest(id);
-        console.log('rejectLeaveRequest response:', result);
+        const result = await rejectLeaveRequestForAdmin(id);
+        console.log('rejectLeaveRequestForAdmin response:', result);
         if (result && result.status === 1) {
-          await this.getAllLeaveRequests();
+          await this.getAllLeaveRequestForAdmin();
           this.showNotification('Leave request rejected successfully', 'success');
           if (this.showViewModal) this.closeViewModal();
         } else {
@@ -607,10 +610,10 @@ export default {
       }
       try {
         this.isLoading = true;
-        const result = await deleteLeaveRequest(id);
-        console.log('deleteLeaveRequest response:', result);
+        const result = await deleteLeaveRequestForAdmin(id);
+        console.log('deleteLeaveRequestForAdmin response:', result);
         if (result && result.status === 1) {
-          await this.getAllLeaveRequests();
+          await this.getAllLeaveRequestForAdmin();
           this.showNotification('Leave request deleted successfully', 'success');
         } else {
           this.showNotification('Failed to delete leave request. Please try again.', 'error');
@@ -645,7 +648,7 @@ export default {
       }
       try {
         this.isLoading = true;
-        const leaveRequest = await this.getOneLeaveRequest(request.id);
+        const leaveRequest = await this.getOneLeaveRequestForAdmin(request.id);
         if (leaveRequest) {
           this.isEditing = true;
           this.form = {
@@ -670,7 +673,7 @@ export default {
     async openViewModal(request) {
       try {
         this.isLoading = true;
-        const leaveRequest = await this.getOneLeaveRequest(request.id);
+        const leaveRequest = await this.getOneLeaveRequestForAdmin(request.id);
         if (leaveRequest) {
           this.selectedRequest = { ...leaveRequest };
           this.showViewModal = true;
@@ -760,7 +763,7 @@ export default {
     // this.currentUserId = this.$store?.state?.user?._id || null;
     console.log('Mounted - isAdmin:', this.isAdmin, 'currentUserId:', this.currentUserId);
     this.resetFilters();
-    this.getAllLeaveRequests();
+    this.getAllLeaveRequestForAdmin();
     window.addEventListener('keydown', this.handleEscape);
   },
   beforeUnmount() {

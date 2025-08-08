@@ -1,7 +1,7 @@
 <template>
   <div class="w-full">
     <div class="flex justify-between items-center mb-6">
-      <h2 class="text-3xl font-extrabold text-gray-900">Job Positions</h2>
+      <h2 class="text-3xl font-extrabold text-gray-900">Job Positions List</h2>
       <button @click="openCreateModal"
         class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-medium transition duration-200">
         Create Job Position
@@ -44,7 +44,7 @@
               <th class="px-4 py-3 text-left">No</th>
               <th class="px-4 py-3 text-left">Position ID</th>
               <th class="px-4 py-3 text-left">Title</th>
-              <th class="px-4 py-3 text-left">Department ID</th>
+              <th class="px-4 py-3 text-left">Department</th>
               <th class="px-4 py-3 text-left">Description</th>
               <th class="px-4 py-3 text-left">Created At</th>
               <th class="px-4 py-3 text-left">Actions</th>
@@ -58,7 +58,7 @@
               </td>
               <td class="px-4 py-3">{{ position._id }}</td>
               <td class="px-4 py-3">{{ position.title }}</td>
-              <td class="px-4 py-3">{{ position.department }}</td>
+              <td class="px-4 py-3">{{ position.department.name_en }}</td>
               <td class="px-4 py-3">{{ position.description }}</td>
               <td class="px-4 py-3">{{ formatDate(position.createdAt) }}</td>
               <td class="px-4 py-3 flex gap-2">
@@ -114,7 +114,7 @@
     <!-- Modal for View Job Position -->
     <transition name="modal">
       <div style="background-color: rgb(0 0 0 / 0.5);" v-if="showViewModal"
-        class="fixed inset-0  bg-opacity-60 flex items-center justify-center z-50" @click.self="closeViewModal">
+        class="fixed inset-0 bg-opacity-60 flex items-center justify-center z-50" @click.self="closeViewModal">
         <div class="bg-white rounded-xl shadow-2xl p-8 w-full max-w-lg mx-4 transform transition-all">
           <div class="flex justify-between items-center mb-6">
             <h3 class="text-2xl font-bold text-gray-900">
@@ -140,9 +140,9 @@
                 </p>
               </div>
               <div>
-                <label class="text-sm font-semibold text-gray-600">Department ID</label>
+                <label class="text-sm font-semibold text-gray-600">Department</label>
                 <p class="text-gray-900 font-medium">
-                  {{ selectedPosition.department }}
+                  {{ selectedPosition.department.name_en }}
                 </p>
               </div>
               <div>
@@ -172,7 +172,7 @@
     <!-- Modal for Create/Update Job Position -->
     <transition name="modal">
       <div style="background-color: rgb(0 0 0 / 0.5);" v-if="showCreateModal"
-        class="fixed inset-0  bg-opacity-60 flex items-center justify-center z-50" @click.self="closeCreateModal">
+        class="fixed inset-0 bg-opacity-60 flex items-center justify-center z-50" @click.self="closeCreateModal">
         <div class="bg-white rounded-xl shadow-2xl p-8 w-full max-w-lg mx-4 transform transition-all">
           <div class="flex justify-between items-center mb-6">
             <h3 class="text-2xl font-bold text-gray-900">
@@ -192,7 +192,7 @@
             </div>
             <div>
               <label class="text-sm font-semibold text-gray-600">Department ID</label>
-              <input v-model="form.department" type="text"
+              <input v-model="form.department_id" type="text"
                 class="border border-gray-300 rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
                 placeholder="Enter department ID" />
             </div>
@@ -240,7 +240,7 @@ export default {
       form: {
         _id: null,
         title: '',
-        department: '',
+        department_id: '',
         description: '',
         createdAt: null
       },
@@ -270,7 +270,7 @@ export default {
     async handleGetAllPosition() {
       try {
         const result = await getAllPosition();
-        if (result && result.status === 200 && result.positions) {
+        if (result && result.status === 1 && result.positions) {
           this.positions = result.positions;
         } else {
           console.warn('Unexpected response:', result);
@@ -281,7 +281,7 @@ export default {
       }
     },
     async savePosition() {
-      if (!this.form.title || !this.form.department || !this.form.description) {
+      if (!this.form.title || !this.form.department_id || !this.form.description) {
         alert(
           'Please fill in all required fields (Title, Department ID, Description).'
         );
@@ -292,7 +292,7 @@ export default {
         if (this.isEditing) {
           const response = await updatePosition(this.form._id, {
             title: this.form.title,
-            department: this.form.department,
+            department: this.form.department_id,
             description: this.form.description
           });
           if (response.status === 200) {
@@ -301,7 +301,10 @@ export default {
             );
             if (index !== -1) {
               this.positions[index] = {
-                ...this.form,
+                ...this.positions[index],
+                title: this.form.title,
+                department: { ...this.positions[index].department, _id: this.form.department_id },
+                description: this.form.description,
                 updatedAt: new Date().toISOString()
               };
             }
@@ -309,13 +312,14 @@ export default {
         } else {
           const response = await createPosition({
             title: this.form.title,
-            department: this.form.department,
+            department: this.form.department_id,
             description: this.form.description
           });
           if (response.status === 200) {
             this.positions.push({
               ...response.data,
               _id: response.data._id,
+              department: { _id: this.form.department_id, name_en: 'Unknown' }, // Placeholder, ideally fetch department name
               createdAt: new Date().toISOString()
             });
           }
@@ -356,7 +360,7 @@ export default {
       this.form = {
         _id: null,
         title: '',
-        department: '',
+        department_id: '',
         description: '',
         createdAt: null
       };
@@ -364,7 +368,13 @@ export default {
     },
     openEditModal(position) {
       this.isEditing = true;
-      this.form = { ...position };
+      this.form = {
+        _id: position._id,
+        title: position.title,
+        department_id: position.department._id,
+        description: position.description,
+        createdAt: position.createdAt
+      };
       this.showCreateModal = true;
     },
     openViewModal(position) {
@@ -377,7 +387,7 @@ export default {
       this.form = {
         _id: null,
         title: '',
-        department: '',
+        department_id: '',
         description: '',
         createdAt: null
       };

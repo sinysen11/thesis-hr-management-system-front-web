@@ -83,19 +83,19 @@
         </button>
         <transition name="slide">
           <div v-if="employeesOpen" class="pl-6 mt-1 space-y-1 text-sm text-gray-600">
-            <router-link to="/employee/employees-list" class="flex items-center px-4 py-2 rounded-md" :class="{
-              'bg-green-700 text-white': currentPath === '/employee/employees-list',
-              'text-gray-500 hover:bg-gray-100': currentPath !== '/employee/employees-list'
+            <router-link to="/employee/leave-report" class="flex items-center px-4 py-2 rounded-md" :class="{
+              'bg-green-700 text-white': currentPath === '/employee/leave-report',
+              'text-gray-500 hover:bg-gray-100': currentPath !== '/employee/leave-report'
             }">
               <i class="fas fa-id-card mr-3"></i>
-              Employees List
+              Leave Report
             </router-link>
             <router-link to="/employee/position-categories" class="flex items-center px-4 py-2 rounded-md" :class="{
               'bg-green-700 text-white': currentPath === '/employee/position-categories',
               'text-gray-500 hover:bg-gray-100': currentPath !== '/employee/position-categories'
             }">
               <i class="fas fa-sitemap mr-3"></i>
-              Position Categories
+              Position
             </router-link>
           </div>
         </transition>

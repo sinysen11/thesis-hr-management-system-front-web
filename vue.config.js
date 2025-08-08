@@ -1,4 +1,4 @@
-const {defineConfig} = require('@vue/cli-service');
+const { defineConfig } = require('@vue/cli-service');
 
 const output_format = (config) => {
     config.output.filename = 'js/[name].[contenthash:8].min.js';
