@@ -98,7 +98,7 @@ module.exports = {
             method: 'get'
         },
         createLeaveRequestForAdmin: {
-            url: 'leave-requests/approver',
+            url: 'leave-requests',
             method: 'post'
         },
         updateLeaveRequestForAdmin: {

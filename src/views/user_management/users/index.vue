@@ -463,7 +463,7 @@ export default {
       try {
         const result = await getAllUser({ page, limit: this.itemsPerPage });
         console.log('Get All Users response:', result);
-        if (result && result.status === 1 && Array.isArray(result.data)) {
+        if (result && result.status === 1) {
           this.users = result.data.map(user => ({
             id: user._id || null,
             first_name_kh: user.first_name_kh || '',

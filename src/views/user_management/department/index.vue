@@ -432,14 +432,18 @@ export default {
       }
       this.loading = true;
       try {
-        const response = await getOneDepartment(department.id);
-        if (response && response.status === 200 && response.data) {
+        const result = await getOneDepartment(department.id);
+        // Check for HTTP 200 + API success + department object
+        if (
+          result.status === 1
+        ) {
+          const dept = result.department;
           this.isEditing = true;
           this.form = {
-            id: response.data._id,
-            name_kh: response.data.name_kh || '',
-            name_en: response.data.name_en || '',
-            description: response.data.description || ''
+            id: dept._id,
+            name_kh: dept.name_kh || '',
+            name_en: dept.name_en || '',
+            description: dept.description || ''
           };
           this.showCreateModal = true;
         } else {
@@ -459,13 +463,16 @@ export default {
       }
       this.loading = true;
       try {
-        const response = await getOneDepartment(department.id);
-        if (response && response.status === 200 && response.data) {
+        const result = await getOneDepartment(department.id);
+        if (
+          result.status === 1
+        ) {
+          const dept = result.department;
           this.selectedDepartment = {
-            id: response.data._id,
-            name_kh: response.data.name_kh || '',
-            name_en: response.data.name_en || '',
-            description: response.data.description || ''
+            id: dept._id,
+            name_kh: dept.name_kh || '',
+            name_en: dept.name_en || '',
+            description: dept.description || ''
           };
           this.showViewModal = true;
         } else {

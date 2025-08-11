@@ -118,8 +118,6 @@ const handleLogin = async () => {
     if (response.status === 1 && response.token && response.user) {
       await setToken('token', response.token);
       await setUserInfoCookie(response.user);
-      console.log('Stored token:', await getToken());
-      console.log('Redirecting to /');
       router.push('/');
     } else {
       console.log('Login failed condition:', {
@@ -142,7 +140,6 @@ onMounted(async () => {
   const token = await getToken();
   console.log('onMounted token:', token);
   if (token) {
-    console.log('Token found, redirecting to /');
     router.push('/');
   }
 });

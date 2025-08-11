@@ -2,7 +2,6 @@
   <div
     class="flex items-center justify-between p-4 border-b bg-gray-100 relative"
   >
-    <!-- Left (Menu Toggle) -->
     <label
       for="menu-toggle"
       class="cursor-pointer text-gray-600 hover:text-gray-800"
@@ -10,7 +9,6 @@
       <font-awesome-icon icon="bars" class="text-xl" />
     </label>
 
-    <!-- Right (User Avatar and Dropdown Trigger) -->
     <div class="relative">
       <button
         @click="toggleDropdown"
@@ -32,7 +30,6 @@
         />
       </button>
 
-      <!-- User Dropdown -->
       <div
         v-if="spanVisible"
         class="absolute top-12 right-0 w-48 bg-white border border-gray-200 rounded-lg shadow-lg p-4 z-50"
@@ -52,73 +49,73 @@
   </div>
 </template>
 
-<script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+<script>
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { useRouter } from 'vue-router';
 import { getUserInfoCookie, removeAllToken } from '@/services/authentication';
 
-// State
-const spanVisible = ref(false);
-const router = useRouter();
-const userInfo = ref(null);
-// const defaultAvatar = './assets/images/logo.png'; // Replace with actual path
-
-// Computed properties
-const fullName = computed(() => {
-  if (userInfo.value) {
-    const { first_name_en, last_name_en } = userInfo.value;
-    return `${first_name_en || ''} ${last_name_en || ''}`.trim() || 'User';
-  }
-  return null;
-});
-
-// const userAvatar = computed(() => {
-//   // Replace with actual logic if user has an avatar URL
-//   return defaultAvatar;
-// });
-
-// Methods
-const toggleDropdown = () => {
-  spanVisible.value = !spanVisible.value;
-};
-
-const handleClickOutside = (event) => {
-  if (!event.target.closest('.relative')) {
-    spanVisible.value = false;
-  }
-};
-
-const handleLogOut = async () => {
-  try {
-    await removeAllToken(); // Clear all cookies
-    router.push('/login'); // Redirect to login
-  } catch (error) {
-    console.error('Logout error:', error);
-    router.push('/login'); // Redirect even if cookie clearing fails
-  }
-};
-
-// const handleImageError = (event) => {
-//   event.target.src = defaultAvatar; // Fallback to default avatar on error
-// };
-
-// Lifecycle hooks
-onMounted(() => {
-  // Load user info from cookie
-  const userInfoCookie = getUserInfoCookie();
-  if (userInfoCookie) {
-    try {
-      userInfo.value = JSON.parse(userInfoCookie);
-    } catch (error) {
-      console.error('Failed to parse user info:', error);
+export default {
+  name: 'NavbarComponent',
+  components: {
+    FontAwesomeIcon
+  },
+  data() {
+    return {
+      spanVisible: false,
+      userInfo: null
+      // defaultAvatar: './assets/images/logo.png', // Replace with your actual path
+    };
+  },
+  computed: {
+    fullName() {
+      if (this.userInfo) {
+        const { first_name_en, last_name_en } = this.userInfo;
+        return `${first_name_en || ''} ${last_name_en || ''}`.trim() || 'User';
+      }
+      return null;
     }
+    // userAvatar() {
+    //   // Replace with actual logic if user has an avatar URL
+    //   return this.defaultAvatar;
+    // },
+  },
+  methods: {
+    toggleDropdown() {
+      this.spanVisible = !this.spanVisible;
+    },
+    handleClickOutside(event) {
+      if (!event.target.closest('.relative')) {
+        this.spanVisible = false;
+      }
+    },
+    async handleLogOut() {
+      try {
+        await removeAllToken(); // Clear all cookies
+        this.$router.push('/login'); // Redirect to login
+      } catch (error) {
+        console.error('Logout error:', error);
+        this.$router.push('/login'); // Redirect even if cookie clearing fails
+      }
+    },
+    handleImageError(event) {
+      // event.target.src = this.defaultAvatar; // Fallback to default avatar on error
+    }
+  },
+  mounted() {
+    const userInfoCookie = getUserInfoCookie();
+    if (userInfoCookie) {
+      try {
+        this.userInfo = JSON.parse(userInfoCookie);
+      } catch (error) {
+        console.error('Failed to parse user info:', error);
+      }
+    }
+    document.addEventListener('click', this.handleClickOutside);
+  },
+  beforeUnmount() {
+    document.removeEventListener('click', this.handleClickOutside);
   }
-  document.addEventListener('click', handleClickOutside);
-});
-
-onUnmounted(() => {
-  document.removeEventListener('click', handleClickOutside);
-});
+};
 </script>
 
 <style scoped>

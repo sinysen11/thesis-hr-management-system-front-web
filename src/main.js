@@ -3,6 +3,7 @@ import { createApp } from 'vue';
 import App from './App.vue';
 import router from './router';
 import 'flatpickr/dist/flatpickr.css';
+import Toast from 'vue-toastification';
 import 'vue-toastification/dist/index.css';
 
 import { library } from '@fortawesome/fontawesome-svg-core';
@@ -46,6 +47,8 @@ library.add(
 );
 const app = createApp(App);
 app.use(router);
-
+app.use(Toast, {
+  timeout: 3000
+});
 app.component('font-awesome-icon', FontAwesomeIcon);
 app.mount('#app');
