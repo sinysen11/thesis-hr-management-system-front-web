@@ -108,6 +108,18 @@
         Request Leave
       </router-link>
 
+      <router-link
+        to="/staff-request-leave"
+        class="flex items-center px-4 py-2 rounded-md text-sm font-medium"
+        :class="{
+          'bg-green-700 text-white': currentPath === '/staff-request-leave',
+          'text-gray-500 hover:bg-gray-100': currentPath !== '/staff-request-leave'
+        }"
+      >
+        <i class="fas fa-calendar-alt mr-3"></i>
+        Staff Request Leave
+      </router-link>
+
       <!-- Employees Dropdown -->
       <div class="w-full">
         <button

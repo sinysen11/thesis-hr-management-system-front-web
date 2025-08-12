@@ -93,9 +93,13 @@ module.exports = {
             url: 'leave-requests/approver',
             method: 'get'
         },
-        getOneLeaveRequestForAdmin: {
+        getStaffRequestForApprover: {
             url: 'leave-requests/approver',
             method: 'get'
+        },
+        allowStaffRequestLeave: {
+            url: 'leave-requests',
+            method: 'post'
         },
         createLeaveRequestForAdmin: {
             url: 'leave-requests',

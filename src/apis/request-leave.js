@@ -9,11 +9,21 @@ export function getAllLeaveRequestForAdmin(id) {
   });
 }
 
-export function getOneLeaveRequestForAdmin(id) {
+export function getStaffRequestForApprover(id) {
   return request({
-    url: `${leaveRequest.getOneLeaveRequestForAdmin.url}/${id}`,
-    method: leaveRequest.getOneLeaveRequestForAdmin.method
+    url: `${leaveRequest.getStaffRequestForApprover.url}/${id}`,
+    method: leaveRequest.getStaffRequestForApprover.method
   });
+}
+
+export function allowStaffRequestLeave(request_id, status) {
+  return request({
+    url: `${leaveRequest.allowStaffRequestLeave.url}/${request_id}`,
+    method: `${leaveRequest.allowStaffRequestLeave.method}`,
+    data: {
+      status
+    }
+  })
 }
 
 export function createLeaveRequestForAdmin(data) {

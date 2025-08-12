@@ -12,6 +12,7 @@ import JobPosting from '@/views/jobs/job_post';
 import JobTitle from '@/views/jobs/job_title';
 import JobCategory from '@/views/jobs/job_category';
 import LeaveRequest from '@/views/leave_request';
+import StaffRequestLeave from '@/views/staff-request-leave';
 import LeaveReport from '@/views/employees/leave_report';
 import PositionCategory from '@/views/employees/position_category';
 import Department from '@/views/user_management/department';
@@ -76,6 +77,12 @@ const routes = [
         path: '/request-leave',
         name: 'request-leave',
         component: LeaveRequest,
+        meta: { requiresAuth: true }
+      },
+      {
+        path: '/staff-request-leave',
+        name: 'staff-request-leave',
+        component: StaffRequestLeave,
         meta: { requiresAuth: true }
       },
       {

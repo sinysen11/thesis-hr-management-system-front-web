@@ -66,14 +66,14 @@
       </form>
 
       <!-- Sign Up Link -->
-      <div class="text-center mt-4 text-sm text-gray-700">
-        Don’t have an account?
+      <!-- <div class="text-center mt-4 text-sm text-gray-700">
+        Don't have an account?
         <RouterLink
           to="/signup"
           class="text-[#2e6d56] font-medium hover:underline"
           >Sign Up</RouterLink
         >
-      </div>
+      </div> -->
 
       <!-- Footer -->
       <div class="text-xs text-center text-gray-500 mt-6">
