@@ -26,6 +26,42 @@ export function allowStaffRequestLeave(request_id, status) {
   })
 }
 
+export function getOwnerLeaveRequest(user_id) {
+  return request({
+    url: `${leaveRequest.getOwnerLeaveRequest.url}/${user_id}`,
+    method: `${leaveRequest.getOwnerLeaveRequest.method}`
+  })
+}
+
+export function getLeavebalanceForUser(user_id) {
+  return request({
+    url: `${leaveRequest.getLeaveBalanceForUser.url}/${user_id}`,
+    method: `${leaveRequest.getLeaveBalanceForUser.method}`
+  })
+}
+
+export function getAllApprover() {
+  return request({
+    url: `${leaveRequest.getAllApprover.url}`,
+    method: `${leaveRequest.getAllApprover.method}`
+  })
+}
+
+export function getLeaveType() {
+  return request({
+    url: `${leaveRequest.getLeaveType.url}`,
+    method: `${leaveRequest.getLeaveType.method}`
+  })
+}
+
+export function createLeaveRequest(data) {
+  return request({
+    url: `${leaveRequest.createLeaveRequest.url}`,
+    method: `${leaveRequest.createLeaveRequest.method}`,
+    data
+  })
+}
+
 export function createLeaveRequestForAdmin(data) {
   return request({
     url: leaveRequest.createLeaveRequestForAdmin.url,
@@ -61,14 +97,6 @@ export function getOneLeaveRequestForStaff(id) {
   return request({
     url: `${leaveRequest.getOneLeaveRequestForStaff.url}/${id}`,
     method: leaveRequest.getOneLeaveRequestForStaff.method
-  });
-}
-
-export function createLeaveRequestForStaff(data) {
-  return request({
-    url: leaveRequest.createLeaveRequestForStaff.url,
-    method: leaveRequest.createLeaveRequestForStaff.method,
-    data
   });
 }
 

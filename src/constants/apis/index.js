@@ -122,7 +122,7 @@ module.exports = {
             url: 'leave-requests',
             method: 'get'
         },
-        createLeaveRequestForStaff: {
+        createLeaveRequest: {
             url: 'leave-requests',
             method: 'post'
         },
@@ -133,6 +133,22 @@ module.exports = {
         deleteLeaveRequestForStaff: {
             url: 'leave-requests',
             method: 'delete' // Changed from 'get' to 'delete'
+        },
+        getLeaveBalanceForUser: {
+            url: 'leave-balance',
+            method: 'get'
+        },
+        getOwnerLeaveRequest: {
+            url: 'leave-requests',
+            method: 'get'
+        },
+        getAllApprover: {
+            url: 'leave-requests/approver',
+            method: 'get'
+        },
+        getLeaveType: {
+            url: 'leave-types',
+            method: 'get'
         }
     },
     users: {

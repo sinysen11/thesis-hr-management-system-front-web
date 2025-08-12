@@ -134,7 +134,8 @@ const routes = [
   },
   {
     path: '/*',
-    redirect: '/login'
+    redirect: '/login',
+    component: Login
   }
 ];
 
