@@ -13,6 +13,8 @@ import JobTitle from '@/views/jobs/job_title';
 import JobCategory from '@/views/jobs/job_category';
 import LeaveRequest from '@/views/leave_request';
 import StaffRequestLeave from '@/views/staff-request-leave';
+import ReportRequestLeave from '@/views/report_request_leave';
+import Holiday from '@/views/hodiday_date';
 import LeaveReport from '@/views/employees/leave_report';
 import PositionCategory from '@/views/employees/position_category';
 import Department from '@/views/user_management/department';
@@ -83,6 +85,18 @@ const routes = [
         path: '/staff-request-leave',
         name: 'staff-request-leave',
         component: StaffRequestLeave,
+        meta: { requiresAuth: true }
+      },
+      {
+        path: '/report-request-leave',
+        name: 'report-request-leave',
+        component: ReportRequestLeave,
+        meta: { requiresAuth: true }
+      },
+      {
+        path: '/holiday',
+        name: 'holiday',
+        component: Holiday,
         meta: { requiresAuth: true }
       },
       {

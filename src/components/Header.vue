@@ -1,10 +1,10 @@
 <template>
   <div
-    class="flex items-center justify-between p-4 border-b bg-gray-100 relative"
+    class="relative flex items-center justify-between p-4 bg-green-700 shadow-lg"
   >
     <label
       for="menu-toggle"
-      class="cursor-pointer text-gray-600 hover:text-gray-800"
+      class="text-gray-100 cursor-pointer hover:text-white"
     >
       <font-awesome-icon icon="bars" class="text-xl" />
     </label>
@@ -18,27 +18,34 @@
         <img
           src="https://sm.ign.com/ign_nordic/cover/a/avatar-gen/avatar-generations_prsz.jpg"
           alt="User Avatar"
-          class="h-10 w-10 rounded-full object-cover"
+          class="object-cover w-10 h-10 rounded-full"
           @error="handleImageError"
         />
-        <span class="text-gray-700 font-medium hidden sm:inline">
+        <span class="hidden font-medium text-white sm:inline">
           {{ fullName || 'User' }}
         </span>
         <font-awesome-icon
           :icon="spanVisible ? 'chevron-up' : 'chevron-down'"
-          class="text-gray-600"
+          class="text-white cursor-pointer"
         />
       </button>
 
       <div
         v-if="spanVisible"
-        class="absolute top-12 right-0 w-48 bg-white border border-gray-200 rounded-lg shadow-lg p-4 z-50"
+        class="absolute right-0 z-50 w-48 p-4 bg-white border border-gray-200 rounded-lg shadow-lg top-12"
       >
-        <div class="text-gray-700 font-medium mb-2">
+        <div class="mb-2 font-medium text-gray-700">
           <strong>{{ fullName || 'Unknown User' }}</strong>
         </div>
         <button
-          class="w-full text-left text-red-600 hover:bg-red-100 px-3 py-2 rounded flex items-center gap-2 transition-colors"
+          class="flex items-center w-full gap-2 px-3 py-2 text-left text-blue-600 transition-colors rounded cursor-pointer hover:bg-blue-100"
+          @click="handleLogOut"
+        >
+          <font-awesome-icon icon="arrow-right-from-bracket" />
+          <span>My Informaion</span>
+        </button>
+        <button
+          class="flex items-center w-full gap-2 px-3 py-2 text-left text-red-600 transition-colors rounded cursor-pointer hover:bg-red-100"
           @click="handleLogOut"
         >
           <font-awesome-icon icon="arrow-right-from-bracket" />

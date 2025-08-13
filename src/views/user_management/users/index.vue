@@ -1,35 +1,32 @@
 ```vue
 <template>
   <div class="w-full">
-    <div v-if="loading" class="fixed inset-0 bg-gray-500 bg-opacity-50 flex items-center justify-center z-50">
-      <div class="text-white text-lg">Loading...</div>
-    </div>
-    <div class="flex justify-between items-center mb-6">
+    <div class="flex items-center justify-between mb-6">
       <h2 class="text-3xl font-extrabold text-gray-900">User Management</h2>
       <button @click="openCreateModal"
         :disabled="loading"
-        class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-medium transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
+        class="px-6 py-2 font-medium text-white transition duration-200 bg-indigo-600 rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed">
         Create User
       </button>
     </div>
 
-    <div class="fixed top-4 right-4 z-50 space-y-4 w-full max-w-xs">
+    <div class="fixed z-50 w-full max-w-xs space-y-4 top-4 right-4">
       <div v-if="successMessage"
-        class="p-4 rounded-lg shadow-md bg-green-500 text-white transition-opacity duration-500 ease-in-out"
+        class="p-4 text-white transition-opacity duration-500 ease-in-out bg-green-700 rounded-lg shadow-md"
         :class="{ 'opacity-0': !successMessage }">
         {{ successMessage }}
       </div>
       <div v-if="errorMessage"
-        class="p-4 rounded-lg shadow-md bg-red-500 text-white transition-opacity duration-500 ease-in-out"
+        class="p-4 text-white transition-opacity duration-500 ease-in-out bg-red-700 rounded-lg shadow-md"
         :class="{ 'opacity-0': !errorMessage }">
         {{ errorMessage }}
       </div>
     </div>
 
-    <div class="bg-white shadow-sm rounded-lg p-6 mb-8">
-      <div class="flex flex-col sm:flex-row items-end gap-4">
+    <div class="p-6 mb-8 bg-white rounded-lg shadow-sm">
+      <div class="flex flex-col items-end gap-4 sm:flex-row">
         <div>
-          <label class="text-sm font-medium text-gray-700 mb-2 block">
+          <label class="block mb-2 text-sm font-medium text-gray-700">
             Search Users
           </label>
           <input type="text" v-model="searchQuery"
@@ -39,21 +36,25 @@
 
         <div class="flex gap-4">
           <button @click="filterData"
-            class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-medium transition duration-200">
+            class="px-6 py-2 font-medium text-white transition duration-200 bg-indigo-600 rounded-lg hover:bg-indigo-700">
             Search
           </button>
           <button @click="resetFilters"
-            class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-6 py-2 rounded-lg font-medium transition duration-200">
+            class="px-6 py-2 font-medium text-gray-800 transition duration-200 bg-gray-200 rounded-lg hover:bg-gray-300">
             Reset
           </button>
         </div>
       </div>
     </div>
+    
+    <div v-if="loading" class="py-4 text-center">
+      <i class="text-6xl text-green-700 fas fa-spinner fa-spin"></i>
+    </div>
 
-    <div class="bg-white shadow-sm rounded-lg overflow-hidden">
+    <div class="overflow-hidden bg-white rounded-lg shadow-sm">
       <div class="overflow-x-auto">
-        <table class="min-w-full table-auto text-sm">
-          <thead class="bg-gray-100 text-gray-600 uppercase text-xs font-semibold">
+        <table class="min-w-full text-sm table-auto">
+          <thead class="text-xs font-semibold text-gray-600 uppercase bg-gray-100">
             <tr>
               <th class="px-4 py-3 text-left">No</th>
               <th class="px-4 py-3 text-left">Name (KH)</th>
@@ -87,20 +88,20 @@
                   {{ user.status || 'N/A' }}
                 </span>
               </td>
-              <td class="px-4 py-3 flex gap-2">
+              <td class="flex gap-2 px-4 py-3">
                 <button @click="openViewModal(user)"
-                  class="text-indigo-600 hover:text-indigo-800 p-2 rounded-full hover:bg-indigo-100 transition"
+                  class="p-2 text-indigo-600 transition rounded-full hover:text-indigo-800 hover:bg-indigo-100"
                   title="View User">
                   <i class="fas fa-eye"></i>
                 </button>
                 <button @click="openEditModal(user)"
                   :disabled="loading"
-                  class="text-indigo-600 hover:text-indigo-800 p-2 rounded-full hover:bg-indigo-100 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                  class="p-2 text-indigo-600 transition rounded-full hover:text-indigo-800 hover:bg-indigo-100 disabled:opacity-50 disabled:cursor-not-allowed"
                   title="Edit User">
                   <i class="fas fa-edit"></i>
                 </button>
                 <button @click="confirmDelete(user.id)"
-                  class="text-red-600 hover:text-red-800 p-2 rounded-full hover:bg-red-100 transition"
+                  class="p-2 text-red-600 transition rounded-full hover:text-red-800 hover:bg-red-100"
                   title="Delete User">
                   <i class="fas fa-trash"></i>
                 </button>
@@ -111,7 +112,7 @@
       </div>
     </div>
 
-    <div class="mt-6 flex justify-between items-center">
+    <div class="flex items-center justify-between mt-6">
       <div class="text-sm text-gray-600">
         Showing {{ (currentPage - 1) * itemsPerPage + 1 }} to
         {{ Math.min(currentPage * itemsPerPage, totalUsers) }}
@@ -119,7 +120,7 @@
       </div>
       <div class="flex gap-2">
         <button @click="prevPage" :disabled="currentPage === 1"
-          class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-300 transition duration-200">
+          class="px-4 py-2 text-gray-800 transition duration-200 bg-gray-200 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-300">
           Previous
         </button>
         <button v-for="page in totalPages" :key="page" @click="goToPage(page)" :class="[
@@ -131,7 +132,7 @@
           {{ page }}
         </button>
         <button @click="nextPage" :disabled="currentPage === totalPages"
-          class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-300 transition duration-200">
+          class="px-4 py-2 text-gray-800 transition duration-200 bg-gray-200 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-300">
           Next
         </button>
       </div>
@@ -139,69 +140,69 @@
 
     <transition name="modal">
       <div style="background-color: rgb(0 0 0 / 0.5);" v-if="showViewModal"
-        class="fixed inset-0 bg-opacity-60 flex items-center justify-center z-50" @click.self="closeViewModal">
+        class="fixed inset-0 z-50 flex items-center justify-center bg-opacity-60" @click.self="closeViewModal">
         <div
           class="bg-white rounded-xl shadow-2xl p-8 w-full max-w-lg mx-4 transform transition-all max-h-[80vh] overflow-y-auto">
-          <div class="flex justify-between items-center mb-6">
+          <div class="flex items-center justify-between mb-6">
             <h3 class="text-2xl font-bold text-gray-900">User Details</h3>
             <button @click="closeViewModal"
-              class="text-gray-500 hover:text-gray-700 p-2 rounded-full hover:bg-gray-100 transition" title="Close">
+              class="p-2 text-gray-500 transition rounded-full hover:text-gray-700 hover:bg-gray-100" title="Close">
               <i class="fas fa-times"></i>
             </button>
           </div>
-          <div v-if="selectedUser" class="space-y-5 border-t border-gray-200 pt-5">
+          <div v-if="selectedUser" class="pt-5 space-y-5 border-t border-gray-200">
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
                 <label class="text-sm font-semibold text-gray-600">Name (KH)</label>
-                <p class="text-gray-900 font-medium">
+                <p class="font-medium text-gray-900">
                   {{ selectedUser.first_name_kh }} {{ selectedUser.last_name_kh }}
                 </p>
               </div>
               <div>
                 <label class="text-sm font-semibold text-gray-600">Name (EN)</label>
-                <p class="text-gray-900 font-medium">
+                <p class="font-medium text-gray-900">
                   {{ selectedUser.first_name_en }} {{ selectedUser.last_name_en }}
                 </p>
               </div>
               <div>
                 <label class="text-sm font-semibold text-gray-600">Username</label>
-                <p class="text-gray-900 font-medium">
+                <p class="font-medium text-gray-900">
                   {{ selectedUser.username }}
                 </p>
               </div>
               <div>
                 <label class="text-sm font-semibold text-gray-600">Email</label>
-                <p class="text-gray-900 font-medium">
+                <p class="font-medium text-gray-900">
                   {{ selectedUser.email }}
                 </p>
               </div>
               <div>
                 <label class="text-sm font-semibold text-gray-600">Role</label>
-                <p class="text-gray-900 font-medium">
+                <p class="font-medium text-gray-900">
                   {{ selectedUser.role?.name || 'N/A' }}
                 </p>
               </div>
               <div>
                 <label class="text-sm font-semibold text-gray-600">Department</label>
-                <p class="text-gray-900 font-medium">
+                <p class="font-medium text-gray-900">
                   {{ selectedUser.department?.name_en || 'N/A' }}
                 </p>
               </div>
               <div>
                 <label class="text-sm font-semibold text-gray-600">Phone Number</label>
-                <p class="text-gray-900 font-medium">
+                <p class="font-medium text-gray-900">
                   {{ selectedUser.phone_number || 'N/A' }}
                 </p>
               </div>
               <div>
                 <label class="text-sm font-semibold text-gray-600">Gender</label>
-                <p class="text-gray-900 font-medium">
+                <p class="font-medium text-gray-900">
                   {{ selectedUser.gender || 'N/A' }}
                 </p>
               </div>
               <div>
                 <label class="text-sm font-semibold text-gray-600">Date of Birth</label>
-                <p class="text-gray-900 font-medium">
+                <p class="font-medium text-gray-900">
                   {{ selectedUser.dob ? new Date(selectedUser.dob).toLocaleDateString() : 'N/A' }}
                 </p>
               </div>
@@ -218,9 +219,9 @@
               </div>
             </div>
           </div>
-          <div class="mt-8 flex justify-end">
+          <div class="flex justify-end mt-8">
             <button @click="closeViewModal"
-              class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-medium transition duration-200">
+              class="px-6 py-2 font-medium text-white transition duration-200 bg-indigo-600 rounded-lg hover:bg-indigo-700">
               Close
             </button>
           </div>
@@ -230,65 +231,65 @@
 
     <transition name="modal">
       <div style="background-color: rgb(0 0 0 / 0.5);" v-if="showCreateModal"
-        class="fixed inset-0 bg-opacity-60 flex items-center justify-center z-50" @click.self="closeCreateModal">
+        class="fixed inset-0 z-50 flex items-center justify-center bg-opacity-60" @click.self="closeCreateModal">
         <div
           class="bg-white rounded-xl shadow-2xl p-8 w-full max-w-lg mx-4 transform transition-all max-h-[80vh] overflow-y-auto">
-          <div class="flex justify-between items-center mb-6">
+          <div class="flex items-center justify-between mb-6">
             <h3 class="text-2xl font-bold text-gray-900">
               {{ isEditing ? 'Edit User' : 'Create User' }}
             </h3>
             <button @click="closeCreateModal"
-              class="text-gray-500 hover:text-gray-700 p-2 rounded-full hover:bg-gray-100 transition" title="Close">
+              class="p-2 text-gray-500 transition rounded-full hover:text-gray-700 hover:bg-gray-100" title="Close">
               <i class="fas fa-times"></i>
             </button>
           </div>
-          <div class="space-y-5 border-t border-gray-200 pt-5">
+          <div class="pt-5 space-y-5 border-t border-gray-200">
             <div>
               <label class="text-sm font-semibold text-gray-600">First Name (KH)</label>
               <input v-model="form.first_name_kh" type="text"
-                class="border border-gray-300 rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
+                class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                 placeholder="Enter first name (KH)" />
             </div>
             <div>
               <label class="text-sm font-semibold text-gray-600">Last Name (KH)</label>
               <input v-model="form.last_name_kh" type="text"
-                class="border border-gray-300 rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
+                class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                 placeholder="Enter last name (KH)" />
             </div>
             <div>
               <label class="text-sm font-semibold text-gray-600">First Name (EN)</label>
               <input v-model="form.first_name_en" type="text"
-                class="border border-gray-300 rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
+                class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                 placeholder="Enter first name (EN)" />
             </div>
             <div>
               <label class="text-sm font-semibold text-gray-600">Last Name (EN)</label>
               <input v-model="form.last_name_en" type="text"
-                class="border border-gray-300 rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
+                class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                 placeholder="Enter last name (EN)" />
             </div>
             <div>
               <label class="text-sm font-semibold text-gray-600">Username</label>
               <input v-model="form.username" type="text"
-                class="border border-gray-300 rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
+                class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                 placeholder="Enter username" />
             </div>
             <div>
               <label class="text-sm font-semibold text-gray-600">Email</label>
               <input v-model="form.email" type="email"
-                class="border border-gray-300 rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
+                class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                 placeholder="Enter email" />
             </div>
             <div v-if="!isEditing">
               <label class="text-sm font-semibold text-gray-600">Password</label>
               <input v-model="form.password" type="password"
-                class="border border-gray-300 rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
+                class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                 placeholder="Enter password" />
             </div>
             <div>
               <label class="text-sm font-semibold text-gray-600">Role</label>
               <select v-model="form.role"
-                class="border border-gray-300 rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+                class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
                 <option value="" disabled>Select a role</option>
                 <option v-for="role in roles" :key="role._id" :value="role._id">
                   {{ role.name }}
@@ -298,7 +299,7 @@
             <div>
               <label class="text-sm font-semibold text-gray-600">Department</label>
               <select v-model="form.department"
-                class="border border-gray-300 rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+                class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
                 <option value="" disabled>Select a department</option>
                 <option v-for="department in departments" :key="department._id" :value="department._id">
                   {{ department.name_en }}
@@ -308,13 +309,13 @@
             <div>
               <label class="text-sm font-semibold text-gray-600">Phone Number</label>
               <input v-model="form.phone_number" type="text"
-                class="border border-gray-300 rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
+                class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                 placeholder="Enter phone number" />
             </div>
             <div>
               <label class="text-sm font-semibold text-gray-600">Gender</label>
               <select v-model="form.gender"
-                class="border border-gray-300 rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+                class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
                 <option value="Male">Male</option>
                 <option value="Female">Female</option>
                 <option value="Other">Other</option>
@@ -323,26 +324,26 @@
             <div>
               <label class="text-sm font-semibold text-gray-600">Date of Birth</label>
               <input v-model="form.dob" type="date"
-                class="border border-gray-300 rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
+                class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                 placeholder="Enter date of birth" />
             </div>
             <div>
               <label class="text-sm font-semibold text-gray-600">Status</label>
               <select v-model="form.status"
-                class="border border-gray-300 rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+                class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
                 <option value="Active">Active</option>
                 <option value="Inactive">Inactive</option>
               </select>
             </div>
           </div>
-          <div class="mt-8 flex justify-end gap-4">
+          <div class="flex justify-end gap-4 mt-8">
             <button @click="closeCreateModal"
-              class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-6 py-2 rounded-lg font-medium transition duration-200">
+              class="px-6 py-2 font-medium text-gray-800 transition duration-200 bg-gray-200 rounded-lg hover:bg-gray-300">
               Cancel
             </button>
             <button @click="saveUser"
               :disabled="loading"
-              class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-medium transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
+              class="px-6 py-2 font-medium text-white transition duration-200 bg-indigo-600 rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed">
               {{ isEditing ? 'Update' : 'Create' }}
             </button>
           </div>
@@ -352,21 +353,21 @@
 
     <transition name="modal">
       <div style="background-color: rgb(0 0 0 / 0.5);" v-if="showDeleteModal"
-        class="fixed inset-0 bg-opacity-60 flex items-center justify-center z-50" @click.self="closeDeleteModal">
-        <div class="bg-white rounded-xl shadow-2xl p-8 w-full max-w-md mx-4 transform transition-all">
+        class="fixed inset-0 z-50 flex items-center justify-center bg-opacity-60" @click.self="closeDeleteModal">
+        <div class="w-full max-w-md p-8 mx-4 transition-all transform bg-white shadow-2xl rounded-xl">
           <div class="text-center">
-            <i class="fas fa-exclamation-triangle text-red-500 text-5xl mb-4"></i>
-            <h3 class="text-2xl font-bold text-gray-900 mb-2">Confirm Deletion</h3>
+            <i class="mb-4 text-5xl text-red-500 fas fa-exclamation-triangle"></i>
+            <h3 class="mb-2 text-2xl font-bold text-gray-900">Confirm Deletion</h3>
             <p class="text-gray-600">Are you sure you want to delete this user? This action cannot be undone.</p>
           </div>
-          <div class="mt-8 flex justify-center gap-4">
+          <div class="flex justify-center gap-4 mt-8">
             <button @click="closeDeleteModal"
-              class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-6 py-2 rounded-lg font-medium transition duration-200">
+              class="px-6 py-2 font-medium text-gray-800 transition duration-200 bg-gray-200 rounded-lg hover:bg-gray-300">
               Cancel
             </button>
             <button @click="deleteUser"
               :disabled="loading"
-              class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg font-medium transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
+              class="px-6 py-2 font-medium text-white transition duration-200 bg-red-600 rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed">
               Delete
             </button>
           </div>

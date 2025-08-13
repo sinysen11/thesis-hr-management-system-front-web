@@ -1,16 +1,19 @@
 <template>
     <div class="w-full">
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-3xl font-extrabold text-gray-900">Staff Leave Request</h2>
+        </div>
         <!-- Filters -->
-        <div class="bg-white shadow-sm rounded-lg p-6 mb-8">
-            <div class="flex flex-col sm:flex-row items-end gap-4">
+        <div class="p-6 mb-8 bg-white rounded-lg shadow-sm">
+            <div class="flex flex-col items-end gap-4 sm:flex-row">
                 <div>
-                    <label class="text-sm font-medium text-gray-700 mb-2 block">Search</label>
+                    <label class="block mb-2 text-sm font-medium text-gray-700">Search</label>
                     <input type="text" v-model="searchQuery"
                         class="border border-gray-300 rounded-lg px-4 py-2 w-[300px] focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
                         placeholder="Search by employee name, leave type, or reason" @input="filterData" />
                 </div>
                 <div>
-                    <label class="text-sm font-medium text-gray-700 mb-2 block">Status</label>
+                    <label class="block mb-2 text-sm font-medium text-gray-700">Status</label>
                     <select v-model="filterStatus"
                         class="border border-gray-300 rounded-lg px-4 py-2 w-[200px] focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
                         @change="filterData">
@@ -22,11 +25,11 @@
                 </div>
                 <div class="flex gap-4">
                     <button @click="filterData"
-                        class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-medium transition duration-200">
+                        class="px-6 py-2 font-medium text-white transition duration-200 bg-indigo-600 rounded-lg hover:bg-indigo-700">
                         Search
                     </button>
                     <button @click="resetFilters"
-                        class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-6 py-2 rounded-lg font-medium transition duration-200">
+                        class="px-6 py-2 font-medium text-gray-800 transition duration-200 bg-gray-200 rounded-lg hover:bg-gray-300">
                         Reset
                     </button>
                 </div>
@@ -34,15 +37,15 @@
         </div>
 
         <!-- Loading -->
-        <div v-if="isLoading" class="text-center py-4">
-            <i class="fas fa-spinner fa-spin text-indigo-600 text-2xl"></i>
+        <div v-if="isLoading" class="py-4 text-center">
+            <i class="text-6xl text-green-700 fas fa-spinner fa-spin"></i>
         </div>
 
         <!-- Table -->
-        <div v-else class="bg-white shadow-sm rounded-lg overflow-hidden">
+        <div v-else class="overflow-hidden bg-white rounded-lg shadow-sm">
             <div class="overflow-x-auto">
-                <table class="min-w-full table-auto text-sm">
-                    <thead class="bg-gray-100 text-gray-600 uppercase text-xs font-semibold">
+                <table class="min-w-full text-sm table-auto">
+                    <thead class="text-xs font-semibold text-gray-600 uppercase bg-gray-100">
                         <tr>
                             <th class="px-4 py-3 text-left">No</th>
                             <th class="px-4 py-3 text-left">Employee Name</th>
@@ -61,7 +64,7 @@
                             <td colspan="10" class="px-4 py-3 text-center">No leave requests found.</td>
                         </tr>
                         <tr v-for="(request, index) in paginatedRequests" :key="request.id"
-                            class="hover:bg-gray-50 transition border-b border-gray-200">
+                            class="transition border-b border-gray-200 hover:bg-gray-50">
                             <td class="px-4 py-3">{{ index + 1 + (currentPage - 1) * itemsPerPage }}</td>
                             <td class="px-4 py-3">{{ request.employeeName }}</td>
                             <td class="px-4 py-3">{{ request.department }}</td>
@@ -82,7 +85,7 @@
                             </td>
                             <td class="px-4 py-3">
                                 <button @click="openViewModal(request)"
-                                    class="text-indigo-600 hover:text-indigo-800 p-2 rounded-full hover:bg-indigo-100 transition cursor-pointer"
+                                    class="p-2 text-indigo-600 transition rounded-full cursor-pointer hover:text-indigo-800 hover:bg-indigo-100"
                                     title="View Request" aria-label="View Request">
                                     <i class="fas fa-eye"></i>
                                 </button>
@@ -94,13 +97,13 @@
         </div>
 
         <!-- Pagination -->
-        <div class="mt-6 flex justify-between items-center" v-if="!isLoading">
+        <div class="flex items-center justify-between mt-6" v-if="!isLoading">
             <div class="text-sm text-gray-600">
                 Showing {{ startIndex + 1 }} to {{ endIndex }} of {{ filteredRequests.length }} requests
             </div>
             <div class="flex gap-2">
                 <button @click="prevPage" :disabled="currentPage === 1"
-                    class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-300 transition duration-200">
+                    class="px-4 py-2 text-gray-800 transition duration-200 bg-gray-200 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-300">
                     Previous
                 </button>
                 <button v-for="page in totalPages" :key="page" @click="goToPage(page)" :class="[
@@ -110,7 +113,7 @@
                     {{ page }}
                 </button>
                 <button @click="nextPage" :disabled="currentPage === totalPages"
-                    class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-300 transition duration-200">
+                    class="px-4 py-2 text-gray-800 transition duration-200 bg-gray-200 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-300">
                     Next
                 </button>
             </div>
@@ -119,37 +122,37 @@
         <!-- View Modal -->
         <transition name="modal">
             <div style="background-color: rgb(0 0 0 / 0.5);" v-if="showViewModal"
-                class="fixed inset-0 bg-opacity-60 flex items-center justify-center z-50" @click.self="closeViewModal">
-                <div class="bg-white rounded-xl shadow-2xl p-8 w-full max-w-lg mx-4 transform transition-all">
-                    <div class="flex justify-between items-center mb-6">
+                class="fixed inset-0 z-50 flex items-center justify-center bg-opacity-60" @click.self="closeViewModal">
+                <div class="w-full max-w-lg p-8 mx-4 transition-all transform bg-white shadow-2xl rounded-xl">
+                    <div class="flex items-center justify-between mb-6">
                         <h3 class="text-2xl font-bold text-gray-900">Staff Leave Request Details</h3>
                         <button @click="closeViewModal"
-                            class="text-gray-500 hover:text-gray-700 p-2 rounded-full hover:bg-gray-100 transition cursor-pointer"
+                            class="p-2 text-gray-500 transition rounded-full cursor-pointer hover:text-gray-700 hover:bg-gray-100"
                             title="Close" aria-label="Close Modal">
                             <i class="fas fa-times"></i>
                         </button>
                     </div>
-                    <div v-if="selectedRequest" class="space-y-5 border-t border-gray-200 pt-5">
+                    <div v-if="selectedRequest" class="pt-5 space-y-5 border-t border-gray-200">
                         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                             <div>
                                 <label class="text-sm font-semibold text-gray-600">Employee Name</label>
-                                <p class="text-gray-900 font-medium">{{ selectedRequest.employeeName }}</p>
+                                <p class="font-medium text-gray-900">{{ selectedRequest.employeeName }}</p>
                             </div>
                             <div>
                                 <label class="text-sm font-semibold text-gray-600">Department</label>
-                                <p class="text-gray-900 font-medium">{{ selectedRequest.department }}</p>
+                                <p class="font-medium text-gray-900">{{ selectedRequest.department }}</p>
                             </div>
                             <div>
                                 <label class="text-sm font-semibold text-gray-600">Leave Type</label>
-                                <p class="text-gray-900 font-medium">{{ selectedRequest.leaveTypeName }}</p>
+                                <p class="font-medium text-gray-900">{{ selectedRequest.leaveTypeName }}</p>
                             </div>
                             <div>
                                 <label class="text-sm font-semibold text-gray-600">Start Date</label>
-                                <p class="text-gray-900 font-medium">{{ selectedRequest.startDate }}</p>
+                                <p class="font-medium text-gray-900">{{ selectedRequest.startDate }}</p>
                             </div>
                             <div>
                                 <label class="text-sm font-semibold text-gray-600">End Date</label>
-                                <p class="text-gray-900 font-medium">{{ selectedRequest.endDate }}</p>
+                                <p class="font-medium text-gray-900">{{ selectedRequest.endDate }}</p>
                             </div>
                             <div>
                                 <label class="text-sm font-semibold text-gray-600">Status</label>
@@ -166,27 +169,27 @@
                             </div>
                             <div class="sm:col-span-2">
                                 <label class="text-sm font-semibold text-gray-600">Reason</label>
-                                <p class="text-gray-900 font-medium">
+                                <p class="font-medium text-gray-900">
                                     {{ selectedRequest.reason || 'No reason provided' }}
                                 </p>
                             </div>
                         </div>
                     </div>
-                    <div class="mt-8 flex justify-end gap-4" v-if="selectedRequest.status === 'PENDING'">
+                    <div class="flex justify-end gap-4 mt-8" v-if="selectedRequest.status === 'PENDING'">
                         <button @click="onAllowLeaveRequest(selectedRequest.id, 'REJECTED')"
-                            class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg font-medium transition duration-200 cursor-pointer"
+                            class="px-6 py-2 font-medium text-white transition duration-200 bg-red-600 rounded-lg cursor-pointer hover:bg-red-700"
                             aria-label="Close Modal">
                             Rejected
                         </button>
                         <button @click="onAllowLeaveRequest(selectedRequest.id, 'APPROVED')"
-                            class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-medium transition duration-200 cursor-pointer"
+                            class="px-6 py-2 font-medium text-white transition duration-200 bg-green-600 rounded-lg cursor-pointer hover:bg-green-700"
                             aria-label="Close Modal">
                             Approved
                         </button>
                     </div>
-                    <div class="mt-8 flex justify-end gap-4" v-if="selectedRequest.status !== 'PENDING'">
+                    <div class="flex justify-end gap-4 mt-8" v-if="selectedRequest.status !== 'PENDING'">
                         <button @click="closeViewModal"
-                            class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-medium transition duration-200 cursor-pointer"
+                            class="px-6 py-2 font-medium text-white transition duration-200 bg-indigo-600 rounded-lg cursor-pointer hover:bg-indigo-700"
                             aria-label="Close Modal">
                             Close
                         </button>
