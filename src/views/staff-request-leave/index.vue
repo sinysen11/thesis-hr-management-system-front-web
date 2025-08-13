@@ -19,7 +19,7 @@
                     <select v-model="filterStatus"
                         class="border border-gray-300 rounded-lg px-4 py-2 w-[200px] focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
                         @change="filterData">
-                        <option value="">All Statuses</option>
+                        <option value="">All</option>
                         <option value="PENDING">Pending</option>
                         <option value="APPROVED">Approved</option>
                         <option value="REJECTED">Rejected</option>
@@ -95,7 +95,6 @@
                                 </span>
                             </td>
 
-                            <!-- Actions -->
                             <td class="flex gap-1 px-3 py-4">
                                 <button @click="openViewModal(request)"
                                     class="p-1 text-green-600 transition rounded-full cursor-pointer hover:bg-green-100 hover:text-green-800"
@@ -133,7 +132,6 @@
             </div>
         </div>
 
-        <!-- View Modal -->
         <transition name="modal">
             <div v-if="showViewModal" style="background-color: rgb(0 0 0 / 0.5);"
                 class="fixed inset-0 z-50 flex items-center justify-center" @click.self="closeViewModal">
@@ -196,6 +194,10 @@
                     </div>
 
                     <div class="flex justify-end gap-3 mt-8">
+                        <button @click="closeViewModal"
+                            class="px-6 py-2 font-medium text-indigo-700 transition bg-indigo-100 rounded-lg cursor-pointer hover:bg-indigo-200">
+                            <i class="mr-1 fas fa-arrow-left"></i> Close
+                        </button>
                         <template v-if="selectedRequest.status === 'PENDING'">
                             <button @click="onAllowLeaveRequest(selectedRequest.id, 'REJECTED')"
                                 class="px-6 py-2 font-medium text-red-700 transition bg-red-100 rounded-lg cursor-pointer hover:bg-red-200">
@@ -204,13 +206,6 @@
                             <button @click="onAllowLeaveRequest(selectedRequest.id, 'APPROVED')"
                                 class="px-6 py-2 font-medium text-green-700 transition bg-green-100 rounded-lg cursor-pointer hover:bg-green-200">
                                 <i class="mr-1 fas fa-check-circle"></i> Approve
-                            </button>
-                        </template>
-
-                        <template v-else>
-                            <button @click="closeViewModal"
-                                class="px-6 py-2 font-medium text-indigo-700 transition bg-indigo-100 rounded-lg cursor-pointer hover:bg-indigo-200">
-                                <i class="mr-1 fas fa-arrow-left"></i> Close
                             </button>
                         </template>
                     </div>
@@ -352,7 +347,6 @@ export default {
 
         openViewModal(request) {
             this.selectedRequest = request;
-            console.log(this.selectedRequest)
             this.showViewModal = true;
         },
         closeViewModal() {
@@ -360,7 +354,7 @@ export default {
             this.selectedRequest = null;
         },
         filterData() {
-            this.currentPage = 1; // reset to first page on filter
+            this.currentPage = 1;
         },
         resetFilters() {
             this.searchQuery = '';

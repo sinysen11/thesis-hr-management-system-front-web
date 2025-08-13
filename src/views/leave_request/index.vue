@@ -190,6 +190,83 @@
     </div>
 
     <transition name="modal">
+      <div v-if="showViewModal" style="background-color: rgb(0 0 0 / 0.5);"
+        class="fixed inset-0 z-50 flex items-center justify-center" @click.self="closeViewModal">
+        <div class="w-full max-w-lg p-8 mx-4 transition-all transform bg-white shadow-2xl rounded-xl">
+          <div class="flex items-center justify-between mb-6">
+            <h3 class="text-2xl font-bold text-gray-900">
+              Staff Leave Request Details
+            </h3>
+            <button @click="closeViewModal"
+              class="p-2 text-gray-500 transition rounded-full cursor-pointer hover:text-gray-700 hover:bg-gray-100"
+              title="Close">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+
+          <div v-if="selectedRequest" class="pt-5 space-y-5 border-t border-gray-200">
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div>
+                <label class="text-sm font-semibold text-gray-600">Employee Name</label>
+                <p class="font-medium text-gray-900">{{ selectedRequest.employeeName }}</p>
+              </div>
+              <div>
+                <label class="text-sm font-semibold text-gray-600">Department</label>
+                <p class="font-medium text-gray-900">{{ selectedRequest.department }}</p>
+              </div>
+              <div>
+                <label class="text-sm font-semibold text-gray-600">Leave Type</label>
+                <p class="font-medium text-gray-900">{{ selectedRequest.leaveTypeName }}</p>
+              </div>
+              <div>
+                <label class="text-sm font-semibold text-gray-600">Start Date</label>
+                <p class="font-medium text-gray-900">{{ selectedRequest.startDate }}</p>
+              </div>
+              <div>
+                <label class="text-sm font-semibold text-gray-600">End Date</label>
+                <p class="font-medium text-gray-900">{{ selectedRequest.endDate }}</p>
+              </div>
+              <div>
+                <label class="text-sm font-semibold text-gray-600">Status</label>
+                <span :class="[
+                  'inline-block ml-2 px-3 py-1 mt-1 rounded-full text-xs font-medium',
+                  selectedRequest.status === 'APPROVED'
+                    ? 'bg-green-200 text-green-800'
+                    : selectedRequest.status === 'PENDING'
+                      ? 'bg-blue-200 text-blue-800'
+                      : (selectedRequest.status === 'CANCELLED' || selectedRequest.status === 'DRAFT')
+                        ? 'bg-yellow-200 text-yellow-800'
+                        : 'bg-red-200 text-red-800'
+                ]">
+                  {{ selectedRequest.status }}
+                </span>
+              </div>
+              <div class="sm:col-span-2">
+                <label class="text-sm font-semibold text-gray-600">Reason</label>
+                <p class="font-medium text-gray-900">
+                  {{ selectedRequest.reason || 'No reason provided' }}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex justify-end gap-3 mt-8">
+            <button @click="closeViewModal"
+              class="px-6 py-2 font-medium text-indigo-700 transition bg-indigo-100 rounded-lg cursor-pointer hover:bg-indigo-200">
+              <i class="mr-1 fas fa-arrow-left"></i> Close
+            </button>
+
+            <button v-if="selectedRequest.status === 'PENDING'" @click="confirmCancel(request)"
+              class="px-6 py-2 font-medium text-red-700 transition bg-red-100 rounded-lg cursor-pointer hover:bg-red-200"
+              title="Delete User">
+              <i class="text-xl fas fa-cancel"></i> Cancel Request
+            </button>
+          </div>
+        </div>
+      </div>
+    </transition>
+
+    <transition name="modal">
       <div style="background-color: rgb(0 0 0 / 0.5);" v-if="showConfirmCancel"
         class="fixed inset-0 z-50 flex items-center justify-center bg-opacity-60" @click.self="cancelConfirm">
         <div class="w-full max-w-lg p-8 mx-4 transition-all transform bg-white shadow-2xl rounded-xl">
@@ -261,7 +338,7 @@ export default {
       isLoading: false,
       currentPage: 1,
       itemsPerPage: 10,
-
+      showViewModal: false,
       showCreateModal: false,
       leaveForm: {
         type: '',
@@ -508,7 +585,13 @@ export default {
     },
 
     openViewModal(request) {
-      console.log('View request', request);
+      this.selectedRequest = request;
+      this.showViewModal = true;
+    },
+
+    closeViewModal() {
+      this.showViewModal = false;
+      this.selectedRequest = null;
     },
 
     getLeaveBarWidth(leave) {
