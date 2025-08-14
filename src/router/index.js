@@ -43,73 +43,81 @@ const routes = [
   {
     path: '/',
     component: MainLayout,
-    meta: { requiresAuth: true }, // Mark as protected
+    meta: { requiresAuth: true },
     children: [
       {
         path: '',
         name: 'Dashboard',
         component: Dashboard,
-        meta: { requiresAuth: true } // Mark as protected
+        meta: {
+          requiresAuth: true,
+          permission: 'DASHBOARD'
+        }
       },
       {
         path: '/applicant',
         name: 'Applicant',
         component: Applicant,
-        meta: { requiresAuth: true }
+        meta: {
+          requiresAuth: true,
+          permission: 'APPLICANTS'
+        }
       },
-      {
-        path: '/jobs/job_posting',
-        name: 'job_posting',
-        component: JobPosting,
-        meta: { requiresAuth: true }
-      },
-      {
-        path: '/jobs/job_title',
-        name: 'job_title',
-        component: JobTitle,
-        meta: { requiresAuth: true }
-      },
-      {
-        path: '/jobs/job_category',
-        name: 'job_category',
-        component: JobCategory,
-        meta: { requiresAuth: true }
+      { 
+        path: '/jobs/job_posting', 
+        name: 'job_posting', 
+        component: JobPosting, 
+        meta: { 
+          requiresAuth: true,
+          permission: 'JOBS'
+        } 
+      }, 
+      { 
+        path: '/jobs/job_title', 
+        name: 'job_title', component: 
+        JobTitle, meta: { requiresAuth: true } 
+      }, 
+      { 
+        path: '/jobs/job_category', 
+        name: 'job_category', 
+        component: JobCategory, 
+        meta: { requiresAuth: true } 
       },
       {
         path: '/request-leave',
         name: 'request-leave',
         component: LeaveRequest,
-        meta: { requiresAuth: true }
+        meta: {
+          requiresAuth: true,
+          permission: 'REQUEST_LEAVE'
+        }
       },
       {
         path: '/staff-request-leave',
         name: 'staff-request-leave',
         component: StaffRequestLeave,
-        meta: { requiresAuth: true }
+        meta: {
+          requiresAuth: true,
+          permission: 'STAFF_REQUEST_LEAVE'
+        }
       },
       {
         path: '/report-request-leave',
         name: 'report-request-leave',
         component: ReportRequestLeave,
-        meta: { requiresAuth: true }
+        meta: {
+          requiresAuth: true,
+          permission: 'LEAVE_REPORT'
+        }
       },
       {
         path: '/holiday',
         name: 'holiday',
         component: Holiday,
-        meta: { requiresAuth: true }
-      },
-      {
-        path: '/employee/leave-report',
-        name: 'leave-report',
-        component: LeaveReport,
-        meta: { requiresAuth: true }
-      },
-      {
-        path: '/employee/position-categories',
-        name: 'position-categories',
-        component: PositionCategory,
-        meta: { requiresAuth: true }
+        meta: {
+          requiresAuth: true,
+          permission: 'HOLIDAY'
+        }
       },
       {
         path: '/users/department',
@@ -121,7 +129,10 @@ const routes = [
         path: '/users/roles',
         name: 'roles',
         component: Roles,
-        meta: { requiresAuth: true }
+        meta: { 
+          requiresAuth: true,
+          permission: 'SETTING'
+        }
       },
       {
         path: '/users/user-management',
@@ -129,16 +140,6 @@ const routes = [
         component: UserManagement,
         meta: { requiresAuth: true }
       },
-      {
-        path: '/employees',
-        component: Employees,
-        meta: { requiresAuth: true }
-      },
-      // {
-      //   path: '/departments',
-      //   component: Departments,
-      //   meta: { requiresAuth: true }
-      // },
       {
         path: '/profile',
         component: Profile,
@@ -156,6 +157,25 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(),
   routes
+});
+
+router.beforeEach((to, from, next) => {
+  const permissions = JSON.parse(localStorage.getItem('permissions') || '[]');
+  console.log(permissions)
+  if (to.meta.requiresAuth) {
+    if (to.path === '/' && !permissions.includes('DASHBOARD')) {
+      const allRoutes = router.getRoutes().filter(data => data.meta?.permission);
+      const firstPermitted = allRoutes.find(data => permissions.includes(data.meta.permission));
+      console.log(router.getRoutes())
+      if (firstPermitted) {
+        return next(firstPermitted.path);
+      } else {
+        return next('/login');
+      }
+    }
+  }
+
+  next();
 });
 
 export default router;

@@ -244,18 +244,23 @@ export default {
       },
       roles: [],
       availablePermissions: [
+        'DASHBOARD',
         'APPLICANTS',
         'JOBS',
         'REQUEST_LEAVE',
+        'STAFF_REQUEST_LEAVE',
         'LEAVE_REPORT',
+        'HOLIDAY',
         'SETTING'
       ],
-      // New object to map permission codes to human-readable names
       permissionLabels: {
+        'DASHBOARD': 'Dashboard',
         'APPLICANTS': 'Applicants',
         'JOBS': 'Jobs',
         'REQUEST_LEAVE': 'Request Leave',
+        'STAFF_REQUEST_LEAVE': 'Staff Request Leave',
         'LEAVE_REPORT': 'Leave Report',
+        'HOLIDAY': 'HOLIDAY',
         'SETTING': 'Setting'
       },
       loading: true,

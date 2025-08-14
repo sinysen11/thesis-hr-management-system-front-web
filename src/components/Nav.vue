@@ -6,148 +6,34 @@
     </div>
 
     <nav class="flex-1 px-5 space-y-3">
-      <router-link to="/"
-        class="flex items-center px-4 py-3 text-sm font-semibold transition-colors duration-200 rounded-md" :class="{
-          'bg-green-700 text-white shadow-md': currentPath === '/',
-          'text-gray-600 hover:bg-green-100 hover:text-green-700': currentPath !== '/'
-        }">
-        <i class="mr-4 text-lg fas fa-th-large"></i>
-        Dashboard
-      </router-link>
+      <template v-for="item in filteredMenu" :key="item.name">
+        <router-link v-if="!item.children" :to="item.path"
+          class="flex items-center px-4 py-3 text-sm font-semibold transition-colors duration-200 rounded-md"
+          :class="currentPath === item.path ? 'bg-green-700 text-white shadow-md' : 'text-gray-600 hover:bg-green-100 hover:text-green-700'">
+          <i :class="`mr-4 text-lg ${item.icon}`"></i>
+          {{ item.name }}
+        </router-link>
 
-      <router-link to="/applicant"
-        class="flex items-center px-4 py-3 text-sm font-semibold transition-colors duration-200 rounded-md" :class="{
-          'bg-green-700 text-white shadow-md': currentPath === '/applicant',
-          'text-gray-600 hover:bg-green-100 hover:text-green-700': currentPath !== '/applicant'
-        }">
-        <i class="mr-4 text-lg fas fa-user-friends"></i>
-        Applicants
-      </router-link>
-
-      <div class="w-full">
-        <button @click="jobsOpen = !jobsOpen"
-          class="flex items-center w-full px-4 py-3 text-sm font-semibold text-gray-600 transition-colors duration-200 rounded-md hover:text-green-700 hover:bg-green-50 focus:outline-none">
-          <i class="mr-4 text-lg fas fa-briefcase"></i>
-          Jobs
-          <i :class="[
-            'ml-auto transition-transform duration-300',
-            jobsOpen ? 'rotate-180' : ''
-          ]" class="text-base fas fa-chevron-down"></i>
-        </button>
-        <transition name="slide">
-          <div v-if="jobsOpen" class="pl-6 mt-2 space-y-1 text-sm text-gray-700 rounded-md">
-            <router-link to="/jobs/job_posting"
-              class="flex items-center px-4 py-2 transition-colors duration-200 rounded-md" :class="{
-                'bg-green-700 text-white': currentPath === '/jobs/job_posting',
-                'hover:bg-green-100 hover:text-green-700': currentPath !== '/jobs/job_posting'
-              }">
-              <i class="mr-4 text-base fas fa-file-alt"></i>
-              Job Posts
-            </router-link>
-            <router-link to="/jobs/job_title"
-              class="flex items-center px-4 py-2 transition-colors duration-200 rounded-md" :class="{
-                'bg-green-700 text-white': currentPath === '/jobs/job_title',
-                'hover:bg-green-100 hover:text-green-700': currentPath !== '/jobs/job_title'
-              }">
-              <i class="mr-4 text-base fas fa-tag"></i>
-              Job Titles
-            </router-link>
-            <router-link to="/jobs/job_category"
-              class="flex items-center px-4 py-2 transition-colors duration-200 rounded-md" :class="{
-                'bg-green-700 text-white': currentPath === '/jobs/job_category',
-                'hover:bg-green-100 hover:text-green-700': currentPath !== '/jobs/job_category'
-              }">
-              <i class="mr-4 text-base fas fa-list"></i>
-              Job Categories
-            </router-link>
-          </div>
-        </transition>
-      </div>
-
-      <router-link to="/request-leave"
-        class="flex items-center px-4 py-3 text-sm font-semibold transition-colors duration-200 rounded-md" :class="{
-          'bg-green-700 text-white shadow-md': currentPath === '/request-leave',
-          'text-gray-600 hover:bg-green-100 hover:text-green-700': currentPath !== '/request-leave'
-        }">
-        <i class="mr-4 text-lg fas fa-calendar-alt"></i>
-        Request Leave
-      </router-link>
-
-      <router-link to="/staff-request-leave"
-        class="flex items-center px-4 py-3 text-sm font-semibold transition-colors duration-200 rounded-md" :class="{
-          'bg-green-700 text-white shadow-md': currentPath === '/staff-request-leave',
-          'text-gray-600 hover:bg-green-100 hover:text-green-700': currentPath !== '/staff-request-leave'
-        }">
-        <i class="mr-4 text-lg fas fa-calendar-alt"></i>
-        Staff Request Leave
-      </router-link>
-
-      <router-link to="/report-request-leave"
-        class="flex items-center px-4 py-3 text-sm font-semibold transition-colors duration-200 rounded-md" :class="{
-          'bg-green-700 text-white shadow-md': currentPath === '/report-request-leave',
-          'text-gray-600 hover:bg-green-100 hover:text-green-700': currentPath !== '/report-request-leave'
-        }">
-        <i class="mr-4 text-lg fa-solid fa-file-circle-check"></i>
-        Report Request Leave
-      </router-link>
-
-      <router-link to="/holiday"
-        class="flex items-center px-4 py-3 text-sm font-semibold transition-colors duration-200 rounded-md" :class="{
-          'bg-green-700 text-white shadow-md': currentPath === '/holiday',
-          'text-gray-600 hover:bg-green-100 hover:text-green-700': currentPath !== '/holiday'
-        }">
-        <i class="mr-4 text-lg fa-solid fa-calendar"></i>
-        Holiday Date
-      </router-link>
-
-      <div class="w-full">
-        <button @click="settingOpen = !settingOpen"
-          class="flex items-center w-full px-4 py-3 text-sm font-semibold text-gray-600 transition-colors duration-200 rounded-md hover:text-green-700 hover:bg-green-50 focus:outline-none">
-          <i class="mr-4 text-lg fas fa-cog"></i>
-          Setting
-          <i :class="[
-            'ml-auto transition-transform duration-300',
-            settingOpen ? 'rotate-180' : ''
-          ]" class="text-base fas fa-chevron-down"></i>
-        </button>
-        <transition name="slide">
-          <div v-if="settingOpen" class="pl-6 mt-2 space-y-1 text-sm text-gray-700 rounded-md">
-            <router-link to="/users/roles" class="flex items-center px-4 py-2 transition-colors duration-200 rounded-md"
-              :class="{
-                'bg-green-700 text-white': currentPath === '/users/roles',
-                'hover:bg-green-100 hover:text-green-700': currentPath !== '/users/roles'
-              }">
-              <i class="mr-4 text-base fas fa-user-shield"></i>
-              Roles
-            </router-link>
-            <router-link to="/users/department"
-              class="flex items-center px-4 py-2 transition-colors duration-200 rounded-md" :class="{
-                'bg-green-700 text-white': currentPath === '/users/department',
-                'hover:bg-green-100 hover:text-green-700': currentPath !== '/users/department'
-              }">
-              <i class="mr-4 text-base fas fa-building"></i>
-              Department
-            </router-link>
-            <router-link to="/users/user-management"
-              class="flex items-center px-4 py-2 transition-colors duration-200 rounded-md" :class="{
-                'bg-green-700 text-white': currentPath === '/users/user-management',
-                'hover:bg-green-100 hover:text-green-700': currentPath !== '/users/user-management'
-              }">
-              <i class="mr-4 text-base fas fa-user"></i>
-              Users
-            </router-link>
-
-            <router-link to="/users/user-tracking"
-              class="flex items-center px-4 py-2 transition-colors duration-200 rounded-md" :class="{
-                'bg-green-700 text-white': currentPath === '/users/user-tracking',
-                'hover:bg-green-100 hover:text-green-700': currentPath !== '/users/user-tracking'
-              }">
-              <i class="mr-4 text-base fas fa-clipboard-list"></i>
-              Tracking Log
-            </router-link>
-          </div>
-        </transition>
-      </div>
+        <div v-else class="w-full">
+          <button @click="toggleOpen(item)"
+            class="flex items-center w-full px-4 py-3 text-sm font-semibold text-gray-600 transition-colors duration-200 rounded-md hover:text-green-700 hover:bg-green-50 focus:outline-none">
+            <i :class="`mr-4 text-lg ${item.icon}`"></i>
+            {{ item.name }}
+            <i :class="['ml-auto transition-transform duration-300', item.open ? 'rotate-180' : '']"
+              class="text-base fas fa-chevron-down"></i>
+          </button>
+          <transition name="slide">
+            <div v-if="item.open" class="pl-6 mt-2 space-y-1 text-sm text-gray-700 rounded-md">
+              <router-link v-for="child in item.children" :key="child.name" :to="child.path"
+                class="flex items-center px-4 py-2 transition-colors duration-200 rounded-md"
+                :class="currentPath === child.path ? 'bg-green-700 text-white' : 'hover:bg-green-100 hover:text-green-700'">
+                <i :class="`mr-4 text-base ${child.icon}`"></i>
+                {{ child.name }}
+              </router-link>
+            </div>
+          </transition>
+        </div>
+      </template>
     </nav>
   </aside>
 </template>
@@ -158,7 +44,96 @@ export default {
     return {
       settingOpen: false,
       jobsOpen: false,
-      employeesOpen: false
+      employeesOpen: false,
+      menuItems: [
+        { 
+          name: 'Dashboard', 
+          path: '/', 
+          icon: 'fas fa-th-large',
+          permission: 'DASHBOARD'
+        },
+        {
+          name: 'Applicants', 
+          path: '/applicant', 
+          icon: 'fas fa-user-friends', 
+          permission: 'APPLICANTS' 
+        },
+        {
+          name: 'Jobs', 
+          icon: 'fas fa-briefcase', 
+          permission: 'JOBS', 
+          open: false, 
+          children: [
+            { 
+              name: 'Job Posts', 
+              path: '/jobs/job_posting', 
+              icon: 'fas fa-file-alt' 
+            },
+            { 
+              name: 'Job Titles', 
+              path: '/jobs/job_title', 
+              icon: 'fas fa-tag' 
+            },
+            { 
+              name: 'Job Categories', 
+              path: '/jobs/job_category', 
+              icon: 'fas fa-list' 
+            }
+          ]
+        },
+        { 
+          name: 'Request Leave', 
+          path: '/request-leave', 
+          icon: 'fas fa-calendar-alt', 
+          permission: 'REQUEST_LEAVE' 
+        },
+        { 
+          name: 'Staff Request Leave', 
+          path: '/staff-request-leave', 
+          icon: 'fas fa-calendar-alt', 
+          permission: 'STAFF_REQUEST_LEAVE' 
+        },
+        { 
+          name: 'Report Request Leave', 
+          path: '/report-request-leave', 
+          icon: 'fa-solid fa-file-circle-check', 
+          permission: 'LEAVE_REPORT' 
+        },
+        { 
+          name: 'Holiday Date',
+          path: '/holiday', 
+          icon: 'fas fa-calendar', 
+          permission: 'HOLIDAY' 
+        },
+        {
+          name: 'Settings', 
+          icon: 'fas fa-cog', 
+          permission: 'SETTING', 
+          open: false, 
+          children: [
+            { 
+              name: 'Roles', 
+              path: '/users/roles', 
+              icon: 'fas fa-user-shield' 
+            },
+            { 
+              name: 'Department', 
+              path: '/users/department', 
+              icon: 'fas fa-building' 
+            },
+            { 
+              name: 'Users', 
+              path: '/users/user-management', 
+              icon: 'fas fa-user' 
+            },
+            { 
+              name: 'Tracking Log', 
+              path: '/users/user-tracking', 
+              icon: 'fas fa-clipboard-list' 
+            }
+          ]
+        }
+      ]
     };
   },
   computed: {
@@ -168,6 +143,17 @@ export default {
     isLoginPage() {
       const hiddenRoutes = ['/login', '/sign-up', '/forgot-password'];
       return hiddenRoutes.includes(this.$route.path);
+    },
+    userPermissions() {
+      return JSON.parse(localStorage.getItem('permissions') || '[]');
+    },
+    filteredMenu() {
+      return this.menuItems.filter(item => this.userPermissions.includes(item.permission));
+    }
+  },
+  methods: {
+    toggleOpen(item) {
+      item.open = !item.open;
     }
   }
 };
