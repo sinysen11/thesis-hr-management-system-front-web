@@ -148,7 +148,7 @@ const routes = [
     ]
   },
   {
-    path: '/*',
+    path: '/:pathMatch(.*)*',
     redirect: '/login',
     component: Login
   }

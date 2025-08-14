@@ -7,32 +7,48 @@
         </div>
         <!-- Filters -->
         <div class="p-6 mb-8 bg-white rounded-lg shadow-sm">
-            <div class="flex flex-col items-end gap-4 sm:flex-row">
-                <div>
+            <div class="flex flex-col w-full gap-4 sm:flex-row sm:items-end">
+                <!-- Search -->
+                <div class="flex-1">
                     <label class="block mb-2 text-sm font-medium text-gray-700">Search</label>
-                    <input type="text" v-model="searchQuery"
-                        class="border border-gray-300 rounded-lg px-4 py-2 w-[300px] focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
-                        placeholder="Search by employee name, leave type, or reason" @input="filterData" />
+                    <input type="text" v-model="filters.name"
+                        class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        placeholder="Employee name" />
                 </div>
-                <div>
+
+                <!-- Leave Type -->
+                <div class="flex-1">
+                    <label class="block mb-2 text-sm font-medium text-gray-700">Leave Type</label>
+                    <select v-model="filters.type"
+                        class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                        <option value="">All</option>
+                        <option v-for="type in leaveTypes" :key="type.code" :value="type.code">
+                            {{ type.name }}
+                        </option>
+                    </select>
+                </div>
+
+                <!-- Status -->
+                <div class="flex-1">
                     <label class="block mb-2 text-sm font-medium text-gray-700">Status</label>
-                    <select v-model="filterStatus"
-                        class="border border-gray-300 rounded-lg px-4 py-2 w-[200px] focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
-                        @change="filterData">
+                    <select v-model="filters.status"
+                        class="w-full px-4 py-2 transition border border-gray-300 rounded-lg cursor-pointer focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
                         <option value="">All</option>
                         <option value="PENDING">Pending</option>
                         <option value="APPROVED">Approved</option>
                         <option value="REJECTED">Rejected</option>
                     </select>
                 </div>
+
+                <!-- Buttons -->
                 <div class="flex gap-4">
-                    <button @click="filterData"
-                        class="px-6 py-2 font-medium text-white transition duration-200 bg-indigo-600 rounded-lg hover:bg-indigo-700">
-                        Search
-                    </button>
                     <button @click="resetFilters"
-                        class="px-6 py-2 font-medium text-gray-800 transition duration-200 bg-gray-200 rounded-lg hover:bg-gray-300">
+                        class="px-6 py-2 font-medium text-gray-800 transition duration-200 bg-gray-200 rounded-lg cursor-pointer hover:bg-gray-300">
                         Reset
+                    </button>
+                    <button @click="applyFilters"
+                        class="px-6 py-2 font-medium text-white transition duration-200 bg-indigo-600 rounded-lg cursor-pointer hover:bg-indigo-700">
+                        Search
                     </button>
                 </div>
             </div>
@@ -225,7 +241,7 @@
 
 <script>
 import { getUserInfoCookie } from '@/services/authentication';
-import { getStaffRequestForApprover, allowStaffRequestLeave } from '@/apis/request-leave';
+import { getStaffRequestForApprover, allowStaffRequestLeave, getLeaveType } from '@/apis/request-leave';
 import moment from 'moment';
 
 export default {
@@ -240,6 +256,17 @@ export default {
             showViewModal: false,
             selectedRequest: null,
             userInfo: null,
+            filters: {
+                name: '',
+                type: '',
+                status: ''
+            },
+            pagination: {
+                total: 0,
+                page: 1,
+                limit: 10
+            },
+            leaveTypes: [],
             notification: {
                 message: '',
                 type: '',
@@ -278,8 +305,15 @@ export default {
     methods: {
         async fetchLeaveRequests(user_id) {
             this.isLoading = true;
+            const params = {
+                name: this.filters.name || undefined,
+                type: this.filters.type || undefined,
+                status: this.filters.status || undefined,
+                page: this.pagination.page,
+                limit: this.pagination.limit
+            };
             try {
-                const response = await getStaffRequestForApprover(user_id);
+                const response = await getStaffRequestForApprover(user_id, params);
                 if (response && response.data) {
                     this.leaveRequests = response.data.map((request) => {
                         let departmentName = 'N/A';
@@ -313,7 +347,6 @@ export default {
                 this.leaveRequests = [];
             } finally {
                 this.isLoading = false;
-                this.adjustCurrentPage();
             }
         },
 
@@ -335,6 +368,28 @@ export default {
             }
         },
 
+        async getLeaveType() {
+            try {
+                const response = await getLeaveType();
+                if (response.status === 1) {
+                    this.leaveTypes = response.leaveTypes;
+                }
+            } catch (error) {
+                console.error('Error fetching leave types:', error);
+            }
+        },
+
+        applyFilters() {
+            this.pagination.page = 1;
+            this.fetchLeaveRequests(this.userInfo._id);
+        },
+
+        resetFilters() {
+            this.filters = { name: '', type: '', status: '' };
+            this.pagination.page = 1;
+            this.fetchLeaveRequests(this.userInfo._id);
+        },
+
         showNotification(message, type = 'success') {
             this.notification.message = message;
             this.notification.type = type;
@@ -353,14 +408,7 @@ export default {
             this.showViewModal = false;
             this.selectedRequest = null;
         },
-        filterData() {
-            this.currentPage = 1;
-        },
-        resetFilters() {
-            this.searchQuery = '';
-            this.filterStatus = '';
-            this.currentPage = 1;
-        },
+
         prevPage() {
             if (this.currentPage > 1) this.currentPage--;
         },
@@ -372,12 +420,8 @@ export default {
         },
         formatDate(date) {
             return date ? moment(date).format('DD-MMM-YYYY') : 'N/A';
-        },
-        adjustCurrentPage() {
-            if (this.currentPage > this.totalPages) {
-                this.currentPage = this.totalPages;
-            }
         }
+
     },
     created() {
         const userInfoCookie = getUserInfoCookie();
@@ -391,6 +435,7 @@ export default {
         if (this.userInfo && this.userInfo._id) {
             this.fetchLeaveRequests(this.userInfo._id);
         }
+        this.getLeaveType();
     }
 };
 </script>

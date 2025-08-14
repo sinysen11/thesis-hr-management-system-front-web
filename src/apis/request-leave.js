@@ -9,10 +9,11 @@ export function getAllLeaveRequestForAdmin(id) {
   });
 }
 
-export function getStaffRequestForApprover(id) {
+export function getStaffRequestForApprover(id, params) {
   return request({
     url: `${leaveRequest.getStaffRequestForApprover.url}/${id}`,
-    method: leaveRequest.getStaffRequestForApprover.method
+    method: leaveRequest.getStaffRequestForApprover.method,
+    params
   });
 }
 
@@ -51,6 +52,14 @@ export function getLeaveType() {
   return request({
     url: `${leaveRequest.getLeaveType.url}`,
     method: `${leaveRequest.getLeaveType.method}`
+  })
+}
+
+export function getLeaveRequestsReport(params) {
+  return request({
+    url: `${leaveRequest.getLeaveReport.url}`,
+    method: `${leaveRequest.getLeaveReport.method}`,
+    params
   })
 }
 

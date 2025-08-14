@@ -293,7 +293,7 @@
       {{ notification.message }}
     </div>
 
-    <div class="flex items-center justify-between mt-6" v-if="!isLoading && totalPages > 1">
+    <div class="flex items-center justify-between mt-6" v-if="!isLoading && totalPages">
       <div class="text-sm text-gray-600">
         Showing {{ startIndex + 1 }} to {{ endIndex }} of {{ leaveRequests.length }} requests
       </div>

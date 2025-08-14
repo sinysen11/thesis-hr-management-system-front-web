@@ -260,7 +260,7 @@ export default {
         'REQUEST_LEAVE': 'Request Leave',
         'STAFF_REQUEST_LEAVE': 'Staff Request Leave',
         'LEAVE_REPORT': 'Leave Report',
-        'HOLIDAY': 'HOLIDAY',
+        'HOLIDAY': 'Holiday',
         'SETTING': 'Setting'
       },
       loading: true,

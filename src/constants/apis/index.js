@@ -149,6 +149,10 @@ module.exports = {
         getLeaveType: {
             url: 'leave-types',
             method: 'get'
+        },
+        getLeaveReport: {
+            url: 'leave/reports',
+            method: 'get'
         }
     },
     users: {
