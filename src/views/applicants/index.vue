@@ -4,7 +4,6 @@
       <h2 class="text-3xl font-extrabold text-gray-900 mb-2">
         Applicant Dashboard
       </h2>
-
       <!-- Filter Section -->
       <div class="bg-white shadow-sm rounded-lg p-6 mb-8">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -56,17 +55,17 @@
               </tr>
             </thead>
             <tbody class="text-gray-700">
-              <tr v-for="(applicant, index) in paginatedApplicants" :key="index"
+              <tr v-for="(applicant, index) in paginatedApplicants" :key="applicant._id"
                 class="hover:bg-gray-50 transition border-b border-gray-200">
                 <td class="px-4 py-2">
                   {{ index + 1 + (currentPage - 1) * itemsPerPage }}
                 </td>
-                <td class="px-4 py-2">{{ applicant.date }}</td>
-                <td class="px-4 py-2">{{ applicant.name }}</td>
-                <td class="px-4 py-2">{{ applicant.position }}</td>
-                <td class="px-4 py-2">{{ applicant.department }}</td>
-                <td class="px-4 py-2">{{ applicant.gender }}</td>
-                <td class="px-4 py-2">{{ formatPhone(applicant.phone) }}</td>
+                <td class="px-4 py-2">{{ formatDate(applicant.createdAt) }}</td>
+                <td class="px-4 py-2">{{ applicant.applicant.first_name }} {{ applicant.applicant.last_name }}</td>
+                <td class="px-4 py-2">{{ applicant.job.title }}</td>
+                <td class="px-4 py-2">{{ applicant.job.type }}</td>
+                <td class="px-4 py-2">{{ applicant.applicant.gender || 'N/A' }}</td>
+                <td class="px-4 py-2">{{ formatPhone(applicant.applicant.phone) }}</td>
                 <td class="px-4 py-2">
                   <button @click="viewApplicant(applicant)"
                     class="text-indigo-600 hover:text-indigo-800 p-2 rounded-full hover:bg-indigo-100 transition"
@@ -75,11 +74,12 @@
                   </button>
                 </td>
                 <td class="px-4 py-2">
-                  <a :href="applicant.download" target="_blank" download
-                    class="text-indigo-600 hover:text-indigo-800 p-2 rounded-full hover:bg-indigo-100 transition"
-                    title="Download File">
-                    <i class="fas fa-cloud-download-alt"></i>
-                  </a>
+                  <button @click="downloadResume(applicant._id, applicant.resume?.fileName)"
+                    class="text-indigo-600 hover:text-indigo-800 p-2 rounded-full hover:bg-indigo-100 transition relative"
+                    title="Download File" :disabled="loading[applicant._id]">
+                    <i v-if="!loading[applicant._id]" class="fas fa-cloud-download-alt"></i>
+                    <i v-else class="fas fa-spinner fa-spin"></i>
+                  </button>
                 </td>
               </tr>
             </tbody>
@@ -92,7 +92,7 @@
         <div class="text-sm text-gray-600">
           Showing {{ (currentPage - 1) * itemsPerPage + 1 }} to
           {{ Math.min(currentPage * itemsPerPage, filteredApplicants.length) }}
-          of {{ filteredApplicants.length }} applicants
+          of {{ totalApplicants }} applicants
         </div>
         <div class="flex gap-2">
           <button @click="prevPage" :disabled="currentPage === 1"
@@ -113,6 +113,8 @@
           </button>
         </div>
       </div>
+
+      <!-- Modal -->
       <transition name="modal">
         <div v-if="showModal" class="fixed inset-0 bg-opacity-40 flex items-center justify-center z-50"
           style="background-color: rgb(0 0 0 / 0.5);" @click.self="closeModal">
@@ -128,42 +130,51 @@
               <div class="grid grid-cols-2 gap-4">
                 <div class="space-y-2">
                   <label class="block text-sm font-medium text-gray-700">Name</label>
-                  <p class="mt-1 text-gray-900 bg-white border border-gray-300 rounded px-3 py-2">{{
-                    selectedApplicant?.name || 'N/A' }}</p>
+                  <p class="mt-1 text-gray-900 bg-white border border-gray-300 rounded px-3 py-2">
+                    {{ selectedApplicant?.applicant.first_name }} {{ selectedApplicant?.applicant.last_name || 'N/A' }}
+                  </p>
                 </div>
                 <div class="space-y-2">
                   <label class="block text-sm font-medium text-gray-700">Position</label>
-                  <p class="mt-1 text-gray-900 bg-white border border-gray-300 rounded px-3 py-2">{{
-                    selectedApplicant?.position || 'N/A' }}</p>
+                  <p class="mt-1 text-gray-900 bg-white border border-gray-300 rounded px-3 py-2">
+                    {{ selectedApplicant?.job.title || 'N/A' }}
+                  </p>
                 </div>
                 <div class="space-y-2">
                   <label class="block text-sm font-medium text-gray-700">Department</label>
-                  <p class="mt-1 text-gray-900 bg-white border border-gray-300 rounded px-3 py-2">{{
-                    selectedApplicant?.department || 'N/A' }}</p>
+                  <p class="mt-1 text-gray-900 bg-white border border-gray-300 rounded px-3 py-2">
+                    {{ selectedApplicant?.job.type || 'N/A' }}
+                  </p>
                 </div>
                 <div class="space-y-2">
                   <label class="block text-sm font-medium text-gray-700">Gender</label>
-                  <p class="mt-1 text-gray-900 bg-white border border-gray-300 rounded px-3 py-2">{{
-                    selectedApplicant?.gender || 'N/A' }}</p>
+                  <p class="mt-1 text-gray-900 bg-white border border-gray-300 rounded px-3 py-2">
+                    {{ selectedApplicant?.applicant.gender || 'N/A' }}
+                  </p>
                 </div>
                 <div class="space-y-2">
                   <label class="block text-sm font-medium text-gray-700">Phone</label>
-                  <p class="mt-1 text-gray-900 bg-white border border-gray-300 rounded px-3 py-2">{{
-                    formatPhone(selectedApplicant?.phone) || 'N/A' }}</p>
+                  <p class="mt-1 text-gray-900 bg-white border border-gray-300 rounded px-3 py-2">
+                    {{ formatPhone(selectedApplicant?.applicant.phone) || 'N/A' }}
+                  </p>
                 </div>
                 <div class="space-y-2">
                   <label class="block text-sm font-medium text-gray-700">Applied Date</label>
-                  <p class="mt-1 text-gray-900 bg-white border border-gray-300 rounded px-3 py-2">{{
-                    selectedApplicant?.date || 'N/A' }}</p>
+                  <p class="mt-1 text-gray-900 bg-white border border-gray-300 rounded px-3 py-2">
+                    {{ formatDate(selectedApplicant?.createdAt) || 'N/A' }}
+                  </p>
                 </div>
                 <div class="space-y-2 col-span-2">
                   <label class="block text-sm font-medium text-gray-700">Resume</label>
                   <p class="mt-1 text-gray-900 bg-white border border-gray-300 rounded px-3 py-2 truncate">
-                    <a v-if="selectedApplicant?.download" :href="selectedApplicant.download" target="_blank" download
-                      class="text-indigo-600 hover:text-indigo-800 underline inline-flex items-center gap-1">
-                      <i class="fas fa-cloud-download-alt"></i>
-                      {{ selectedApplicant.download }}
-                    </a>
+                    <button v-if="selectedApplicant?.resume?.fileName"
+                      @click="downloadResume(selectedApplicant._id, selectedApplicant.resume.fileName)"
+                      class="text-indigo-600 hover:text-indigo-800 underline inline-flex items-center gap-1"
+                      :disabled="loading[selectedApplicant._id]">
+                      <i v-if="!loading[selectedApplicant._id]" class="fas fa-cloud-download-alt"></i>
+                      <i v-else class="fas fa-spinner fa-spin"></i>
+                      {{ selectedApplicant.resume.fileName }}
+                    </button>
                     <span v-else>N/A</span>
                   </p>
                 </div>
@@ -185,11 +196,10 @@
 <script>
 import FlatPickr from 'vue-flatpickr-component';
 import 'flatpickr/dist/flatpickr.css';
+import { getAllApplicant, getOneResume } from '@/apis/applicant';
 
 export default {
-  components: {
-    FlatPickr
-  },
+  components: { FlatPickr },
   data() {
     return {
       appliedFrom: '',
@@ -197,6 +207,7 @@ export default {
       searchQuery: '',
       currentPage: 1,
       itemsPerPage: 10,
+      totalApplicants: 0,
       flatpickrConfig: {
         dateFormat: 'd-M-Y',
         altInput: true,
@@ -205,198 +216,23 @@ export default {
       },
       showModal: false,
       selectedApplicant: null,
-      applicants: [
-        {
-          download:
-            'Supervisor Database Administration -IT_Rath SamOeurn and CV.pdf',
-          date: '06-Jun-2025',
-          name: 'Rath SamOeurn',
-          position: 'Supervisor (Database Administrator)',
-          department: 'Information Technology',
-          gender: 'Male',
-          phone: '85569604'
-        },
-        {
-          download: 'Phanpheanuma Run Resume.pdf',
-          date: '04-Jun-2025',
-          name: 'Run Phanpheanuma',
-          position: 'Assistant Manager',
-          department: 'Accounting and Finance',
-          gender: 'Female',
-          phone: '09791242'
-        },
-        {
-          download: 'uch-danet_senior staff_infrastructure_CV_CL.pdf',
-          date: '03-Jun-2025',
-          name: 'UCH DANET',
-          position: 'Senior Staff (Infrastructure)',
-          department: 'Information Technology',
-          gender: 'Male',
-          phone: '07056998'
-        },
-        {
-          download: 'att.eEDjRvSn0bMl-...jpeg',
-          date: '03-Jun-2025',
-          name: 'Yem Sorphorn',
-          position: 'Intern',
-          department: 'Credit Control',
-          gender: 'Female',
-          phone: '09667308'
-        },
-        {
-          download: 'Cheng Seakgech CV.pdf',
-          date: '03-Jun-2025',
-          name: 'Cheng Seakgech',
-          position: 'Intern',
-          department: 'Credit Control',
-          gender: 'Female',
-          phone: '01694828'
-        },
-        {
-          download: 'JulrichCV.pdf',
-          date: '03-Jun-2025',
-          name: 'Julrich',
-          position: 'Senior Staff (Infrastructure)',
-          department: 'Information Technology',
-          gender: 'Male',
-          phone: '01648641'
-        },
-        {
-          download: 'CV-Professional Resume - UY SREYNICH.pdf',
-          date: '30-May-2025',
-          name: 'Uy Sreynich',
-          position: 'Assistant Manager',
-          department: 'Accounting and Finance',
-          gender: 'Female',
-          phone: '07055959'
-        },
-        {
-          download: 'Mrs. Bros Mouykeang CV Resume.pdf',
-          date: '30-May-2025',
-          name: 'Bros Mouykeang',
-          position: 'Assistant Manager',
-          department: 'Accounting and Finance',
-          gender: 'Female',
-          phone: '08676756'
-        },
-        {
-          download: 'Mrs. Bros Mouykeang CV Resume.pdf',
-          date: '30-May-2025',
-          name: 'Bros Mouykeang',
-          position: 'Assistant Manager',
-          department: 'Accounting and Finance',
-          gender: 'Female',
-          phone: '08676756'
-        },
-        {
-          download: 'Mrs. Bros Mouykeang CV Resume.pdf',
-          date: '30-May-2025',
-          name: 'Bros Mouykeang',
-          position: 'Assistant Manager',
-          department: 'Accounting and Finance',
-          gender: 'Female',
-          phone: '08676756'
-        },
-        {
-          download: 'Mrs. Bros Mouykeang CV Resume.pdf',
-          date: '30-May-2025',
-          name: 'Bros Mouykeang',
-          position: 'Assistant Manager',
-          department: 'Accounting and Finance',
-          gender: 'Female',
-          phone: '08676756'
-        },
-        {
-          download: 'Mrs. Bros Mouykeang CV Resume.pdf',
-          date: '30-May-2025',
-          name: 'Bros Mouykeang',
-          position: 'Assistant Manager',
-          department: 'Accounting and Finance',
-          gender: 'Female',
-          phone: '08676756'
-        },
-        {
-          download: 'Mrs. Bros Mouykeang CV Resume.pdf',
-          date: '30-May-2025',
-          name: 'Bros Mouykeang',
-          position: 'Assistant Manager',
-          department: 'Accounting and Finance',
-          gender: 'Female',
-          phone: '08676756'
-        },
-        {
-          download: 'Mrs. Bros Mouykeang CV Resume.pdf',
-          date: '30-May-2025',
-          name: 'Bros Mouykeang',
-          position: 'Assistant Manager',
-          department: 'Accounting and Finance',
-          gender: 'Female',
-          phone: '08676756'
-        },
-        {
-          download: 'Mrs. Bros Mouykeang CV Resume.pdf',
-          date: '30-May-2025',
-          name: 'Bros Mouykeang',
-          position: 'Assistant Manager',
-          department: 'Accounting and Finance',
-          gender: 'Female',
-          phone: '08676756'
-        },
-        {
-          download: 'Mrs. Bros Mouykeang CV Resume.pdf',
-          date: '30-May-2025',
-          name: 'Bros Mouykeang',
-          position: 'Assistant Manager',
-          department: 'Accounting and Finance',
-          gender: 'Female',
-          phone: '08676756'
-        },
-        {
-          download: 'Mrs. Bros Mouykeang CV Resume.pdf',
-          date: '30-May-2025',
-          name: 'Bros Mouykeang',
-          position: 'Assistant Manager',
-          department: 'Accounting and Finance',
-          gender: 'Female',
-          phone: '08676756'
-        },
-        {
-          download: 'Mrs. Bros Mouykeang CV Resume.pdf',
-          date: '30-May-2025',
-          name: 'Bros Mouykeang',
-          position: 'Assistant Manager',
-          department: 'Accounting and Finance',
-          gender: 'Female',
-          phone: '08676756'
-        },
-        {
-          download: 'Mrs. Bros Mouykeang CV Resume.pdf',
-          date: '30-May-2025',
-          name: 'Bros Mouykeang',
-          position: 'Assistant Manager',
-          department: 'Accounting and Finance',
-          gender: 'Female',
-          phone: '08676756'
-        }
-      ]
+      applicants: [],
+      loading: {} // Track loading state for each applicant
     };
   },
   computed: {
     filteredApplicants() {
       return this.applicants.filter((applicant) => {
+        const fullName = `${applicant.applicant.first_name} ${applicant.applicant.last_name}`.toLowerCase();
         const matchSearch =
           this.searchQuery === '' ||
-          applicant.name
-            .toLowerCase()
-            .includes(this.searchQuery.toLowerCase()) ||
-          applicant.download
-            .toLowerCase()
-            .includes(this.searchQuery.toLowerCase());
+          fullName.includes(this.searchQuery.toLowerCase()) ||
+          applicant.resume.fileName.toLowerCase().includes(this.searchQuery.toLowerCase());
         const matchDate =
           (!this.appliedFrom ||
-            new Date(applicant.date) >= new Date(this.appliedFrom)) &&
+            new Date(applicant.createdAt) >= new Date(this.appliedFrom)) &&
           (!this.appliedTo ||
-            new Date(applicant.date) <= new Date(this.appliedTo));
+            new Date(applicant.createdAt) <= new Date(this.appliedTo));
         return matchSearch && matchDate;
       });
     },
@@ -410,14 +246,46 @@ export default {
     }
   },
   methods: {
+    async fetchApplicants() {
+      try {
+        const response = await getAllApplicant({
+          page: this.currentPage,
+          limit: this.itemsPerPage
+        });
+        if (response.status === 1) {
+          this.applicants = response.data;
+          this.totalApplicants = response.pagination.total;
+        }
+      } catch (error) {
+        console.error('Error fetching applicants:', error);
+      }
+    },
+    async downloadResume(applicantId, fileName = 'resume.pdf') {
+      try {
+        this.loading[applicantId] = true; // Set loading state for this applicant
+        const response = await getOneResume(applicantId);
+        const blob = new Blob([response], { type: 'application/pdf' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = fileName;
+        link.click();
+        URL.revokeObjectURL(link.href);
+      } catch (error) {
+        console.error('Download failed:', error);
+      } finally {
+        this.loading[applicantId] = false; // Reset loading state
+      }
+    },
     filterData() {
-      this.currentPage = 1; // Reset to first page on filter
+      this.currentPage = 1;
+      this.fetchApplicants();
     },
     resetFilters() {
       this.appliedFrom = '';
       this.appliedTo = '';
       this.searchQuery = '';
-      this.currentPage = 1; // Reset to first page on reset
+      this.currentPage = 1;
+      this.fetchApplicants();
     },
     viewApplicant(applicant) {
       this.selectedApplicant = applicant;
@@ -428,24 +296,35 @@ export default {
       this.selectedApplicant = null;
     },
     formatPhone(phone) {
-      return phone.startsWith('0') ? phone : '0' + phone;
+      return phone?.startsWith('0') ? phone : '0' + phone;
+    },
+    formatDate(date) {
+      if (!date) return 'N/A';
+      return new Date(date).toLocaleDateString('en-GB', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric'
+      });
     },
     prevPage() {
       if (this.currentPage > 1) {
         this.currentPage--;
+        this.fetchApplicants();
       }
     },
     nextPage() {
       if (this.currentPage < this.totalPages) {
         this.currentPage++;
+        this.fetchApplicants();
       }
     },
     goToPage(page) {
       this.currentPage = page;
+      this.fetchApplicants();
     }
   },
   mounted() {
-    // Add keyboard event listener for closing modal with Escape key
+    this.fetchApplicants();
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && this.showModal) {
         this.closeModal();

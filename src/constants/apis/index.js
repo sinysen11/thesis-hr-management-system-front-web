@@ -1,4 +1,3 @@
-
 module.exports = {
     jobs: {
         createJob: {
@@ -63,6 +62,16 @@ module.exports = {
         deletePosition: {
             url: 'position',
             method: 'delete' // Changed from 'get' to 'delete'
+        }
+    },
+    applicant: {
+        getAllApplicant: {
+            url: 'get-applicant',
+            get: 'get'
+        },
+        getOneResume: {
+            url: 'get-applicant',
+            get: 'get'
         }
     },
     department: {

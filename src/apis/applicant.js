@@ -1,40 +1,47 @@
 import request from '@/services/request';
-import { branches } from '@/constants/apis';
+import { applicant } from '@/constants/apis';
 
 export function getAllApplicant(data) {
   return request({
-    url: branches.getAllApplicant.url,
-    method: branches.getAllApplicant.method,
+    url: applicant.getAllApplicant.url,
+    method: applicant.getAllApplicant.method,
     data
+  });
+}
+export function getOneResume(id) {
+  return request({
+    url: `${applicant.getOneResume.url}/${id}/document`,
+    method: applicant.getOneResume.method,
+    responseType: 'blob' // tells Axios to return binary data
   });
 }
 
 export function createApplicant(data) {
   return request({
-    url: branches.createApplicant.url,
-    method: branches.createApplicant.method,
+    url: applicant.createApplicant.url,
+    method: applicant.createApplicant.method,
     data
   });
 }
 export function getOneApplicant(data) {
   return request({
-    url: `${branches.getOneApplicant.url}/${data}`,
-    method: branches.getOneApplicant.method
+    url: `${applicant.getOneApplicant.url}/${data}`,
+    method: applicant.getOneApplicant.method
   });
 }
 
 export function updateApplicant(id, data) {
   return request({
-    url: `${branches.updateApplicant.url}/${id}`,
-    method: branches.updateApplicant.method,
+    url: `${applicant.updateApplicant.url}/${id}`,
+    method: applicant.updateApplicant.method,
     data
   });
 }
 
 export function deleteApplicant(id, data) {
   return request({
-    url: `${branches.deleteApplicant.url}/${id}`,
-    method: branches.deleteApplicant.method,
+    url: `${applicant.deleteApplicant.url}/${id}`,
+    method: applicant.deleteApplicant.method,
     data
   });
 }
