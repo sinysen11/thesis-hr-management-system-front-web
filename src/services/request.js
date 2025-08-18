@@ -9,7 +9,7 @@ import { getToken } from '@/services/authentication';
 
 // Create Axios instance
 const service = axios.create({
-  baseURL: process.env.VUE_APP_BASE_API || 'http://localhost:3000/api',
+  baseURL: process.env.VUE_APP_BASE_API || 'https://thesis-posting-and-leave-request-api.onrender.com/api',
   timeout: 300000
 });
 

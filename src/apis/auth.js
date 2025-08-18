@@ -2,10 +2,12 @@ import request from '@/services/request';
 import { users } from '@/constants/apis';
 import axios from 'axios';
 
+const API_BASE_URL = process.env.VUE_APP_BASE_API || 'https://thesis-posting-and-leave-request-api.onrender.com/api';
+
 export const verifyToken = async (token) => {
   const response = await axios.post(
-    'http://localhost:3000/api/users/verify-token',
-    { token: token },
+    `${API_BASE_URL}/users/verify-token`,
+    { token },
     {
       headers: {
         Authorization: `Bearer ${token}`
@@ -14,7 +16,6 @@ export const verifyToken = async (token) => {
   );
   return response.data;
 };
-
 export function signin(data) {
   return request({
     url: users.signin.url, // Maps to 'users/login'

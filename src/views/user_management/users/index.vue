@@ -1,24 +1,29 @@
-```vue
 <template>
   <div class="w-full">
     <div class="flex items-center justify-between mb-6">
       <h2 class="text-3xl font-extrabold text-gray-900">User Management</h2>
-      <button @click="openCreateModal"
+      <button
+        @click="openCreateModal"
         :disabled="loading"
-        class="px-6 py-2 font-medium text-white transition duration-200 bg-indigo-600 rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed">
+        class="px-6 py-2 font-medium text-white transition duration-1 bg-indigo-600 rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
         Create User
       </button>
     </div>
 
     <div class="fixed z-50 w-full max-w-xs space-y-4 top-4 right-4">
-      <div v-if="successMessage"
+      <div
+        v-if="successMessage"
         class="p-4 text-white transition-opacity duration-500 ease-in-out bg-green-700 rounded-lg shadow-md"
-        :class="{ 'opacity-0': !successMessage }">
+        :class="{ 'opacity-0': !successMessage }"
+      >
         {{ successMessage }}
       </div>
-      <div v-if="errorMessage"
+      <div
+        v-if="errorMessage"
         class="p-4 text-white transition-opacity duration-500 ease-in-out bg-red-700 rounded-lg shadow-md"
-        :class="{ 'opacity-0': !errorMessage }">
+        :class="{ 'opacity-0': !errorMessage }"
+      >
         {{ errorMessage }}
       </div>
     </div>
@@ -29,24 +34,31 @@
           <label class="block mb-2 text-sm font-medium text-gray-700">
             Search Users
           </label>
-          <input type="text" v-model="searchQuery"
+          <input
+            type="text"
+            v-model="searchQuery"
             class="border border-gray-300 rounded-lg px-4 py-2 w-[300px] focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
-            placeholder="Search by username, email, or name" />
+            placeholder="Search by username, email, or name"
+          />
         </div>
 
         <div class="flex gap-4">
-          <button @click="filterData"
-            class="px-6 py-2 font-medium text-white transition duration-200 bg-indigo-600 rounded-lg hover:bg-indigo-700">
+          <button
+            @click="filterData"
+            class="px-6 py-2 font-medium text-white transition duration-1 bg-indigo-600 rounded-lg hover:bg-indigo-700"
+          >
             Search
           </button>
-          <button @click="resetFilters"
-            class="px-6 py-2 font-medium text-gray-800 transition duration-200 bg-gray-200 rounded-lg hover:bg-gray-300">
+          <button
+            @click="resetFilters"
+            class="px-6 py-2 font-medium text-gray-800 transition duration-1 bg-gray-1 rounded-lg hover:bg-gray-300"
+          >
             Reset
           </button>
         </div>
       </div>
     </div>
-    
+
     <div v-if="loading" class="py-4 text-center">
       <i class="text-6xl text-green-700 fas fa-spinner fa-spin"></i>
     </div>
@@ -54,7 +66,9 @@
     <div class="overflow-hidden bg-white rounded-lg shadow-sm">
       <div class="overflow-x-auto">
         <table class="min-w-full text-sm table-auto">
-          <thead class="text-xs font-semibold text-gray-600 uppercase bg-gray-100">
+          <thead
+            class="text-xs font-semibold text-gray-600 uppercase bg-gray-100"
+          >
             <tr>
               <th class="px-4 py-3 text-left">No</th>
               <th class="px-4 py-3 text-left">Name (KH)</th>
@@ -68,41 +82,57 @@
             </tr>
           </thead>
           <tbody class="text-gray-700">
-            <tr v-for="(user, index) in paginatedUsers" :key="user.id" class="transition border-b border-gray-200">
+            <tr
+              v-for="(user, index) in paginatedUsers"
+              :key="user.id"
+              class="transition border-b border-gray-1"
+            >
               <td class="px-4 py-3">
                 {{ index + 1 + (currentPage - 1) * itemsPerPage }}
               </td>
-              <td class="px-4 py-3">{{ user.first_name_kh }} {{ user.last_name_kh }}</td>
-              <td class="px-4 py-3">{{ user.first_name_en }} {{ user.last_name_en }}</td>
+              <td class="px-4 py-3">
+                {{ user.first_name_kh }} {{ user.last_name_kh }}
+              </td>
+              <td class="px-4 py-3">
+                {{ user.first_name_en }} {{ user.last_name_en }}
+              </td>
               <td class="px-4 py-3">{{ user.username }}</td>
               <td class="px-4 py-3">{{ user.email }}</td>
               <td class="px-4 py-3">{{ user.role?.name || 'N/A' }}</td>
               <td class="px-4 py-3">{{ user.department?.name_en || 'N/A' }}</td>
               <td class="px-4 py-3">
-                <span :class="[
-                  'px-2 py-1 rounded-full text-xs font-medium',
-                  user.status === 'Active'
-                    ? 'bg-green-100 text-green-800'
-                    : 'bg-red-100 text-red-800'
-                ]">
+                <span
+                  :class="[
+                    'px-2 py-1 rounded-full text-xs font-medium',
+                    user.status === 'Active'
+                      ? 'bg-green-100 text-green-800'
+                      : 'bg-red-100 text-red-800'
+                  ]"
+                >
                   {{ user.status || 'N/A' }}
                 </span>
               </td>
               <td class="flex gap-2 px-4 py-3">
-                <button @click="openViewModal(user)"
+                <button
+                  @click="openViewModal(user)"
                   class="p-2 text-indigo-600 transition rounded-full hover:text-indigo-800 hover:bg-indigo-100"
-                  title="View User">
+                  title="View User"
+                >
                   <i class="fas fa-eye"></i>
                 </button>
-                <button @click="openEditModal(user)"
+                <button
+                  @click="openEditModal(user)"
                   :disabled="loading"
                   class="p-2 text-indigo-600 transition rounded-full hover:text-indigo-800 hover:bg-indigo-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                  title="Edit User">
+                  title="Edit User"
+                >
                   <i class="fas fa-edit"></i>
                 </button>
-                <button @click="confirmDelete(user.id)"
+                <button
+                  @click="confirmDelete(user.id)"
                   class="p-2 text-red-600 transition rounded-full hover:text-red-800 hover:bg-red-100"
-                  title="Delete User">
+                  title="Delete User"
+                >
                   <i class="fas fa-trash"></i>
                 </button>
               </td>
@@ -119,53 +149,83 @@
         of {{ totalUsers }} users
       </div>
       <div class="flex gap-2">
-        <button @click="prevPage" :disabled="currentPage === 1"
-          class="px-4 py-2 text-gray-800 transition duration-200 bg-gray-200 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-300">
+        <button
+          @click="prevPage"
+          :disabled="currentPage === 1"
+          class="px-4 py-2 text-gray-800 transition duration-1 bg-gray-1 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-300"
+        >
           Previous
         </button>
-        <button v-for="page in totalPages" :key="page" @click="goToPage(page)" :class="[
-          'px-4 py-2 rounded-lg transition duration-200',
-          currentPage === page
-            ? 'bg-indigo-600 text-white'
-            : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
-        ]">
+        <button
+          v-for="page in totalPages"
+          :key="page"
+          @click="goToPage(page)"
+          :class="[
+            'px-4 py-2 rounded-lg transition duration-1',
+            currentPage === page
+              ? 'bg-indigo-600 text-white'
+              : 'bg-gray-1 text-gray-800 hover:bg-gray-300'
+          ]"
+        >
           {{ page }}
         </button>
-        <button @click="nextPage" :disabled="currentPage === totalPages"
-          class="px-4 py-2 text-gray-800 transition duration-200 bg-gray-200 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-300">
+        <button
+          @click="nextPage"
+          :disabled="currentPage === totalPages"
+          class="px-4 py-2 text-gray-800 transition duration-1 bg-gray-1 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-300"
+        >
           Next
         </button>
       </div>
     </div>
 
     <transition name="modal">
-      <div style="background-color: rgb(0 0 0 / 0.5);" v-if="showViewModal"
-        class="fixed inset-0 z-50 flex items-center justify-center bg-opacity-60" @click.self="closeViewModal">
+      <div
+        style="background-color: rgb(0 0 0 / 0.5)"
+        v-if="showViewModal"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-opacity-60"
+        @click.self="closeViewModal"
+      >
         <div
-          class="bg-white rounded-xl shadow-2xl p-8 w-full max-w-lg mx-4 transform transition-all max-h-[80vh] overflow-y-auto">
+          class="bg-white rounded-xl shadow-2xl p-8 w-full max-w-lg mx-4 transform transition-all max-h-[80vh] overflow-y-auto"
+        >
           <div class="flex items-center justify-between mb-6">
             <h3 class="text-2xl font-bold text-gray-900">User Details</h3>
-            <button @click="closeViewModal"
-              class="p-2 text-gray-500 transition rounded-full hover:text-gray-700 hover:bg-gray-100" title="Close">
+            <button
+              @click="closeViewModal"
+              class="p-2 text-gray-500 transition rounded-full hover:text-gray-700 hover:bg-gray-100"
+              title="Close"
+            >
               <i class="fas fa-times"></i>
             </button>
           </div>
-          <div v-if="selectedUser" class="pt-5 space-y-5 border-t border-gray-200">
+          <div
+            v-if="selectedUser"
+            class="pt-5 space-y-5 border-t border-gray-1"
+          >
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
-                <label class="text-sm font-semibold text-gray-600">Name (KH)</label>
+                <label class="text-sm font-semibold text-gray-600"
+                  >Name (KH)</label
+                >
                 <p class="font-medium text-gray-900">
-                  {{ selectedUser.first_name_kh }} {{ selectedUser.last_name_kh }}
+                  {{ selectedUser.first_name_kh }}
+                  {{ selectedUser.last_name_kh }}
                 </p>
               </div>
               <div>
-                <label class="text-sm font-semibold text-gray-600">Name (EN)</label>
+                <label class="text-sm font-semibold text-gray-600"
+                  >Name (EN)</label
+                >
                 <p class="font-medium text-gray-900">
-                  {{ selectedUser.first_name_en }} {{ selectedUser.last_name_en }}
+                  {{ selectedUser.first_name_en }}
+                  {{ selectedUser.last_name_en }}
                 </p>
               </div>
               <div>
-                <label class="text-sm font-semibold text-gray-600">Username</label>
+                <label class="text-sm font-semibold text-gray-600"
+                  >Username</label
+                >
                 <p class="font-medium text-gray-900">
                   {{ selectedUser.username }}
                 </p>
@@ -183,45 +243,63 @@
                 </p>
               </div>
               <div>
-                <label class="text-sm font-semibold text-gray-600">Department</label>
+                <label class="text-sm font-semibold text-gray-600"
+                  >Department</label
+                >
                 <p class="font-medium text-gray-900">
                   {{ selectedUser.department?.name_en || 'N/A' }}
                 </p>
               </div>
               <div>
-                <label class="text-sm font-semibold text-gray-600">Phone Number</label>
+                <label class="text-sm font-semibold text-gray-600"
+                  >Phone Number</label
+                >
                 <p class="font-medium text-gray-900">
                   {{ selectedUser.phone_number || 'N/A' }}
                 </p>
               </div>
               <div>
-                <label class="text-sm font-semibold text-gray-600">Gender</label>
+                <label class="text-sm font-semibold text-gray-600"
+                  >Gender</label
+                >
                 <p class="font-medium text-gray-900">
                   {{ selectedUser.gender || 'N/A' }}
                 </p>
               </div>
               <div>
-                <label class="text-sm font-semibold text-gray-600">Date of Birth</label>
+                <label class="text-sm font-semibold text-gray-600"
+                  >Date of Birth</label
+                >
                 <p class="font-medium text-gray-900">
-                  {{ selectedUser.dob ? new Date(selectedUser.dob).toLocaleDateString() : 'N/A' }}
+                  {{
+                    selectedUser.dob
+                      ? new Date(selectedUser.dob).toLocaleDateString()
+                      : 'N/A'
+                  }}
                 </p>
               </div>
               <div>
-                <label class="text-sm font-semibold text-gray-600">Status</label>
-                <p :class="[
-                  'text-sm font-medium',
-                  selectedUser.status === 'Active'
-                    ? 'text-green-800'
-                    : 'text-red-800'
-                ]">
+                <label class="text-sm font-semibold text-gray-600"
+                  >Status</label
+                >
+                <p
+                  :class="[
+                    'text-sm font-medium',
+                    selectedUser.status === 'Active'
+                      ? 'text-green-800'
+                      : 'text-red-800'
+                  ]"
+                >
                   {{ selectedUser.status || 'N/A' }}
                 </p>
               </div>
             </div>
           </div>
           <div class="flex justify-end mt-8">
-            <button @click="closeViewModal"
-              class="px-6 py-2 font-medium text-white transition duration-200 bg-indigo-600 rounded-lg hover:bg-indigo-700">
+            <button
+              @click="closeViewModal"
+              class="px-6 py-2 font-medium text-white transition duration-1 bg-indigo-600 rounded-lg hover:bg-indigo-700"
+            >
               Close
             </button>
           </div>
@@ -230,66 +308,109 @@
     </transition>
 
     <transition name="modal">
-      <div style="background-color: rgb(0 0 0 / 0.5);" v-if="showCreateModal"
-        class="fixed inset-0 z-50 flex items-center justify-center bg-opacity-60" @click.self="closeCreateModal">
+      <div
+        style="background-color: rgb(0 0 0 / 0.5)"
+        v-if="showCreateModal"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-opacity-60"
+        @click.self="closeCreateModal"
+      >
         <div
-          class="bg-white rounded-xl shadow-2xl p-8 w-full max-w-lg mx-4 transform transition-all max-h-[80vh] overflow-y-auto">
+          class="bg-white rounded-xl shadow-2xl p-8 w-full max-w-lg mx-4 transform transition-all max-h-[80vh] overflow-y-auto"
+        >
           <div class="flex items-center justify-between mb-6">
             <h3 class="text-2xl font-bold text-gray-900">
               {{ isEditing ? 'Edit User' : 'Create User' }}
             </h3>
-            <button @click="closeCreateModal"
-              class="p-2 text-gray-500 transition rounded-full hover:text-gray-700 hover:bg-gray-100" title="Close">
+            <button
+              @click="closeCreateModal"
+              class="p-2 text-gray-500 transition rounded-full hover:text-gray-700 hover:bg-gray-100"
+              title="Close"
+            >
               <i class="fas fa-times"></i>
             </button>
           </div>
-          <div class="pt-5 space-y-5 border-t border-gray-200">
+          <div class="pt-5 space-y-5 border-t border-gray-1">
             <div>
-              <label class="text-sm font-semibold text-gray-600">First Name (KH)</label>
-              <input v-model="form.first_name_kh" type="text"
+              <label class="text-sm font-semibold text-gray-600"
+                >First Name (KH)</label
+              >
+              <input
+                v-model="form.first_name_kh"
+                type="text"
                 class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                placeholder="Enter first name (KH)" />
+                placeholder="Enter first name (KH)"
+              />
             </div>
             <div>
-              <label class="text-sm font-semibold text-gray-600">Last Name (KH)</label>
-              <input v-model="form.last_name_kh" type="text"
+              <label class="text-sm font-semibold text-gray-600"
+                >Last Name (KH)</label
+              >
+              <input
+                v-model="form.last_name_kh"
+                type="text"
                 class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                placeholder="Enter last name (KH)" />
+                placeholder="Enter last name (KH)"
+              />
             </div>
             <div>
-              <label class="text-sm font-semibold text-gray-600">First Name (EN)</label>
-              <input v-model="form.first_name_en" type="text"
+              <label class="text-sm font-semibold text-gray-600"
+                >First Name (EN)</label
+              >
+              <input
+                v-model="form.first_name_en"
+                type="text"
                 class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                placeholder="Enter first name (EN)" />
+                placeholder="Enter first name (EN)"
+              />
             </div>
             <div>
-              <label class="text-sm font-semibold text-gray-600">Last Name (EN)</label>
-              <input v-model="form.last_name_en" type="text"
+              <label class="text-sm font-semibold text-gray-600"
+                >Last Name (EN)</label
+              >
+              <input
+                v-model="form.last_name_en"
+                type="text"
                 class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                placeholder="Enter last name (EN)" />
+                placeholder="Enter last name (EN)"
+              />
             </div>
             <div>
-              <label class="text-sm font-semibold text-gray-600">Username</label>
-              <input v-model="form.username" type="text"
+              <label class="text-sm font-semibold text-gray-600"
+                >Username</label
+              >
+              <input
+                v-model="form.username"
+                type="text"
                 class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                placeholder="Enter username" />
+                placeholder="Enter username"
+              />
             </div>
             <div>
               <label class="text-sm font-semibold text-gray-600">Email</label>
-              <input v-model="form.email" type="email"
+              <input
+                v-model="form.email"
+                type="email"
                 class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                placeholder="Enter email" />
+                placeholder="Enter email"
+              />
             </div>
             <div v-if="!isEditing">
-              <label class="text-sm font-semibold text-gray-600">Password</label>
-              <input v-model="form.password" type="password"
+              <label class="text-sm font-semibold text-gray-600"
+                >Password</label
+              >
+              <input
+                v-model="form.password"
+                type="password"
                 class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                placeholder="Enter password" />
+                placeholder="Enter password"
+              />
             </div>
             <div>
               <label class="text-sm font-semibold text-gray-600">Role</label>
-              <select v-model="form.role"
-                class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+              <select
+                v-model="form.role"
+                class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              >
                 <option value="" disabled>Select a role</option>
                 <option v-for="role in roles" :key="role._id" :value="role._id">
                   {{ role.name }}
@@ -297,53 +418,79 @@
               </select>
             </div>
             <div>
-              <label class="text-sm font-semibold text-gray-600">Department</label>
-              <select v-model="form.department"
-                class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+              <label class="text-sm font-semibold text-gray-600"
+                >Department</label
+              >
+              <select
+                v-model="form.department"
+                class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              >
                 <option value="" disabled>Select a department</option>
-                <option v-for="department in departments" :key="department._id" :value="department._id">
+                <option
+                  v-for="department in departments"
+                  :key="department._id"
+                  :value="department._id"
+                >
                   {{ department.name_en }}
                 </option>
               </select>
             </div>
             <div>
-              <label class="text-sm font-semibold text-gray-600">Phone Number</label>
-              <input v-model="form.phone_number" type="text"
+              <label class="text-sm font-semibold text-gray-600"
+                >Phone Number</label
+              >
+              <input
+                v-model="form.phone_number"
+                type="text"
                 class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                placeholder="Enter phone number" />
+                placeholder="Enter phone number"
+              />
             </div>
             <div>
               <label class="text-sm font-semibold text-gray-600">Gender</label>
-              <select v-model="form.gender"
-                class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+              <select
+                v-model="form.gender"
+                class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              >
                 <option value="Male">Male</option>
                 <option value="Female">Female</option>
                 <option value="Other">Other</option>
               </select>
             </div>
             <div>
-              <label class="text-sm font-semibold text-gray-600">Date of Birth</label>
-              <input v-model="form.dob" type="date"
+              <label class="text-sm font-semibold text-gray-600"
+                >Date of Birth</label
+              >
+              <input
+                v-model="form.dob"
+                type="date"
                 class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                placeholder="Enter date of birth" />
+                placeholder="Enter date of birth"
+              />
             </div>
             <div>
               <label class="text-sm font-semibold text-gray-600">Status</label>
-              <select v-model="form.status"
-                class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+              <select
+                v-model="form.status"
+                class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              >
                 <option value="Active">Active</option>
                 <option value="Inactive">Inactive</option>
               </select>
             </div>
           </div>
           <div class="flex justify-end gap-4 mt-8">
-            <button @click="closeCreateModal"
-              class="px-6 py-2 font-medium text-gray-800 transition duration-200 bg-gray-200 rounded-lg hover:bg-gray-300">
+            <button
+              @click="closeCreateModal"
+              class="px-6 py-2 font-medium text-gray-800 transition duration-1 bg-gray-1 rounded-lg hover:bg-gray-300"
+            >
               Cancel
             </button>
-            <button @click="saveUser"
+            <button
+              @click="saveUser"
               :disabled="loading"
-              class="px-6 py-2 font-medium text-white transition duration-200 bg-indigo-600 rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed">
+              class="px-6 py-2 font-medium text-white transition duration-1 bg-indigo-600 rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
               {{ isEditing ? 'Update' : 'Create' }}
             </button>
           </div>
@@ -352,22 +499,39 @@
     </transition>
 
     <transition name="modal">
-      <div style="background-color: rgb(0 0 0 / 0.5);" v-if="showDeleteModal"
-        class="fixed inset-0 z-50 flex items-center justify-center bg-opacity-60" @click.self="closeDeleteModal">
-        <div class="w-full max-w-md p-8 mx-4 transition-all transform bg-white shadow-2xl rounded-xl">
+      <div
+        style="background-color: rgb(0 0 0 / 0.5)"
+        v-if="showDeleteModal"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-opacity-60"
+        @click.self="closeDeleteModal"
+      >
+        <div
+          class="w-full max-w-md p-8 mx-4 transition-all transform bg-white shadow-2xl rounded-xl"
+        >
           <div class="text-center">
-            <i class="mb-4 text-5xl text-red-500 fas fa-exclamation-triangle"></i>
-            <h3 class="mb-2 text-2xl font-bold text-gray-900">Confirm Deletion</h3>
-            <p class="text-gray-600">Are you sure you want to delete this user? This action cannot be undone.</p>
+            <i
+              class="mb-4 text-5xl text-red-500 fas fa-exclamation-triangle"
+            ></i>
+            <h3 class="mb-2 text-2xl font-bold text-gray-900">
+              Confirm Deletion
+            </h3>
+            <p class="text-gray-600">
+              Are you sure you want to delete this user? This action cannot be
+              undone.
+            </p>
           </div>
           <div class="flex justify-center gap-4 mt-8">
-            <button @click="closeDeleteModal"
-              class="px-6 py-2 font-medium text-gray-800 transition duration-200 bg-gray-200 rounded-lg hover:bg-gray-300">
+            <button
+              @click="closeDeleteModal"
+              class="px-6 py-2 font-medium text-gray-800 transition duration-1 bg-gray-1 rounded-lg hover:bg-gray-300"
+            >
               Cancel
             </button>
-            <button @click="deleteUser"
+            <button
+              @click="deleteUser"
               :disabled="loading"
-              class="px-6 py-2 font-medium text-white transition duration-200 bg-red-600 rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed">
+              class="px-6 py-2 font-medium text-white transition duration-1 bg-red-600 rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
               Delete
             </button>
           </div>
@@ -428,10 +592,15 @@ export default {
         const searchQuery = this.searchQuery.toLowerCase();
         return (
           this.searchQuery === '' ||
-          (user.username && user.username.toLowerCase().includes(searchQuery)) ||
+          (user.username &&
+            user.username.toLowerCase().includes(searchQuery)) ||
           (user.email && user.email.toLowerCase().includes(searchQuery)) ||
-          `${user.first_name_kh} ${user.last_name_kh}`.toLowerCase().includes(searchQuery) ||
-          `${user.first_name_en} ${user.last_name_en}`.toLowerCase().includes(searchQuery)
+          `${user.first_name_kh} ${user.last_name_kh}`
+            .toLowerCase()
+            .includes(searchQuery) ||
+          `${user.first_name_en} ${user.last_name_en}`
+            .toLowerCase()
+            .includes(searchQuery)
         );
       });
     },
@@ -465,7 +634,7 @@ export default {
         const result = await getAllUser({ page, limit: this.itemsPerPage });
         console.log('Get All Users response:', result);
         if (result && result.status === 1) {
-          this.users = result.data.map(user => ({
+          this.users = result.data.map((user) => ({
             id: user._id || null,
             first_name_kh: user.first_name_kh || '',
             last_name_kh: user.last_name_kh || '',
@@ -502,10 +671,14 @@ export default {
         let rolesData = [];
         if (result && result.status === 1 && Array.isArray(result.roles)) {
           rolesData = result.roles; // Case: { status: 1, roles: [...] }
-        } else if (result && result.status === 1 && Array.isArray(result.data)) {
+        } else if (
+          result &&
+          result.status === 1 &&
+          Array.isArray(result.data)
+        ) {
           rolesData = result.data; // Case: { status: 1, data: [...] }
-        } else if (result && result.status === 200 && Array.isArray(result.data)) {
-          rolesData = result.data; // Case: { status: 200, data: [...] }
+        } else if (result && result.status === 1) {
+          rolesData = result.data; // Case: { status: 1, data: [...] }
         } else if (Array.isArray(result)) {
           rolesData = result; // Case: Direct array
         } else {
@@ -527,25 +700,50 @@ export default {
       try {
         const result = await getAllDepartment();
         console.log('Get All Departments response:', result);
+
         let departmentsData = [];
-        if (result && result.status === 200 && Array.isArray(result.departments)) {
-          departmentsData = result.departments; // Case: { status: 200, departments: [...] }
-        } else if (result && result.status === 200 && Array.isArray(result.data)) {
-          departmentsData = result.data; // Case: { status: 200, data: [...] }
-        } else if (result && result.status === 200 && Array.isArray(result.data.departments)) {
-          departmentsData = result.data.departments; // Case: { status: 200, data: { departments: [...] } }
+
+        // Handle various possible response formats
+        if (result && result.status === 1 && Array.isArray(result.data)) {
+          departmentsData = result.data; // Case: { status: 1, data: [...] }
+        } else if (
+          result &&
+          result.status === 1 &&
+          Array.isArray(result.departments)
+        ) {
+          departmentsData = result.departments; // Case: { status: 1, departments: [...] }
+        } else if (
+          result &&
+          result.status === 1 &&
+          Array.isArray(result.data?.departments)
+        ) {
+          departmentsData = result.data.departments; // Case: { status: 1, data: { departments: [...] } }
         } else if (Array.isArray(result)) {
           departmentsData = result; // Case: Direct array
         } else {
-          throw new Error('Invalid department data format');
+          throw new Error(
+            `Invalid department data format. Received: ${
+              result ? JSON.stringify(result, null, 2) : 'undefined or null'
+            }`
+          );
         }
-        this.departments = departmentsData;
+
+        // Map departments to ensure consistent structure
+        this.departments = departmentsData.map((dept) => ({
+          _id: dept._id || null,
+          name_en: dept.name_en || 'N/A',
+          name_kh: dept.name_kh || '',
+          description: dept.description || '',
+          createdAt: dept.createdAt || '',
+          updatedAt: dept.updatedAt || ''
+        }));
+
         if (this.departments.length === 0) {
           this.alert('No departments available.', 'error');
         }
       } catch (error) {
         console.error('Error fetching departments:', error);
-        this.alert('Error fetching departments: ' + error.message, 'error');
+        this.alert(`Error fetching departments: ${error.message}`, 'error');
       } finally {
         this.loading = false;
       }
@@ -573,7 +771,7 @@ export default {
         if (this.isEditing) {
           const { id, password, ...formData } = this.form; // Exclude password when editing
           const updatedUser = await updateUser(this.form.id, formData);
-          if (updatedUser && updatedUser.status === 200) {
+          if (updatedUser && updatedUser.status === 1) {
             await this.getAllUsers(this.currentPage);
             this.alert('User updated successfully!');
           } else {
@@ -616,11 +814,14 @@ export default {
         console.log('Deleting user with ID:', this.userToDeleteId);
         const result = await deleteUser(this.userToDeleteId);
         console.log('Delete API response:', result);
-        if (result && [200, 204].includes(result.status)) {
+        if (result && [1, 204].includes(result.status)) {
           await this.getAllUsers(this.currentPage);
           this.alert('User deleted successfully!');
         } else {
-          this.alert(`Failed to delete user. Status: ${result?.status || 'unknown'}`, 'error');
+          this.alert(
+            `Failed to delete user. Status: ${result?.status || 'unknown'}`,
+            'error'
+          );
         }
       } catch (error) {
         console.error('Error deleting user:', error);
@@ -750,7 +951,11 @@ export default {
     console.log('Component mounted, fetching data...');
     this.loading = true;
     try {
-      await Promise.all([this.getAllRoles(), this.getAllDepartments(), this.getAllUsers()]);
+      await Promise.all([
+        this.getAllRoles(),
+        this.getAllDepartments(),
+        this.getAllUsers()
+      ]);
     } catch (error) {
       console.error('Error during initial data fetch:', error);
       this.alert('Failed to load initial data: ' + error.message, 'error');
@@ -824,4 +1029,3 @@ td {
   background: #555;
 }
 </style>
-```
