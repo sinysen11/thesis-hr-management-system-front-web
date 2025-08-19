@@ -13,15 +13,17 @@ module.exports = defineConfig({
         });
     },
 
-    configureWebpack: process.env.NODE_ENV === 'local' ? (config) => {} : output_format,
+    configureWebpack: process.env.NODE_ENV === 'local' ? (config) => { } : output_format,
 
     devServer: {
         proxy: {
             '/api': {
-                target: 'http://localhost:3000',
+                target: 'https://thesis-posting-and-leave-request-api.onrender.com',
                 changeOrigin: true
             }
         },
-        open: true
+        open: true,
+        host: '0.0.0.0',
+        allowedHosts: 'all'
     }
 });
