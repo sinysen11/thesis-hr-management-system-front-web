@@ -67,6 +67,24 @@
             </div>
           </div>
 
+          <div class="flex flex-col gap-4 mb-5 sm:flex-row sm:gap-6">
+            <div class="flex-1">
+              <label class="block mb-2 font-semibold text-gray-700">
+                Day Type <span class="text-red-600">*</span>
+              </label>
+              <select v-model="leaveForm.dayType" required @change="clearError('dayType')"
+                class="w-full p-3 mb-1 transition border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-green-700 focus:border-green-700">
+                <option value="" disabled>Select</option>
+                <option value="morning">Morning</option>
+                <option value="afternoon">Afternoon</option>
+                <option value="full">Full Day</option>
+              </select>
+              <p v-if="errors.dayType" class="mb-4 text-sm text-red-600">{{ errors.dayType }}</p>
+            </div>
+
+            <div class="flex-1"></div>
+          </div>
+
           <label class="block mb-2 font-semibold text-gray-700">
             Reason <span class="text-red-600">*</span>
           </label>
@@ -345,7 +363,8 @@ export default {
         approver: '',
         fromDate: '',
         toDate: '',
-        reason: ''
+        reason: '',
+        dayType: ''
       },
       errors: {},
       approvers: [],
@@ -397,6 +416,9 @@ export default {
       if (!this.leaveForm.reason) {
         this.errors.reason = 'Reason is required.';
       }
+      if (!this.leaveForm.dayType) {
+        this.errors.dayType = 'Day Type is required.';
+      }
 
       return Object.keys(this.errors).length === 0;
     },
@@ -431,7 +453,11 @@ export default {
         return;
       }
       try {
-        const payload = { ...this.leaveForm };
+        let time = {};
+        if (this.leaveForm.dayType === 'morning') time = { isMorning: true };
+        else if (this.leaveForm.dayType === 'afternoon') time = { isNoon: true };
+        else if (this.leaveForm.dayType === 'full') time = { isFull: true };
+        const payload = { ...this.leaveForm, ...time };
         const res = await createLeaveRequest(payload);
 
         if (res.status === 1) {
@@ -443,7 +469,8 @@ export default {
             approver: '',
             fromDate: '',
             toDate: '',
-            reason: ''
+            reason: '',
+            dayType: ''
           };
           this.errors = {};
         }
