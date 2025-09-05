@@ -40,26 +40,42 @@
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
       <div class="md:col-span-2 bg-white p-6 rounded-lg shadow">
         <h3 class="text-lg font-semibold mb-4">Recent Leave Requests</h3>
-        <table class="w-full text-left border-t">
-          <thead>
-            <tr class="border-b">
-              <th class="py-2">Name</th>
-              <th class="py-2">Date</th>
-              <th class="py-2">Status</th>
+        <table
+          class="min-w-full table-auto text-sm bg-white rounded-xl overflow-hidden shadow-lg border border-gray-200"
+        >
+          <thead
+            class="bg-indigo-50 text-indigo-800 uppercase text-xs font-semibold tracking-wider"
+          >
+            <tr>
+              <th class="px-6 py-4 text-left">Name</th>
+              <th class="px-6 py-4 text-left">Reason</th>
+              <th class="px-6 py-4 text-left">Date</th>
+              <th class="px-6 py-4 text-left">Status</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody class="text-gray-800 divide-y divide-gray-200">
+            <tr v-if="leaveRequests.length === 0">
+              <td
+                colspan="4"
+                class="px-6 py-4 text-center text-gray-500 italic"
+              >
+                No leave requests found.
+              </td>
+            </tr>
             <tr
-              v-for="(request, index) in leaveRequests"
+              v-for="(request, index) in leaveRequests.slice(0, 5)"
               :key="index"
-              class="border-b"
+              class="transition-colors duration-200 hover:bg-gray-100 cursor-pointer"
             >
-              <td class="py-2">{{ request.name }}</td>
-              <td class="py-2">{{ request.date }}</td>
-              <td class="py-2">
+              <td class="px-6 py-4 font-medium whitespace-nowrap">
+                {{ request.employeeName }}
+              </td>
+              <td class="px-6 py-4">{{ request.reason }}</td>
+              <td class="px-6 py-4">{{ request.startDate }}</td>
+              <td class="px-6 py-4">
                 <span
                   :class="[
-                    'px-2 py-1 rounded-full text-sm font-medium',
+                    'px-3 py-1.5 rounded-full text-xs font-semibold',
                     statusClass(request.status)
                   ]"
                 >
@@ -91,20 +107,16 @@
 </template>
 
 <script>
+import { getUserInfoCookie } from '@/services/authentication';
 import Chart from 'chart.js/auto';
+import moment from 'moment';
+import { getStaffRequestForApprover } from '@/apis/request-leave';
 
 export default {
   name: 'Dashboard',
   data() {
     return {
-      leaveRequests: [
-        { name: 'Chan Danaroth', date: 'Feb 14, 2025', status: 'Approved' },
-        { name: 'Chan Mony', date: 'Feb 14, 2025', status: 'Rejected' },
-        { name: 'Thin Chrang', date: 'Feb 14, 2025', status: 'Rejected' },
-        { name: 'Sen Siny', date: 'Feb 14, 2025', status: 'Declined' },
-        { name: 'Yoeum Sovanet', date: 'Feb 14, 2025', status: 'Canceled' },
-        { name: 'Sim Sreymean', date: 'Feb 14, 2025', status: 'Pending' }
-      ],
+      leaveRequests: [],
       upcomingBirthdays: [
         { name: 'Chan Danaroth', date: 'Feb 14, 2025' },
         { name: 'Sok Rithy', date: 'Mar 03, 2025' },
@@ -113,25 +125,87 @@ export default {
         { name: 'Long Vannak', date: 'Jun 18, 2025' },
         { name: 'Mao Sokha', date: 'Jul 29, 2025' },
         { name: 'Neang Bopha', date: 'Aug 07, 2025' }
-      ]
+      ],
+      userInfo: null,
+      isLoading: false
     };
   },
   methods: {
+    async fetchLeaveRequests(user_id) {
+      this.isLoading = true;
+      try {
+        const response = await getStaffRequestForApprover(user_id, {
+          limit: 5 // Fetch only the 5 most recent requests
+        });
+        if (response && response.data) {
+          this.leaveRequests = response.data.map((request) => {
+            let departmentName = 'N/A';
+            if (request.user?.department) {
+              departmentName = request.user.department.name_en || 'N/A';
+            }
+            return {
+              id: request._id || '',
+              employeeId: request.user?._id || '',
+              employeeName: request.user
+                ? `${request.user.first_name_en || ''} ${
+                    request.user.last_name_en || ''
+                  }`.trim() || 'Unknown Employee'
+                : 'Unknown Employee',
+              department: departmentName,
+              leaveTypeId: request.type?._id || '',
+              leaveTypeName: request.type?.name || 'Unknown Type',
+              startDate: this.formatDate(request.fromDate),
+              endDate: this.formatDate(request.toDate),
+              approverId: request.approver?._id || '',
+              approverName: request.approver
+                ? `${request.approver.first_name_en || ''} ${
+                    request.approver.last_name_en || ''
+                  }`.trim() || 'N/A'
+                : 'N/A',
+              status: request.status || 'PENDING',
+              reason: request.reason || 'No reason provided'
+            };
+          });
+        } else {
+          this.leaveRequests = [];
+        }
+      } catch (error) {
+        console.error('Error fetching leave requests:', error);
+        this.leaveRequests = [];
+      } finally {
+        this.isLoading = false;
+      }
+    },
     statusClass(status) {
       switch (status) {
-        case 'Approved':
+        case 'APPROVED':
           return 'bg-green-100 text-green-700';
-        case 'Rejected':
+        case 'REJECTED':
           return 'bg-red-100 text-red-700';
-        case 'Declined':
+        case 'CANCELLED':
+        case 'DRAFT':
           return 'bg-yellow-200 text-yellow-800';
-        case 'Canceled':
-          return 'bg-pink-100 text-pink-700';
-        case 'Pending':
+        case 'PENDING':
           return 'bg-yellow-100 text-yellow-700';
         default:
           return 'bg-gray-100 text-gray-700';
       }
+    },
+    formatDate(date) {
+      return date ? moment(date).format('DD-MMM-YYYY') : 'N/A';
+    }
+  },
+  created() {
+    const userInfoCookie = getUserInfoCookie();
+    if (userInfoCookie) {
+      try {
+        this.userInfo = JSON.parse(userInfoCookie);
+      } catch {
+        this.userInfo = null;
+      }
+    }
+    if (this.userInfo && this.userInfo._id) {
+      this.fetchLeaveRequests(this.userInfo._id);
     }
   },
   mounted() {

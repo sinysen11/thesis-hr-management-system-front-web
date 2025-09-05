@@ -1,13 +1,32 @@
 <template>
-  <!-- <div class="min-h-screen bg-gray-50 flex flex-col"> -->
   <div class="w-full">
     <div class="flex justify-between items-center mb-6">
       <h2 class="text-3xl font-extrabold text-gray-900">Job Categories</h2>
-      <button @click="openCreateModal"
-        class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-medium transition duration-200">
+      <button
+        @click="openCreateModal"
+        class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-medium transition duration-200"
+      >
         Create Job Category
       </button>
     </div>
+    <!-- Notification Area -->
+    <div class="fixed top-4 right-4 z-50 space-y-4 w-full max-w-xs">
+      <div
+        v-if="successMessage"
+        class="p-4 rounded-lg shadow-md bg-green-500 text-white transition-opacity duration-500 ease-in-out"
+        :class="{ 'opacity-0': !successMessage }"
+      >
+        {{ successMessage }}
+      </div>
+      <div
+        v-if="errorMessage"
+        class="p-4 rounded-lg shadow-md bg-red-500 text-white transition-opacity duration-500 ease-in-out"
+        :class="{ 'opacity-0': !errorMessage }"
+      >
+        {{ errorMessage }}
+      </div>
+    </div>
+
     <!-- Filter Section -->
     <div class="bg-white shadow-sm rounded-lg p-6 mb-8">
       <div class="flex flex-col sm:flex-row items-end gap-4">
@@ -16,19 +35,26 @@
           <label class="text-sm font-medium text-gray-700 mb-2 block">
             Search Job Categories
           </label>
-          <input type="text" v-model="searchQuery"
+          <input
+            type="text"
+            v-model="searchQuery"
             class="border border-gray-300 rounded-lg px-4 py-2 w-[300px] focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
-            placeholder="Search by category name" />
+            placeholder="Search by category name"
+          />
         </div>
 
         <!-- Buttons -->
         <div class="flex gap-4">
-          <button @click="filterData"
-            class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-medium transition duration-200">
+          <button
+            @click="filterData"
+            class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-medium transition duration-200"
+          >
             Search
           </button>
-          <button @click="resetFilters"
-            class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-6 py-2 rounded-lg font-medium transition duration-200">
+          <button
+            @click="resetFilters"
+            class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-6 py-2 rounded-lg font-medium transition duration-200"
+          >
             Reset
           </button>
         </div>
@@ -39,7 +65,9 @@
     <div class="bg-white shadow-sm rounded-lg overflow-hidden">
       <div class="overflow-x-auto">
         <table class="min-w-full table-auto text-sm">
-          <thead class="bg-gray-100 text-gray-600 uppercase text-xs font-semibold">
+          <thead
+            class="bg-gray-100 text-gray-600 uppercase text-xs font-semibold"
+          >
             <tr>
               <th class="px-4 py-3 text-left">No</th>
               <th class="px-4 py-3 text-left">Category Name</th>
@@ -49,37 +77,48 @@
             </tr>
           </thead>
           <tbody class="text-gray-700">
-            <tr v-for="(category, index) in paginatedCategories" :key="category.id"
-              class="hover:bg-gray-50 transition border-b border-gray-200">
+            <tr
+              v-for="(category, index) in paginatedCategories"
+              :key="category.id"
+              class="hover:bg-gray-50 transition border-b border-gray-200"
+            >
               <td class="px-4 py-3">
                 {{ index + 1 + (currentPage - 1) * itemsPerPage }}
               </td>
               <td class="px-4 py-3">{{ category.name }}</td>
               <td class="px-4 py-3">{{ category.description }}</td>
               <td class="px-4 py-3">
-                <span :class="[
-                  'px-2 py-1 rounded-full text-xs font-medium',
-                  category.status === 'Active'
-                    ? 'bg-green-100 text-green-800'
-                    : 'bg-red-100 text-red-800'
-                ]">
+                <span
+                  :class="[
+                    'px-2 py-1 rounded-full text-xs font-medium',
+                    category.status === 'Active'
+                      ? 'bg-green-100 text-green-800'
+                      : 'bg-red-100 text-red-800'
+                  ]"
+                >
                   {{ category.status }}
                 </span>
               </td>
               <td class="px-4 py-3 flex gap-2">
-                <button @click="openViewModal(category)"
+                <button
+                  @click="openViewModal(category)"
                   class="text-indigo-600 hover:text-indigo-800 p-2 rounded-full hover:bg-indigo-100 transition"
-                  title="View Category">
+                  title="View Category"
+                >
                   <i class="fas fa-eye"></i>
                 </button>
-                <button @click="openEditModal(category)"
+                <button
+                  @click="openEditModal(category)"
                   class="text-indigo-600 hover:text-indigo-800 p-2 rounded-full hover:bg-indigo-100 transition"
-                  title="Edit Category">
+                  title="Edit Category"
+                >
                   <i class="fas fa-edit"></i>
                 </button>
-                <button @click="deleteCategory(category.id)"
+                <button
+                  @click="deleteCategory(category.id)"
                   class="text-red-600 hover:text-red-800 p-2 rounded-full hover:bg-red-100 transition"
-                  title="Delete Category">
+                  title="Delete Category"
+                >
                   <i class="fas fa-trash"></i>
                 </button>
               </td>
@@ -97,69 +136,101 @@
         of {{ filteredCategories.length }} categories
       </div>
       <div class="flex gap-2">
-        <button @click="prevPage" :disabled="currentPage === 1"
-          class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-300 transition duration-200">
+        <button
+          @click="prevPage"
+          :disabled="currentPage === 1"
+          class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-300 transition duration-200"
+        >
           Previous
         </button>
-        <button v-for="page in totalPages" :key="page" @click="goToPage(page)" :class="[
-          'px-4 py-2 rounded-lg transition duration-200',
-          currentPage === page
-            ? 'bg-indigo-600 text-white'
-            : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
-        ]">
+        <button
+          v-for="page in totalPages"
+          :key="page"
+          @click="goToPage(page)"
+          :class="[
+            'px-4 py-2 rounded-lg transition duration-200',
+            currentPage === page
+              ? 'bg-indigo-600 text-white'
+              : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
+          ]"
+        >
           {{ page }}
         </button>
-        <button @click="nextPage" :disabled="currentPage === totalPages"
-          class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-300 transition duration-200">
+        <button
+          @click="nextPage"
+          :disabled="currentPage === totalPages"
+          class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-300 transition duration-200"
+        >
           Next
         </button>
       </div>
     </div>
     <!-- Modal for View Job Category -->
     <transition name="modal">
-      <div style="background-color: rgb(0 0 0 / 0.5);" v-if="showViewModal"
+      <div
+        style="background-color: rgb(0 0 0 / 0.5)"
+        v-if="showViewModal"
         class="fixed inset-0 bg-gray-50 bg-opacity-60 flex items-center justify-center z-50"
-        @click.self="closeViewModal">
-        <div class="bg-white rounded-xl shadow-2xl p-8 w-full max-w-lg mx-4 transform transition-all">
+        @click.self="closeViewModal"
+      >
+        <div
+          class="bg-white rounded-xl shadow-2xl p-8 w-full max-w-lg mx-4 transform transition-all"
+        >
           <div class="flex justify-between items-center mb-6">
             <h3 class="text-2xl font-bold text-gray-900">
               Job Category Details
             </h3>
-            <button @click="closeViewModal"
-              class="text-gray-500 hover:text-gray-700 p-2 rounded-full hover:bg-gray-100 transition" title="Close">
+            <button
+              @click="closeViewModal"
+              class="text-gray-500 hover:text-gray-700 p-2 rounded-full hover:bg-gray-100 transition"
+              title="Close"
+            >
               <i class="fas fa-times"></i>
             </button>
           </div>
-          <div v-if="selectedCategory" class="space-y-5 border-t border-gray-200 pt-5">
+          <div
+            v-if="selectedCategory"
+            class="space-y-5 border-t border-gray-200 pt-5"
+          >
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
-                <label class="text-sm font-semibold text-gray-600">Category Name</label>
+                <label class="text-sm font-semibold text-gray-600"
+                  >Category Name</label
+                >
                 <p class="text-gray-900 font-medium">
                   {{ selectedCategory.name }}
                 </p>
               </div>
               <div class="sm:col-span-2">
-                <label class="text-sm font-semibold text-gray-600">Description</label>
+                <label class="text-sm font-semibold text-gray-600"
+                  >Description</label
+                >
                 <p class="text-gray-900 font-medium">
                   {{ selectedCategory.description }}
                 </p>
               </div>
               <div>
-                <label class="text-sm font-semibold text-gray-600">Status</label>
-                <p :class="[
-                  'text-sm font-medium',
-                  selectedCategory.status === 'Active'
-                    ? 'text-green-800'
-                    : 'text-red-800'
-                ]">
+                <label class="text-sm font-semibold text-gray-600"
+                  >Status</label
+                >
+                <p
+                  :class="[
+                    'text-sm font-medium',
+                    selectedCategory.status === 'Active'
+                      ? 'text-green-800'
+                      : 'text-red-800'
+                  ]"
+                >
                   {{ selectedCategory.status }}
                 </p>
               </div>
             </div>
           </div>
           <div class="mt-8 flex justify-end">
-            <button @click="closeViewModal"
-              class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-medium transition duration-200">
+            <button
+              @click="closeViewModal"
+              class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-medium transition duration-200"
+            >
               Close
             </button>
           </div>
@@ -169,48 +240,72 @@
 
     <!-- Modal for Create/Update Job Category -->
     <transition name="modal">
-      <div style="background-color: rgb(0 0 0 / 0.5);" v-if="showCreateModal"
+      <div
+        style="background-color: rgb(0 0 0 / 0.5)"
+        v-if="showCreateModal"
         class="fixed inset-0 bg-gray-50 bg-opacity-60 flex items-center justify-center z-50"
-        @click.self="closeCreateModal">
-        <div class="bg-white rounded-xl shadow-2xl p-8 w-full max-w-lg mx-4 transform transition-all">
+        @click.self="closeCreateModal"
+      >
+        <div
+          class="bg-white rounded-xl shadow-2xl p-8 w-full max-w-lg mx-4 transform transition-all"
+        >
           <div class="flex justify-between items-center mb-6">
             <h3 class="text-2xl font-bold text-gray-900">
               {{ isEditing ? 'Edit Job Category' : 'Create Job Category' }}
             </h3>
-            <button @click="closeCreateModal"
-              class="text-gray-500 hover:text-gray-700 p-2 rounded-full hover:bg-gray-100 transition" title="Close">
+            <button
+              @click="closeCreateModal"
+              class="text-gray-500 hover:text-gray-700 p-2 rounded-full hover:bg-gray-100 transition"
+              title="Close"
+            >
               <i class="fas fa-times"></i>
             </button>
           </div>
           <div class="space-y-5 border-t border-gray-200 pt-5">
             <div>
-              <label class="text-sm font-semibold text-gray-600">Category Name</label>
-              <input v-model="form.name" type="text"
+              <label class="text-sm font-semibold text-gray-600"
+                >Category Name</label
+              >
+              <input
+                v-model="form.name"
+                type="text"
                 class="border border-gray-300 rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
-                placeholder="Enter category name" />
+                placeholder="Enter category name"
+              />
             </div>
             <div>
-              <label class="text-sm font-semibold text-gray-600">Description</label>
-              <textarea v-model="form.description"
+              <label class="text-sm font-semibold text-gray-600"
+                >Description</label
+              >
+              <textarea
+                v-model="form.description"
                 class="border border-gray-300 rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
-                placeholder="Enter description" rows="4"></textarea>
+                placeholder="Enter description"
+                rows="4"
+              ></textarea>
             </div>
             <div>
               <label class="text-sm font-semibold text-gray-600">Status</label>
-              <select v-model="form.status"
-                class="border border-gray-300 rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+              <select
+                v-model="form.status"
+                class="border border-gray-300 rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
+              >
                 <option value="Active">Active</option>
                 <option value="Inactive">Inactive</option>
               </select>
             </div>
           </div>
           <div class="mt-8 flex justify-end gap-4">
-            <button @click="closeCreateModal"
-              class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-6 py-2 rounded-lg font-medium transition duration-200">
+            <button
+              @click="closeCreateModal"
+              class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-6 py-2 rounded-lg font-medium transition duration-200"
+            >
               Cancel
             </button>
-            <button @click="saveCategory"
-              class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-medium transition duration-200">
+            <button
+              @click="saveCategory"
+              class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-medium transition duration-200"
+            >
               {{ isEditing ? 'Update' : 'Create' }}
             </button>
           </div>
@@ -218,7 +313,6 @@
       </div>
     </transition>
   </div>
-  <!-- </div> -->
 </template>
 
 <script>
@@ -267,7 +361,9 @@ export default {
           description: 'Roles in advertising, branding, and market research.',
           status: 'Active'
         }
-      ]
+      ],
+      errorMessage: '',
+      successMessage: ''
     };
   },
   computed: {
@@ -289,6 +385,20 @@ export default {
     }
   },
   methods: {
+    alert(message, type = 'success') {
+      console.log('Alert:', { message, type });
+      if (type === 'success') {
+        this.successMessage = message;
+        this.errorMessage = '';
+      } else {
+        this.errorMessage = message;
+        this.successMessage = '';
+      }
+      setTimeout(() => {
+        this.successMessage = '';
+        this.errorMessage = '';
+      }, 3000);
+    },
     filterData() {
       this.currentPage = 1; // Reset to first page on filter
     },
@@ -310,10 +420,12 @@ export default {
       this.isEditing = true;
       this.form = { ...category };
       this.showCreateModal = true;
+      this.alert('Category fetched successfully for editing.', 'success');
     },
     openViewModal(category) {
       this.selectedCategory = { ...category };
       this.showViewModal = true;
+      this.alert('Category fetched successfully for viewing.', 'success');
     },
     closeCreateModal() {
       this.showCreateModal = false;
@@ -331,7 +443,10 @@ export default {
     },
     saveCategory() {
       if (!this.form.name) {
-        alert('Please fill in the required field (Category Name).');
+        this.alert(
+          'Please fill in the required field (Category Name).',
+          'error'
+        );
         return;
       }
       if (this.isEditing) {
@@ -340,20 +455,30 @@ export default {
         );
         if (index !== -1) {
           this.categories[index] = { ...this.form };
+          this.alert('Category updated successfully!', 'success');
+        } else {
+          this.alert('Failed to update category. Category not found.', 'error');
         }
       } else {
         this.categories.push({
           ...this.form,
           id: uuidv4()
         });
+        this.alert('Category created successfully!', 'success');
       }
       this.closeCreateModal();
     },
     deleteCategory(id) {
       if (confirm('Are you sure you want to delete this job category?')) {
-        this.categories = this.categories.filter(
-          (category) => category.id !== id
+        const index = this.categories.findIndex(
+          (category) => category.id === id
         );
+        if (index !== -1) {
+          this.categories.splice(index, 1);
+          this.alert('Category deleted successfully!', 'success');
+        } else {
+          this.alert('Failed to delete category. Category not found.', 'error');
+        }
       }
     },
     prevPage() {

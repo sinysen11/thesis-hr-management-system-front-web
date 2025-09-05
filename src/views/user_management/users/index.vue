@@ -329,154 +329,186 @@
               <i class="fas fa-times"></i>
             </button>
           </div>
-          <div class="pt-5 space-y-5 border-t border-gray-1">
-            <div>
-              <label class="text-sm font-semibold text-gray-600"
-                >First Name (KH)</label
-              >
-              <input
-                v-model="form.first_name_kh"
-                type="text"
-                class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                placeholder="Enter first name (KH)"
-              />
-            </div>
-            <div>
-              <label class="text-sm font-semibold text-gray-600"
-                >Last Name (KH)</label
-              >
-              <input
-                v-model="form.last_name_kh"
-                type="text"
-                class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                placeholder="Enter last name (KH)"
-              />
-            </div>
-            <div>
-              <label class="text-sm font-semibold text-gray-600"
-                >First Name (EN)</label
-              >
-              <input
-                v-model="form.first_name_en"
-                type="text"
-                class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                placeholder="Enter first name (EN)"
-              />
-            </div>
-            <div>
-              <label class="text-sm font-semibold text-gray-600"
-                >Last Name (EN)</label
-              >
-              <input
-                v-model="form.last_name_en"
-                type="text"
-                class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                placeholder="Enter last name (EN)"
-              />
-            </div>
-            <div>
-              <label class="text-sm font-semibold text-gray-600"
-                >Username</label
-              >
-              <input
-                v-model="form.username"
-                type="text"
-                class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                placeholder="Enter username"
-              />
-            </div>
-            <div>
-              <label class="text-sm font-semibold text-gray-600">Email</label>
-              <input
-                v-model="form.email"
-                type="email"
-                class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                placeholder="Enter email"
-              />
-            </div>
-            <div v-if="!isEditing">
-              <label class="text-sm font-semibold text-gray-600"
-                >Password</label
-              >
-              <input
-                v-model="form.password"
-                type="password"
-                class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                placeholder="Enter password"
-              />
-            </div>
-            <div>
-              <label class="text-sm font-semibold text-gray-600">Role</label>
-              <select
-                v-model="form.role"
-                class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-              >
-                <option value="" disabled>Select a role</option>
-                <option v-for="role in roles" :key="role._id" :value="role._id">
-                  {{ role.name }}
-                </option>
-              </select>
-            </div>
-            <div>
-              <label class="text-sm font-semibold text-gray-600"
-                >Department</label
-              >
-              <select
-                v-model="form.department"
-                class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-              >
-                <option value="" disabled>Select a department</option>
-                <option
-                  v-for="department in departments"
-                  :key="department._id"
-                  :value="department._id"
+          <div class="pt-5 border-t border-gray-1">
+            <div class="flex flex-col gap-5">
+              <div class="flex flex-col sm:flex-row gap-5">
+                <div class="w-full sm:w-1/2">
+                  <label class="text-sm font-semibold text-gray-600"
+                    >First Name (KH)</label
+                  >
+                  <input
+                    v-model="form.first_name_kh"
+                    type="text"
+                    class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    placeholder="Enter first name (KH)"
+                  />
+                </div>
+                <div class="w-full sm:w-1/2">
+                  <label class="text-sm font-semibold text-gray-600"
+                    >Last Name (KH)</label
+                  >
+                  <input
+                    v-model="form.last_name_kh"
+                    type="text"
+                    class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    placeholder="Enter last name (KH)"
+                  />
+                </div>
+              </div>
+
+              <div class="flex flex-col sm:flex-row gap-5">
+                <div class="w-full sm:w-1/2">
+                  <label class="text-sm font-semibold text-gray-600"
+                    >First Name (EN)</label
+                  >
+                  <input
+                    v-model="form.first_name_en"
+                    type="text"
+                    class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    placeholder="Enter first name (EN)"
+                  />
+                </div>
+                <div class="w-full sm:w-1/2">
+                  <label class="text-sm font-semibold text-gray-600"
+                    >Last Name (EN)</label
+                  >
+                  <input
+                    v-model="form.last_name_en"
+                    type="text"
+                    class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    placeholder="Enter last name (EN)"
+                  />
+                </div>
+              </div>
+
+              <div class="flex flex-col sm:flex-row gap-5">
+                <div class="w-full sm:w-1/2">
+                  <label class="text-sm font-semibold text-gray-600"
+                    >Username</label
+                  >
+                  <input
+                    v-model="form.username"
+                    type="text"
+                    class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    placeholder="Enter username"
+                  />
+                </div>
+                <div class="w-full sm:w-1/2">
+                  <label class="text-sm font-semibold text-gray-600"
+                    >Email</label
+                  >
+                  <input
+                    v-model="form.email"
+                    type="email"
+                    class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    placeholder="Enter email"
+                  />
+                </div>
+              </div>
+
+              <div class="flex flex-col sm:flex-row gap-5">
+                <div v-if="!isEditing" class="w-full sm:w-1/2">
+                  <label class="text-sm font-semibold text-gray-600"
+                    >Password</label
+                  >
+                  <input
+                    v-model="form.password"
+                    type="password"
+                    class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    placeholder="Enter password"
+                  />
+                </div>
+                <div class="w-full sm:w-1/2">
+                  <label class="text-sm font-semibold text-gray-600"
+                    >Role</label
+                  >
+                  <select
+                    v-model="form.role"
+                    class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  >
+                    <option value="" disabled>Select a role</option>
+                    <option
+                      v-for="role in roles"
+                      :key="role._id"
+                      :value="role._id"
+                    >
+                      {{ role.name }}
+                    </option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="flex flex-col sm:flex-row gap-5">
+                <div class="w-full sm:w-1/2">
+                  <label class="text-sm font-semibold text-gray-600"
+                    >Department</label
+                  >
+                  <select
+                    v-model="form.department"
+                    class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  >
+                    <option value="" disabled>Select a department</option>
+                    <option
+                      v-for="department in departments"
+                      :key="department._id"
+                      :value="department._id"
+                    >
+                      {{ department.name_en }}
+                    </option>
+                  </select>
+                </div>
+                <div class="w-full sm:w-1/2">
+                  <label class="text-sm font-semibold text-gray-600"
+                    >Phone Number</label
+                  >
+                  <input
+                    v-model="form.phone_number"
+                    type="text"
+                    class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    placeholder="Enter phone number"
+                  />
+                </div>
+              </div>
+
+              <div class="flex flex-col sm:flex-row gap-5">
+                <div class="w-full sm:w-1/2">
+                  <label class="text-sm font-semibold text-gray-600"
+                    >Gender</label
+                  >
+                  <select
+                    v-model="form.gender"
+                    class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  >
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+                <div class="w-full sm:w-1/2">
+                  <label class="text-sm font-semibold text-gray-600"
+                    >Date of Birth</label
+                  >
+                  <input
+                    v-model="form.dob"
+                    type="date"
+                    class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    placeholder="Enter date of birth"
+                  />
+                </div>
+              </div>
+
+              <div class="w-full">
+                <label class="text-sm font-semibold text-gray-600"
+                  >Status</label
                 >
-                  {{ department.name_en }}
-                </option>
-              </select>
-            </div>
-            <div>
-              <label class="text-sm font-semibold text-gray-600"
-                >Phone Number</label
-              >
-              <input
-                v-model="form.phone_number"
-                type="text"
-                class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                placeholder="Enter phone number"
-              />
-            </div>
-            <div>
-              <label class="text-sm font-semibold text-gray-600">Gender</label>
-              <select
-                v-model="form.gender"
-                class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-              >
-                <option value="Male">Male</option>
-                <option value="Female">Female</option>
-                <option value="Other">Other</option>
-              </select>
-            </div>
-            <div>
-              <label class="text-sm font-semibold text-gray-600"
-                >Date of Birth</label
-              >
-              <input
-                v-model="form.dob"
-                type="date"
-                class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                placeholder="Enter date of birth"
-              />
-            </div>
-            <div>
-              <label class="text-sm font-semibold text-gray-600">Status</label>
-              <select
-                v-model="form.status"
-                class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-              >
-                <option value="Active">Active</option>
-                <option value="Inactive">Inactive</option>
-              </select>
+                <select
+                  v-model="form.status"
+                  class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                >
+                  <option value="Active">Active</option>
+                  <option value="Inactive">Inactive</option>
+                </select>
+              </div>
             </div>
           </div>
           <div class="flex justify-end gap-4 mt-8">
