@@ -21,7 +21,7 @@ router.beforeEach(async (to, from, next) => {
         to.name === 'signup' ||
         to.name === 'forgot-password')
     ) {
-      return next({ path: '/' });
+      return next({ path: '/login' });
     }
 
     if (to.meta.is_need_authorization) {
@@ -38,7 +38,7 @@ router.beforeEach(async (to, from, next) => {
             return next();
           } else {
             console.error('Failed to fetch menu by role:', result);
-            return next({ path: '/' });
+            return next({ path: '/login' });
           }
         }
       }

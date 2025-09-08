@@ -4,7 +4,8 @@
       <h2 class="text-3xl font-extrabold text-gray-900">Job Titles</h2>
       <button
         @click="openCreateModal"
-        class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-medium transition duration-200"
+        :disabled="loading"
+        class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-medium transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
       >
         Create Job Title
       </button>
@@ -40,24 +41,30 @@
             placeholder="Search by title (KH or EN)"
           />
         </div>
-
         <div class="flex gap-4">
           <button
             @click="filterData"
-            class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-medium transition duration-200"
+            :disabled="loading"
+            class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-medium transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Search
           </button>
           <button
             @click="resetFilters"
-            class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-6 py-2 rounded-lg font-medium transition duration-200"
+            :disabled="loading"
+            class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-6 py-2 rounded-lg font-medium transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Reset
           </button>
         </div>
       </div>
     </div>
-    <div class="bg-white shadow-sm rounded-lg overflow-hidden">
+
+    <div v-if="loading" class="py-4 text-center">
+      <i class="text-6xl text-green-700 fas fa-spinner fa-spin"></i>
+    </div>
+
+    <div class="bg-white shadow-sm rounded-lg overflow-hidden" v-else>
       <div class="overflow-x-auto">
         <table class="min-w-full table-auto text-sm">
           <thead
@@ -74,7 +81,7 @@
             <tr
               v-for="(jobTitle, index) in paginatedJobTitles"
               :key="jobTitle.id"
-              class="transition border-b border-gray-200"
+              class="transition border-b border-gray-200 hover:bg-gray-50"
             >
               <td class="px-4 py-3">
                 {{ index + 1 + (currentPage - 1) * itemsPerPage }}
@@ -84,25 +91,33 @@
               <td class="px-4 py-3 flex gap-2">
                 <button
                   @click="openViewModal(jobTitle)"
-                  class="text-indigo-600 hover:text-indigo-800 p-2 rounded-full hover:bg-indigo-100 transition"
+                  :disabled="loading"
+                  class="text-indigo-600 hover:text-indigo-800 p-2 rounded-full hover:bg-indigo-100 transition disabled:opacity-50 disabled:cursor-not-allowed"
                   title="View Job Title"
                 >
                   <i class="fas fa-eye"></i>
                 </button>
                 <button
                   @click="openEditModal(jobTitle)"
-                  class="text-indigo-600 hover:text-indigo-800 p-2 rounded-full hover:bg-indigo-100 transition"
+                  :disabled="loading"
+                  class="text-indigo-600 hover:text-indigo-800 p-2 rounded-full hover:bg-indigo-100 transition disabled:opacity-50 disabled:cursor-not-allowed"
                   title="Edit Job Title"
                 >
                   <i class="fas fa-edit"></i>
                 </button>
                 <button
                   @click="confirmDelete(jobTitle.id)"
-                  class="text-red-600 hover:text-red-800 p-2 rounded-full hover:bg-red-100 transition"
+                  :disabled="loading"
+                  class="text-red-600 hover:text-red-800 p-2 rounded-full hover:bg-red-100 transition disabled:opacity-50 disabled:cursor-not-allowed"
                   title="Delete Job Title"
                 >
                   <i class="fas fa-trash"></i>
                 </button>
+              </td>
+            </tr>
+            <tr v-if="paginatedJobTitles.length === 0">
+              <td colspan="4" class="px-4 py-3 text-center text-gray-500">
+                No job titles found.
               </td>
             </tr>
           </tbody>
@@ -119,7 +134,7 @@
       <div class="flex gap-2">
         <button
           @click="prevPage"
-          :disabled="currentPage === 1"
+          :disabled="currentPage === 1 || loading"
           class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-300 transition duration-200"
         >
           Previous
@@ -128,18 +143,20 @@
           v-for="page in totalPages"
           :key="page"
           @click="goToPage(page)"
+          :disabled="loading"
           :class="[
             'px-4 py-2 rounded-lg transition duration-200',
             currentPage === page
               ? 'bg-indigo-600 text-white'
-              : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
+              : 'bg-gray-200 text-gray-800 hover:bg-gray-300',
+            loading ? 'opacity-50 cursor-not-allowed' : ''
           ]"
         >
           {{ page }}
         </button>
         <button
           @click="nextPage"
-          :disabled="currentPage === totalPages"
+          :disabled="currentPage === totalPages || loading"
           class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-300 transition duration-200"
         >
           Next
@@ -155,7 +172,7 @@
         @click.self="closeViewModal"
       >
         <div
-          class="bg-white rounded-xl shadow-2xl p-8 w-full max-w-lg mx-4 transform transition-all"
+          class="bg-white rounded-xl shadow-2xl p-8 w-full max-w-lg mx-4 transform transition-all max-h-[80vh] overflow-y-auto"
         >
           <div class="flex justify-between items-center mb-6">
             <h3 class="text-2xl font-bold text-gray-900">Job Title Details</h3>
@@ -210,7 +227,7 @@
         @click.self="closeCreateModal"
       >
         <div
-          class="bg-white rounded-xl shadow-2xl p-8 w-full max-w-lg mx-4 transform transition-all"
+          class="bg-white rounded-xl shadow-2xl p-8 w-full max-w-lg mx-4 transform transition-all max-h-[80vh] overflow-y-auto"
         >
           <div class="flex justify-between items-center mb-6">
             <h3 class="text-2xl font-bold text-gray-900">
@@ -257,7 +274,8 @@
             </button>
             <button
               @click="saveJobTitle"
-              class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-medium transition duration-200"
+              :disabled="loading"
+              class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-medium transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {{ isEditing ? 'Update' : 'Create' }}
             </button>
@@ -297,7 +315,8 @@
             </button>
             <button
               @click="deleteJobTitle"
-              class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg font-medium transition duration-200"
+              :disabled="loading"
+              class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg font-medium transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Delete
             </button>
@@ -336,7 +355,8 @@ export default {
       },
       jobTitles: [],
       errorMessage: '',
-      successMessage: ''
+      successMessage: '',
+      loading: false
     };
   },
   computed: {
@@ -379,8 +399,8 @@ export default {
         this.errorMessage = '';
       }, 3000);
     },
-
     async getAllJobTitles() {
+      this.loading = true;
       try {
         const result = await getAllJobTitle();
         console.log('getAllJobTitle response:', result);
@@ -404,9 +424,10 @@ export default {
       } catch (error) {
         console.error('Error fetching job titles:', error);
         this.alert('Error fetching job titles: ' + error.message, 'error');
+      } finally {
+        this.loading = false;
       }
     },
-
     async saveJobTitle() {
       if (!this.form.des_kh || !this.form.des_en) {
         this.alert(
@@ -415,6 +436,7 @@ export default {
         );
         return;
       }
+      this.loading = true;
       try {
         if (this.isEditing) {
           const { id, ...formData } = this.form;
@@ -447,15 +469,17 @@ export default {
       } catch (error) {
         console.error('Error saving job title:', error);
         this.alert('Error saving job title: ' + error.message, 'error');
+      } finally {
+        this.loading = false;
       }
     },
-
     async openEditModal(jobTitle) {
       console.log('Job Title for editing:', jobTitle);
       if (!jobTitle.id) {
         this.alert('Invalid job title ID.', 'error');
         return;
       }
+      this.loading = true;
       try {
         const response = await getOneJobTitle(jobTitle.id);
         console.log('getOneJobTitle response:', response);
@@ -491,15 +515,17 @@ export default {
           'Error fetching job title for editing: ' + error.message,
           'error'
         );
+      } finally {
+        this.loading = false;
       }
     },
-
     async openViewModal(jobTitle) {
       console.log('Job Title for viewing:', jobTitle);
       if (!jobTitle.id) {
         this.alert('Invalid job title ID.', 'error');
         return;
       }
+      this.loading = true;
       try {
         const response = await getOneJobTitle(jobTitle.id);
         console.log('getOneJobTitle response:', response);
@@ -534,20 +560,21 @@ export default {
           'Error fetching job title for viewing: ' + error.message,
           'error'
         );
+      } finally {
+        this.loading = false;
       }
     },
-
     confirmDelete(id) {
       console.log('Confirm Delete ID:', id);
       this.jobTitleToDeleteId = id;
       this.showDeleteModal = true;
     },
-
     async deleteJobTitle() {
       if (!this.jobTitleToDeleteId) {
         this.alert('No job title selected for deletion.', 'error');
         return;
       }
+      this.loading = true;
       try {
         console.log('Deleting job title with ID:', this.jobTitleToDeleteId);
         const result = await deleteJobTitle(this.jobTitleToDeleteId);
@@ -562,19 +589,17 @@ export default {
         console.error('Error deleting job title:', error);
         this.alert('Error deleting job title: ' + error.message, 'error');
       } finally {
+        this.loading = false;
         this.closeDeleteModal();
       }
     },
-
     filterData() {
       this.currentPage = 1;
     },
-
     resetFilters() {
       this.searchQuery = '';
       this.currentPage = 1;
     },
-
     openCreateModal() {
       this.isEditing = false;
       this.form = {
@@ -584,7 +609,6 @@ export default {
       };
       this.showCreateModal = true;
     },
-
     closeCreateModal() {
       this.showCreateModal = false;
       this.isEditing = false;
@@ -594,29 +618,24 @@ export default {
         des_en: ''
       };
     },
-
     closeViewModal() {
       this.showViewModal = false;
       this.selectedJobTitle = null;
     },
-
     closeDeleteModal() {
       this.showDeleteModal = false;
       this.jobTitleToDeleteId = null;
     },
-
     prevPage() {
       if (this.currentPage > 1) {
         this.currentPage--;
       }
     },
-
     nextPage() {
       if (this.currentPage < this.totalPages) {
         this.currentPage++;
       }
     },
-
     goToPage(page) {
       this.currentPage = page;
     }
@@ -639,3 +658,54 @@ export default {
   }
 };
 </script>
+
+<style scoped>
+th,
+td {
+  text-align: left;
+  white-space: nowrap;
+}
+
+.modal-enter-active,
+.modal-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.modal-enter-from,
+.modal-leave-to {
+  opacity: 0;
+}
+
+.modal-enter-active .modal-content,
+.modal-leave-active .modal-content {
+  transition: transform 0.3s ease;
+}
+
+.modal-enter-from .modal-content,
+.modal-leave-to .modal-content {
+  transform: translateY(-20px);
+}
+
+.max-h-\[80vh\] {
+  scrollbar-width: thin;
+  scrollbar-color: #888 #f1f1f1;
+}
+
+.max-h-\[80vh\]::-webkit-scrollbar {
+  width: 8px;
+}
+
+.max-h-\[80vh\]::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.max-h-\[80vh\]::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+.max-h-\[80vh\]::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+</style>

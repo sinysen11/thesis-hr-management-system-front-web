@@ -40,7 +40,11 @@
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
       <div class="md:col-span-2 bg-white p-6 rounded-lg shadow">
         <h3 class="text-lg font-semibold mb-4">Recent Leave Requests</h3>
+        <div v-if="isLoading" class="py-4 text-center">
+          <i class="text-6xl text-green-700 fas fa-spinner fa-spin"></i>
+        </div>
         <table
+          v-else
           class="min-w-full table-auto text-sm bg-white rounded-xl overflow-hidden shadow-lg border border-gray-200"
         >
           <thead

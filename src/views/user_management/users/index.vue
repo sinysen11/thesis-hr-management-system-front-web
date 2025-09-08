@@ -1,33 +1,35 @@
 <template>
   <div class="w-full">
-    <div class="flex items-center justify-between mb-6">
-      <h2 class="text-3xl font-extrabold text-gray-900">User Management</h2>
-      <button
-        @click="openCreateModal"
-        :disabled="loading"
-        class="px-6 py-2 font-medium text-white transition duration-1 bg-indigo-600 rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
-      >
-        Create User
-      </button>
-    </div>
-
+    <!-- Fixed-Position Alerts -->
     <div class="fixed z-50 w-full max-w-xs space-y-4 top-4 right-4">
       <div
         v-if="successMessage"
-        class="p-4 text-white transition-opacity duration-500 ease-in-out bg-green-700 rounded-lg shadow-md"
+        class="p-4 text-white transition-opacity duration-500 ease-in-out bg-green-500 rounded-lg shadow-md"
         :class="{ 'opacity-0': !successMessage }"
       >
         {{ successMessage }}
       </div>
       <div
         v-if="errorMessage"
-        class="p-4 text-white transition-opacity duration-500 ease-in-out bg-red-700 rounded-lg shadow-md"
+        class="p-4 text-white transition-opacity duration-500 ease-in-out bg-red-500 rounded-lg shadow-md"
         :class="{ 'opacity-0': !errorMessage }"
       >
         {{ errorMessage }}
       </div>
     </div>
 
+    <div class="flex items-center justify-between mb-6">
+      <h2 class="text-3xl font-extrabold text-gray-900">User Management</h2>
+      <button
+        @click="openCreateModal"
+        :disabled="loading"
+        class="px-6 py-2 font-medium text-white transition duration-200 bg-indigo-600 rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        Create User
+      </button>
+    </div>
+
+    <!-- Filter Section -->
     <div class="p-6 mb-8 bg-white rounded-lg shadow-sm">
       <div class="flex flex-col items-end gap-4 sm:flex-row">
         <div>
@@ -41,17 +43,16 @@
             placeholder="Search by username, email, or name"
           />
         </div>
-
         <div class="flex gap-4">
           <button
             @click="filterData"
-            class="px-6 py-2 font-medium text-white transition duration-1 bg-indigo-600 rounded-lg hover:bg-indigo-700"
+            class="px-6 py-2 font-medium text-white transition duration-200 bg-indigo-600 rounded-lg hover:bg-indigo-700"
           >
             Search
           </button>
           <button
             @click="resetFilters"
-            class="px-6 py-2 font-medium text-gray-800 transition duration-1 bg-gray-1 rounded-lg hover:bg-gray-300"
+            class="px-6 py-2 font-medium text-gray-800 transition duration-200 bg-gray-200 rounded-lg hover:bg-gray-300"
           >
             Reset
           </button>
@@ -63,6 +64,7 @@
       <i class="text-6xl text-green-700 fas fa-spinner fa-spin"></i>
     </div>
 
+    <!-- Table Section -->
     <div class="overflow-hidden bg-white rounded-lg shadow-sm">
       <div class="overflow-x-auto">
         <table class="min-w-full text-sm table-auto">
@@ -85,7 +87,7 @@
             <tr
               v-for="(user, index) in paginatedUsers"
               :key="user.id"
-              class="transition border-b border-gray-1"
+              class="transition border-b border-gray-200 hover:bg-gray-50"
             >
               <td class="px-4 py-3">
                 {{ index + 1 + (currentPage - 1) * itemsPerPage }}
@@ -130,7 +132,8 @@
                 </button>
                 <button
                   @click="confirmDelete(user.id)"
-                  class="p-2 text-red-600 transition rounded-full hover:text-red-800 hover:bg-red-100"
+                  :disabled="loading"
+                  class="p-2 text-red-600 transition rounded-full hover:text-red-800 hover:bg-red-100 disabled:opacity-50 disabled:cursor-not-allowed"
                   title="Delete User"
                 >
                   <i class="fas fa-trash"></i>
@@ -142,17 +145,18 @@
       </div>
     </div>
 
+    <!-- Pagination Controls -->
     <div class="flex items-center justify-between mt-6">
       <div class="text-sm text-gray-600">
         Showing {{ (currentPage - 1) * itemsPerPage + 1 }} to
-        {{ Math.min(currentPage * itemsPerPage, totalUsers) }}
-        of {{ totalUsers }} users
+        {{ Math.min(currentPage * itemsPerPage, filteredUsers.length) }}
+        of {{ filteredUsers.length }} users
       </div>
       <div class="flex gap-2">
         <button
           @click="prevPage"
           :disabled="currentPage === 1"
-          class="px-4 py-2 text-gray-800 transition duration-1 bg-gray-1 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-300"
+          class="px-4 py-2 text-gray-800 transition duration-200 bg-gray-200 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-300"
         >
           Previous
         </button>
@@ -161,10 +165,10 @@
           :key="page"
           @click="goToPage(page)"
           :class="[
-            'px-4 py-2 rounded-lg transition duration-1',
+            'px-4 py-2 rounded-lg transition duration-200',
             currentPage === page
               ? 'bg-indigo-600 text-white'
-              : 'bg-gray-1 text-gray-800 hover:bg-gray-300'
+              : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
           ]"
         >
           {{ page }}
@@ -172,13 +176,14 @@
         <button
           @click="nextPage"
           :disabled="currentPage === totalPages"
-          class="px-4 py-2 text-gray-800 transition duration-1 bg-gray-1 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-300"
+          class="px-4 py-2 text-gray-800 transition duration-200 bg-gray-200 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-300"
         >
           Next
         </button>
       </div>
     </div>
 
+    <!-- Modal for View User -->
     <transition name="modal">
       <div
         style="background-color: rgb(0 0 0 / 0.5)"
@@ -201,7 +206,7 @@
           </div>
           <div
             v-if="selectedUser"
-            class="pt-5 space-y-5 border-t border-gray-1"
+            class="pt-5 space-y-5 border-t border-gray-200"
           >
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
@@ -284,7 +289,7 @@
                 >
                 <p
                   :class="[
-                    'text-sm font-medium',
+                    'font-medium',
                     selectedUser.status === 'Active'
                       ? 'text-green-800'
                       : 'text-red-800'
@@ -298,7 +303,7 @@
           <div class="flex justify-end mt-8">
             <button
               @click="closeViewModal"
-              class="px-6 py-2 font-medium text-white transition duration-1 bg-indigo-600 rounded-lg hover:bg-indigo-700"
+              class="px-6 py-2 font-medium text-white transition duration-200 bg-indigo-600 rounded-lg hover:bg-indigo-700"
             >
               Close
             </button>
@@ -307,6 +312,7 @@
       </div>
     </transition>
 
+    <!-- Modal for Create/Update User -->
     <transition name="modal">
       <div
         style="background-color: rgb(0 0 0 / 0.5)"
@@ -329,199 +335,185 @@
               <i class="fas fa-times"></i>
             </button>
           </div>
-          <div class="pt-5 border-t border-gray-1">
-            <div class="flex flex-col gap-5">
-              <div class="flex flex-col sm:flex-row gap-5">
-                <div class="w-full sm:w-1/2">
-                  <label class="text-sm font-semibold text-gray-600"
-                    >First Name (KH)</label
-                  >
-                  <input
-                    v-model="form.first_name_kh"
-                    type="text"
-                    class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                    placeholder="Enter first name (KH)"
-                  />
-                </div>
-                <div class="w-full sm:w-1/2">
-                  <label class="text-sm font-semibold text-gray-600"
-                    >Last Name (KH)</label
-                  >
-                  <input
-                    v-model="form.last_name_kh"
-                    type="text"
-                    class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                    placeholder="Enter last name (KH)"
-                  />
-                </div>
-              </div>
-
-              <div class="flex flex-col sm:flex-row gap-5">
-                <div class="w-full sm:w-1/2">
-                  <label class="text-sm font-semibold text-gray-600"
-                    >First Name (EN)</label
-                  >
-                  <input
-                    v-model="form.first_name_en"
-                    type="text"
-                    class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                    placeholder="Enter first name (EN)"
-                  />
-                </div>
-                <div class="w-full sm:w-1/2">
-                  <label class="text-sm font-semibold text-gray-600"
-                    >Last Name (EN)</label
-                  >
-                  <input
-                    v-model="form.last_name_en"
-                    type="text"
-                    class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                    placeholder="Enter last name (EN)"
-                  />
-                </div>
-              </div>
-
-              <div class="flex flex-col sm:flex-row gap-5">
-                <div class="w-full sm:w-1/2">
-                  <label class="text-sm font-semibold text-gray-600"
-                    >Username</label
-                  >
-                  <input
-                    v-model="form.username"
-                    type="text"
-                    class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                    placeholder="Enter username"
-                  />
-                </div>
-                <div class="w-full sm:w-1/2">
-                  <label class="text-sm font-semibold text-gray-600"
-                    >Email</label
-                  >
-                  <input
-                    v-model="form.email"
-                    type="email"
-                    class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                    placeholder="Enter email"
-                  />
-                </div>
-              </div>
-
-              <div class="flex flex-col sm:flex-row gap-5">
-                <div v-if="!isEditing" class="w-full sm:w-1/2">
-                  <label class="text-sm font-semibold text-gray-600"
-                    >Password</label
-                  >
-                  <input
-                    v-model="form.password"
-                    type="password"
-                    class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                    placeholder="Enter password"
-                  />
-                </div>
-                <div class="w-full sm:w-1/2">
-                  <label class="text-sm font-semibold text-gray-600"
-                    >Role</label
-                  >
-                  <select
-                    v-model="form.role"
-                    class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                  >
-                    <option value="" disabled>Select a role</option>
-                    <option
-                      v-for="role in roles"
-                      :key="role._id"
-                      :value="role._id"
-                    >
-                      {{ role.name }}
-                    </option>
-                  </select>
-                </div>
-              </div>
-
-              <div class="flex flex-col sm:flex-row gap-5">
-                <div class="w-full sm:w-1/2">
-                  <label class="text-sm font-semibold text-gray-600"
-                    >Department</label
-                  >
-                  <select
-                    v-model="form.department"
-                    class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                  >
-                    <option value="" disabled>Select a department</option>
-                    <option
-                      v-for="department in departments"
-                      :key="department._id"
-                      :value="department._id"
-                    >
-                      {{ department.name_en }}
-                    </option>
-                  </select>
-                </div>
-                <div class="w-full sm:w-1/2">
-                  <label class="text-sm font-semibold text-gray-600"
-                    >Phone Number</label
-                  >
-                  <input
-                    v-model="form.phone_number"
-                    type="text"
-                    class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                    placeholder="Enter phone number"
-                  />
-                </div>
-              </div>
-
-              <div class="flex flex-col sm:flex-row gap-5">
-                <div class="w-full sm:w-1/2">
-                  <label class="text-sm font-semibold text-gray-600"
-                    >Gender</label
-                  >
-                  <select
-                    v-model="form.gender"
-                    class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                  >
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                    <option value="Other">Other</option>
-                  </select>
-                </div>
-                <div class="w-full sm:w-1/2">
-                  <label class="text-sm font-semibold text-gray-600"
-                    >Date of Birth</label
-                  >
-                  <input
-                    v-model="form.dob"
-                    type="date"
-                    class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                    placeholder="Enter date of birth"
-                  />
-                </div>
-              </div>
-
-              <div class="w-full">
+          <div class="pt-5 space-y-5 border-t border-gray-200">
+            <div class="flex flex-col sm:flex-row gap-5">
+              <div class="w-full sm:w-1/2">
                 <label class="text-sm font-semibold text-gray-600"
-                  >Status</label
+                  >First Name (KH)</label
                 >
+                <input
+                  v-model="form.first_name_kh"
+                  type="text"
+                  class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  placeholder="Enter first name (KH)"
+                />
+              </div>
+              <div class="w-full sm:w-1/2">
+                <label class="text-sm font-semibold text-gray-600"
+                  >Last Name (KH)</label
+                >
+                <input
+                  v-model="form.last_name_kh"
+                  type="text"
+                  class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  placeholder="Enter last name (KH)"
+                />
+              </div>
+            </div>
+            <div class="flex flex-col sm:flex-row gap-5">
+              <div class="w-full sm:w-1/2">
+                <label class="text-sm font-semibold text-gray-600"
+                  >First Name (EN)</label
+                >
+                <input
+                  v-model="form.first_name_en"
+                  type="text"
+                  class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  placeholder="Enter first name (EN)"
+                />
+              </div>
+              <div class="w-full sm:w-1/2">
+                <label class="text-sm font-semibold text-gray-600"
+                  >Last Name (EN)</label
+                >
+                <input
+                  v-model="form.last_name_en"
+                  type="text"
+                  class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  placeholder="Enter last name (EN)"
+                />
+              </div>
+            </div>
+            <div class="flex flex-col sm:flex-row gap-5">
+              <div class="w-full sm:w-1/2">
+                <label class="text-sm font-semibold text-gray-600"
+                  >Username</label
+                >
+                <input
+                  v-model="form.username"
+                  type="text"
+                  class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  placeholder="Enter username"
+                />
+              </div>
+              <div class="w-full sm:w-1/2">
+                <label class="text-sm font-semibold text-gray-600">Email</label>
+                <input
+                  v-model="form.email"
+                  type="email"
+                  class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  placeholder="Enter email"
+                />
+              </div>
+            </div>
+            <div class="flex flex-col sm:flex-row gap-5">
+              <div v-if="!isEditing" class="w-full sm:w-1/2">
+                <label class="text-sm font-semibold text-gray-600"
+                  >Password</label
+                >
+                <input
+                  v-model="form.password"
+                  type="password"
+                  class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  placeholder="Enter password"
+                />
+              </div>
+              <div class="w-full sm:w-1/2">
+                <label class="text-sm font-semibold text-gray-600">Role</label>
                 <select
-                  v-model="form.status"
+                  v-model="form.role"
                   class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                 >
-                  <option value="Active">Active</option>
-                  <option value="Inactive">Inactive</option>
+                  <option value="" disabled>Select a role</option>
+                  <option
+                    v-for="role in roles"
+                    :key="role._id"
+                    :value="role._id"
+                  >
+                    {{ role.name }}
+                  </option>
                 </select>
               </div>
+            </div>
+            <div class="flex flex-col sm:flex-row gap-5">
+              <div class="w-full sm:w-1/2">
+                <label class="text-sm font-semibold text-gray-600"
+                  >Department</label
+                >
+                <select
+                  v-model="form.department"
+                  class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                >
+                  <option value="" disabled>Select a department</option>
+                  <option
+                    v-for="department in departments"
+                    :key="department._id"
+                    :value="department._id"
+                  >
+                    {{ department.name_en }}
+                  </option>
+                </select>
+              </div>
+              <div class="w-full sm:w-1/2">
+                <label class="text-sm font-semibold text-gray-600"
+                  >Phone Number</label
+                >
+                <input
+                  v-model="form.phone_number"
+                  type="text"
+                  class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  placeholder="Enter phone number"
+                />
+              </div>
+            </div>
+            <div class="flex flex-col sm:flex-row gap-5">
+              <div class="w-full sm:w-1/2">
+                <label class="text-sm font-semibold text-gray-600"
+                  >Gender</label
+                >
+                <select
+                  v-model="form.gender"
+                  class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                >
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+              <div class="w-full sm:w-1/2">
+                <label class="text-sm font-semibold text-gray-600"
+                  >Date of Birth</label
+                >
+                <input
+                  v-model="form.dob"
+                  type="date"
+                  class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  placeholder="Enter date of birth"
+                />
+              </div>
+            </div>
+            <div class="w-full">
+              <label class="text-sm font-semibold text-gray-600">Status</label>
+              <select
+                v-model="form.status"
+                class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              >
+                <option value="Active">Active</option>
+                <option value="Inactive">Inactive</option>
+              </select>
             </div>
           </div>
           <div class="flex justify-end gap-4 mt-8">
             <button
               @click="closeCreateModal"
-              class="px-6 py-2 font-medium text-gray-800 transition duration-1 bg-gray-1 rounded-lg hover:bg-gray-300"
+              class="px-6 py-2 font-medium text-gray-800 transition duration-200 bg-gray-200 rounded-lg hover:bg-gray-300"
             >
               Cancel
             </button>
             <button
               @click="saveUser"
               :disabled="loading"
-              class="px-6 py-2 font-medium text-white transition duration-1 bg-indigo-600 rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              class="px-6 py-2 font-medium text-white transition duration-200 bg-indigo-600 rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {{ isEditing ? 'Update' : 'Create' }}
             </button>
@@ -530,6 +522,7 @@
       </div>
     </transition>
 
+    <!-- Modal for Delete Confirmation -->
     <transition name="modal">
       <div
         style="background-color: rgb(0 0 0 / 0.5)"
@@ -555,14 +548,14 @@
           <div class="flex justify-center gap-4 mt-8">
             <button
               @click="closeDeleteModal"
-              class="px-6 py-2 font-medium text-gray-800 transition duration-1 bg-gray-1 rounded-lg hover:bg-gray-300"
+              class="px-6 py-2 font-medium text-gray-800 transition duration-200 bg-gray-200 rounded-lg hover:bg-gray-300"
             >
               Cancel
             </button>
             <button
               @click="deleteUser"
               :disabled="loading"
-              class="px-6 py-2 font-medium text-white transition duration-1 bg-red-600 rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              class="px-6 py-2 font-medium text-white transition duration-200 bg-red-600 rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Delete
             </button>
@@ -620,19 +613,18 @@ export default {
       if (!this.users || !Array.isArray(this.users)) {
         return [];
       }
+      const query = this.searchQuery.toLowerCase();
       return this.users.filter((user) => {
-        const searchQuery = this.searchQuery.toLowerCase();
         return (
           this.searchQuery === '' ||
-          (user.username &&
-            user.username.toLowerCase().includes(searchQuery)) ||
-          (user.email && user.email.toLowerCase().includes(searchQuery)) ||
+          (user.username && user.username.toLowerCase().includes(query)) ||
+          (user.email && user.email.toLowerCase().includes(query)) ||
           `${user.first_name_kh} ${user.last_name_kh}`
             .toLowerCase()
-            .includes(searchQuery) ||
+            .includes(query) ||
           `${user.first_name_en} ${user.last_name_en}`
             .toLowerCase()
-            .includes(searchQuery)
+            .includes(query)
         );
       });
     },
@@ -642,12 +634,11 @@ export default {
       return this.filteredUsers.slice(start, end);
     },
     totalPages() {
-      return Math.ceil(this.totalUsers / this.itemsPerPage) || 1;
+      return Math.ceil(this.filteredUsers.length / this.itemsPerPage) || 1;
     }
   },
   methods: {
     alert(message, type = 'success') {
-      console.log('Alert:', { message, type });
       if (type === 'success') {
         this.successMessage = message;
         this.errorMessage = '';
@@ -664,7 +655,6 @@ export default {
       this.loading = true;
       try {
         const result = await getAllUser({ page, limit: this.itemsPerPage });
-        console.log('Get All Users response:', result);
         if (result && result.status === 1) {
           this.users = result.data.map((user) => ({
             id: user._id || null,
@@ -684,7 +674,6 @@ export default {
           this.currentPage = result.page || 1;
           this.itemsPerPage = result.limit || 10;
           this.totalUsers = result.total || this.users.length;
-          console.log('Mapped users:', this.users);
         } else {
           this.alert('Failed to load users. Invalid response format.', 'error');
         }
@@ -699,20 +688,17 @@ export default {
       this.loading = true;
       try {
         const result = await getAllRole();
-        console.log('Get All Roles response:', result);
         let rolesData = [];
         if (result && result.status === 1 && Array.isArray(result.roles)) {
-          rolesData = result.roles; // Case: { status: 1, roles: [...] }
+          rolesData = result.roles;
         } else if (
           result &&
           result.status === 1 &&
           Array.isArray(result.data)
         ) {
-          rolesData = result.data; // Case: { status: 1, data: [...] }
-        } else if (result && result.status === 1) {
-          rolesData = result.data; // Case: { status: 1, data: [...] }
+          rolesData = result.data;
         } else if (Array.isArray(result)) {
-          rolesData = result; // Case: Direct array
+          rolesData = result;
         } else {
           throw new Error('Invalid roles data format');
         }
@@ -731,45 +717,30 @@ export default {
       this.loading = true;
       try {
         const result = await getAllDepartment();
-        console.log('Get All Departments response:', result);
-
         let departmentsData = [];
-
-        // Handle various possible response formats
-        if (result && result.status === 1 && Array.isArray(result.data)) {
-          departmentsData = result.data; // Case: { status: 1, data: [...] }
-        } else if (
+        if (
           result &&
           result.status === 1 &&
           Array.isArray(result.departments)
         ) {
-          departmentsData = result.departments; // Case: { status: 1, departments: [...] }
+          departmentsData = result.departments;
         } else if (
           result &&
           result.status === 1 &&
-          Array.isArray(result.data?.departments)
+          Array.isArray(result.data)
         ) {
-          departmentsData = result.data.departments; // Case: { status: 1, data: { departments: [...] } }
+          departmentsData = result.data;
         } else if (Array.isArray(result)) {
-          departmentsData = result; // Case: Direct array
+          departmentsData = result;
         } else {
-          throw new Error(
-            `Invalid department data format. Received: ${
-              result ? JSON.stringify(result, null, 2) : 'undefined or null'
-            }`
-          );
+          throw new Error('Invalid department data format');
         }
-
-        // Map departments to ensure consistent structure
         this.departments = departmentsData.map((dept) => ({
           _id: dept._id || null,
           name_en: dept.name_en || 'N/A',
           name_kh: dept.name_kh || '',
-          description: dept.description || '',
-          createdAt: dept.createdAt || '',
-          updatedAt: dept.updatedAt || ''
+          description: dept.description || ''
         }));
-
         if (this.departments.length === 0) {
           this.alert('No departments available.', 'error');
         }
@@ -801,7 +772,7 @@ export default {
       this.loading = true;
       try {
         if (this.isEditing) {
-          const { id, password, ...formData } = this.form; // Exclude password when editing
+          const { id, password, ...formData } = this.form;
           const updatedUser = await updateUser(this.form.id, formData);
           if (updatedUser && updatedUser.status === 1) {
             await this.getAllUsers(this.currentPage);
@@ -832,7 +803,6 @@ export default {
         this.alert('Invalid user ID.', 'error');
         return;
       }
-      console.log('Confirm Delete ID:', id);
       this.userToDeleteId = id;
       this.showDeleteModal = true;
     },
@@ -843,9 +813,7 @@ export default {
       }
       this.loading = true;
       try {
-        console.log('Deleting user with ID:', this.userToDeleteId);
         const result = await deleteUser(this.userToDeleteId);
-        console.log('Delete API response:', result);
         if (result && [1, 204].includes(result.status)) {
           await this.getAllUsers(this.currentPage);
           this.alert('User deleted successfully!');
@@ -865,12 +833,10 @@ export default {
     },
     filterData() {
       this.currentPage = 1;
-      this.getAllUsers(this.currentPage);
     },
     resetFilters() {
       this.searchQuery = '';
       this.currentPage = 1;
-      this.getAllUsers(this.currentPage);
     },
     openCreateModal() {
       if (this.roles.length === 0 || this.departments.length === 0) {
@@ -897,7 +863,6 @@ export default {
       this.showCreateModal = true;
     },
     openEditModal(user) {
-      console.log('User for editing:', user);
       if (!user.id) {
         this.alert('Invalid user ID.', 'error');
         return;
@@ -915,7 +880,7 @@ export default {
         last_name_en: user.last_name_en || '',
         username: user.username || '',
         email: user.email || '',
-        password: '', // Do not prefill password
+        password: '',
         role: user.role?._id || '',
         department: user.department?._id || '',
         phone_number: user.phone_number || '',
@@ -926,7 +891,6 @@ export default {
       this.showCreateModal = true;
     },
     openViewModal(user) {
-      console.log('User for viewing:', user);
       if (!user.id) {
         this.alert('Invalid user ID.', 'error');
         return;
@@ -965,22 +929,18 @@ export default {
     prevPage() {
       if (this.currentPage > 1) {
         this.currentPage--;
-        this.getAllUsers(this.currentPage);
       }
     },
     nextPage() {
       if (this.currentPage < this.totalPages) {
         this.currentPage++;
-        this.getAllUsers(this.currentPage);
       }
     },
     goToPage(page) {
       this.currentPage = page;
-      this.getAllUsers(this.currentPage);
     }
   },
   async mounted() {
-    console.log('Component mounted, fetching data...');
     this.loading = true;
     try {
       await Promise.all([
@@ -996,15 +956,9 @@ export default {
     }
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
-        if (this.showCreateModal) {
-          this.closeCreateModal();
-        }
-        if (this.showViewModal) {
-          this.closeViewModal();
-        }
-        if (this.showDeleteModal) {
-          this.closeDeleteModal();
-        }
+        if (this.showCreateModal) this.closeCreateModal();
+        if (this.showViewModal) this.closeViewModal();
+        if (this.showDeleteModal) this.closeDeleteModal();
       }
     });
   }
