@@ -23,6 +23,20 @@ export function signin(data) {
     data
   });
 }
+export function forgotPassword(data) {
+  return request({
+    url: users.forgotPassword.url,
+    method: users.forgotPassword.method,
+    data
+  });
+}
+export function resetPassword(data) {
+  return request({
+    url: users.resetPassword.url,
+    method: users.resetPassword.method,
+    data
+  });
+}
 
 export function refreshToken(data) {
   return request({

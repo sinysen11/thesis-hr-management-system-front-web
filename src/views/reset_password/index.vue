@@ -12,27 +12,28 @@
         <p class="text-gray-600 text-xs mt-1">SunFlex(Cambodia) Co., Ltd.</p>
       </div>
 
-      <!-- Forgot Password Form -->
+      <!-- Reset Password Form -->
       <div class="space-y-6">
         <div>
           <h2 class="text-xl font-semibold text-gray-900 text-center">
-            Forgot Password
+            Reset Password
           </h2>
           <p class="text-sm text-gray-600 text-center mt-2">
-            Enter your email to reset your password.
+            Enter your new password below.
           </p>
         </div>
-        <form @submit.prevent="requestPasswordReset" class="space-y-4">
+        <form @submit.prevent="resetPasswordHandler" class="space-y-4">
           <div>
             <label class="block text-sm font-medium text-gray-700"
-              >Email <span class="text-red-500">*</span></label
+              >New Password <span class="text-red-500">*</span></label
             >
             <input
-              v-model="email"
-              type="email"
+              v-model="password"
+              type="password"
               required
+              minlength="6"
               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-700 transition text-sm"
-              placeholder="Enter your email"
+              placeholder="Enter new password"
             />
           </div>
 
@@ -41,7 +42,7 @@
             class="w-full bg-[#2e6d56] text-white py-2 rounded-md hover:bg-green-800 transition text-sm font-medium"
             :disabled="isLoading"
           >
-            {{ isLoading ? 'Sending...' : 'Send Reset Link' }}
+            {{ isLoading ? 'Resetting...' : 'Reset Password' }}
           </button>
         </form>
 
@@ -69,14 +70,14 @@
 </template>
 
 <script>
-import { useRouter } from 'vue-router';
-import { forgotPassword } from '@/apis/auth';
+import { useRouter, useRoute } from 'vue-router';
+import { resetPassword } from '@/apis/auth';
 
 export default {
-  name: 'ForgotPassword',
+  name: 'ResetPassword',
   data() {
     return {
-      email: '',
+      password: '',
       isLoading: false,
       error: '',
       successMessage: ''
@@ -84,32 +85,45 @@ export default {
   },
   setup() {
     const router = useRouter();
-    return { router };
+    const route = useRoute();
+    return { router, route };
   },
   methods: {
-    async requestPasswordReset() {
-      if (!this.email) {
-        alert('Please enter your email.');
+    async resetPasswordHandler() {
+      if (!this.password) {
+        alert('Please fill in both fields.');
         return;
       }
-
       this.isLoading = true;
       this.error = null;
 
       try {
-        const res = await forgotPassword({ email: this.email });
+        // ✅ get token from query string
+        const token = this.route.query.token;
+
+        if (!token) {
+          alert('Invalid or missing token');
+          this.isLoading = false;
+          return;
+        }
+
+        // call API with raw JSON (token + new_password)
+        const res = await resetPassword({
+          token,
+          new_password: this.password
+        });
+
         if (res.status === 1) {
-          this.successMessage = 'Password reset link sent to your email';
-          // optional: wait a bit before redirecting
+          this.successMessage = 'Password has been reset successfully';
           setTimeout(() => {
             this.router.push('/login');
           }, 2000);
         } else {
-          this.error = res.message || 'Failed to send reset link. Please try again.';
+          this.error = res.message || 'Failed to reset password. Please try again.';
           alert(this.error);
         }
       } catch (err) {
-        this.error = err.message || 'Failed to send reset link. Please try again.';
+        this.error = err.message || 'Failed to reset password. Please try again.';
         alert(this.error);
       } finally {
         this.isLoading = false;

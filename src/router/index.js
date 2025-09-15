@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 import Login from '@/views/login';
 import SignUp from '@/views/signUp';
 import ForgotPassword from '@/views/forgot_password';
+import ResetPassword from '@/views/reset_password';
 import Dashboard from '@/views/Dashboard.vue';
 import Employees from '@/views/Employees.vue';
 // import Departments from '@/views/Department.vue';
@@ -15,11 +16,13 @@ import LeaveRequest from '@/views/leave_request';
 import StaffRequestLeave from '@/views/staff-request-leave';
 import ReportRequestLeave from '@/views/report_request_leave';
 import Holiday from '@/views/hodiday_date';
-import LeaveReport from '@/views/employees/leave_report';
-import PositionCategory from '@/views/employees/position_category';
+// import LeaveReport from '@/views/employees/leave_report';
+// import PositionCategory from '@/views/employees/position_category';
 import Department from '@/views/user_management/department';
 import Roles from '@/views/user_management/roles';
 import UserManagement from '@/views/user_management/users';
+// import NotFound from '@/views/NotFound.vue';
+import ActivityLog from '@/views/user_management/activity_log';
 
 const routes = [
   {
@@ -38,6 +41,12 @@ const routes = [
     path: '/forgot-password',
     name: 'forgot-password',
     component: ForgotPassword,
+    meta: { requiresAuth: false } // Explicitly mark as public
+  },
+  {
+    path: '/reset-password',
+    name: 'reset-password',
+    component: ResetPassword,
     meta: { requiresAuth: false } // Explicitly mark as public
   },
   {
@@ -138,6 +147,12 @@ const routes = [
         path: '/users/user-management',
         name: 'user-management',
         component: UserManagement,
+        meta: { requiresAuth: true }
+      },
+      {
+        path: '/users/user-activity-log',
+        name: 'user-activity-log',
+        component: ActivityLog,
         meta: { requiresAuth: true }
       },
       {

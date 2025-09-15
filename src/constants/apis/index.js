@@ -164,9 +164,27 @@ module.exports = {
             method: 'get'
         }
     },
+    activityLog: {
+        getAllActivityLog: {
+        url: 'activity-log',
+        method: 'get'
+        },
+        getOneActivityLog: {
+        url: 'activity-log',
+        method: 'get'
+        }
+    },
     users: {
         signin: {
             url: 'users/login',
+            method: 'post'
+        },
+        forgotPassword: {
+            url: 'users/forgot-password',
+            method: 'post'
+        },
+        resetPassword: {
+            url: 'users/reset-password',
             method: 'post'
         },
         verifyToken: {

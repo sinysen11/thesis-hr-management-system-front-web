@@ -156,7 +156,7 @@ export default {
             },
             {
               name: 'Tracking Log',
-              path: '/users/user-tracking',
+              path: '/users/user-activity-log',
               icon: 'fas fa-clipboard-list'
             }
           ]

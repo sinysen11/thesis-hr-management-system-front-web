@@ -17,11 +17,12 @@ module.exports = defineConfig({
     process.env.NODE_ENV === 'local' ? (config) => {} : output_format,
 
   devServer: {
+    port: 8080,
     proxy:
       process.env.NODE_ENV === 'local'
         ? {
             '/api': {
-              target: 'http://localhost:3000',
+              target: 'http://localhost:8080',
               changeOrigin: true
             }
           }

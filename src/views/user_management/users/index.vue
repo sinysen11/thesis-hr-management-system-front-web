@@ -783,7 +783,7 @@ export default {
         } else {
           const { id, ...formData } = this.form;
           const newUser = await createUser(formData);
-          if (newUser && newUser.status === 201) {
+          if (newUser && newUser.status === 1) {
             await this.getAllUsers(this.currentPage);
             this.alert('User created successfully!');
           } else {
