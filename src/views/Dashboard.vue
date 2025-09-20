@@ -16,12 +16,12 @@
         </h3>
         <p class="text-3xl font-bold text-green-600">{{ totalDepartments }}</p>
       </div>
-      <!-- <div class="bg-white p-6 rounded-lg shadow">
+      <div class="bg-white p-6 rounded-lg shadow">
         <h3 class="text-lg font-semibold flex items-center gap-2">
-          <i class="fas fa-tasks text-yellow-600"></i> Active Projects
+          <i class="fas fa-tasks text-yellow-600"></i> Applicants Applied
         </h3>
-        <p class="text-3xl font-bold text-yellow-600">12</p>
-      </div> -->
+        <p class="text-3xl font-bold text-yellow-600">{{ totalApplicants }}</p>
+      </div>
     </div>
 
     <!-- Charts -->
@@ -123,6 +123,7 @@ import moment from 'moment';
 import { getStaffRequestForApprover } from '@/apis/request-leave';
 import { getAllDepartment } from '@/apis/department';
 import { getAllUser } from '@/apis/user';
+import { getAllApplicant } from '@/apis/applicant';
 export default {
   name: 'Dashboard',
   data() {
@@ -132,7 +133,8 @@ export default {
       userInfo: null,
       isLoading: false,
       totalEmployees: 0,
-      totalDepartments: 0 // Initialize total departments
+      totalDepartments: 0, // Initialize total departments,
+      totalApplicants: 0 // Initialize total applicants
     };
   },
   methods: {
@@ -185,6 +187,20 @@ export default {
       } catch (error) {
         console.error('Error fetching departments:', error);
         this.totalDepartments = 0;
+      }
+    },
+    async fetchTotalApplicant() {
+      try {
+        const response = await getAllApplicant();
+        if (response && response.data) {
+          this.totalApplicants = response.data.length; // Count total departments
+        } else {
+          console.warn('No valid department data received:', response);
+          this.totalApplicants = 0;
+        }
+      } catch (error) {
+        console.error('Error fetching departments:', error);
+        this.totalApplicants = 0;
       }
     },
     async fetchLeaveRequests(user_id) {
@@ -266,7 +282,8 @@ export default {
       await Promise.all([
         this.fetchLeaveRequests(this.userInfo._id),
         this.fetchTotalEmployees(),
-        this.fetchTotalDepartments()
+        this.fetchTotalDepartments(),
+        this.fetchTotalApplicant()
       ]);
     }
   },
