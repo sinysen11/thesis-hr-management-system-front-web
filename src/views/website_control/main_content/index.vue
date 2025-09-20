@@ -1,5 +1,6 @@
 <template>
   <div class="w-full">
+    <!-- Fixed-Position Alerts -->
     <div class="fixed z-50 w-full max-w-xs space-y-4 top-4 right-4">
       <div v-if="successMessage"
         class="p-4 text-white transition-opacity duration-500 ease-in-out bg-green-500 rounded-lg shadow-md"
@@ -14,22 +15,23 @@
     </div>
 
     <div class="flex items-center justify-between mb-6">
-      <h2 class="text-3xl font-extrabold text-gray-900">Roles</h2>
+      <h2 class="text-3xl font-extrabold text-gray-900">Main Content</h2>
       <button @click="openCreateModal" :disabled="loading"
         class="px-6 py-2 font-medium text-white transition duration-200 bg-indigo-600 rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed">
-        Create Role
+        Create Main Content
       </button>
     </div>
 
+    <!-- Filter Section -->
     <div class="p-6 mb-8 bg-white rounded-lg shadow-sm">
       <div class="flex flex-col items-end gap-4 sm:flex-row">
         <div>
           <label class="block mb-2 text-sm font-medium text-gray-700">
-            Search Roles
+            Search Main Content
           </label>
           <input type="text" v-model="searchQuery"
             class="border border-gray-300 rounded-lg px-4 py-2 w-[300px] focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
-            placeholder="Search by name" />
+            placeholder="Search by type, title, or description" />
         </div>
         <div class="flex gap-4">
           <button @click="filterData"
@@ -48,41 +50,44 @@
       <i class="text-6xl text-green-700 fas fa-spinner fa-spin"></i>
     </div>
 
+    <!-- Table Section -->
     <div class="overflow-hidden bg-white rounded-lg shadow-sm">
       <div class="overflow-x-auto">
         <table class="min-w-full text-sm table-auto">
           <thead class="text-xs font-semibold text-gray-600 uppercase bg-gray-100">
             <tr>
               <th class="px-4 py-3 text-left">No</th>
-              <th class="px-4 py-3 text-left">Name</th>
-              <th class="px-4 py-3 text-left">Permissions</th>
+              <th class="px-4 py-3 text-left">Type</th>
+              <th class="px-4 py-3 text-left">Title</th>
+              <th class="px-4 py-3 text-left">Description</th>
+              <th class="px-4 py-3 text-left">Status</th>
               <th class="px-4 py-3 text-left">Actions</th>
             </tr>
           </thead>
           <tbody class="text-gray-700">
-            <tr v-for="(role, index) in paginatedRoles" :key="role.id"
+            <tr v-for="(content, index) in paginatedMainContents" :key="content.id"
               class="transition border-b border-gray-200 hover:bg-gray-50">
               <td class="px-4 py-3">
                 {{ index + 1 + (currentPage - 1) * itemsPerPage }}
               </td>
-              <td class="px-4 py-3">{{ role.name }}</td>
-              <td class="px-4 py-3">
-                {{ role.permissions.map(p => permissionLabels[p] || p).join(', ') }}
-              </td>
+              <td class="px-4 py-3">{{ content.type }}</td>
+              <td class="px-4 py-3">{{ content.title }}</td>
+              <td class="px-4 py-3">{{ content.description }}</td>
+              <td class="px-4 py-3">{{ content.status }}</td>
               <td class="flex gap-2 px-4 py-3">
-                <button @click="openViewModal(role)"
+                <button @click="openViewModal(content)"
                   class="p-2 text-indigo-600 transition rounded-full hover:text-indigo-800 hover:bg-indigo-100"
-                  title="View Role">
+                  title="View Main Content">
                   <i class="fas fa-eye"></i>
                 </button>
-                <button @click="openEditModal(role)" :disabled="loading"
+                <button @click="openEditModal(content)" :disabled="loading"
                   class="p-2 text-indigo-600 transition rounded-full hover:text-indigo-800 hover:bg-indigo-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                  title="Edit Role">
+                  title="Edit Main Content">
                   <i class="fas fa-edit"></i>
                 </button>
-                <button @click="confirmDelete(role.id)" :disabled="loading"
+                <button @click="confirmDelete(content.id)" :disabled="loading"
                   class="p-2 text-red-600 transition rounded-full hover:text-red-800 hover:bg-red-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                  title="Delete Role">
+                  title="Delete Main Content">
                   <i class="fas fa-trash"></i>
                 </button>
               </td>
@@ -92,11 +97,12 @@
       </div>
     </div>
 
+    <!-- Pagination Controls -->
     <div class="flex items-center justify-between mt-6">
       <div class="text-sm text-gray-600">
         Showing {{ (currentPage - 1) * itemsPerPage + 1 }} to
-        {{ Math.min(currentPage * itemsPerPage, filteredRoles.length) }}
-        of {{ filteredRoles.length }} roles
+        {{ Math.min(currentPage * itemsPerPage, filteredMainContents.length) }}
+        of {{ filteredMainContents.length }} main contents
       </div>
       <div class="flex gap-2">
         <button @click="prevPage" :disabled="currentPage === 1"
@@ -118,28 +124,36 @@
       </div>
     </div>
 
+    <!-- Modal for View Main Content -->
     <transition name="modal">
       <div style="background-color: rgb(0 0 0 / 0.5);" v-if="showViewModal"
         class="fixed inset-0 z-50 flex items-center justify-center bg-opacity-60" @click.self="closeViewModal">
-        <div class="w-full max-w-lg p-8 mx-4 transition-all transform bg-white shadow-2xl rounded-xl">
+        <div
+          class="bg-white rounded-xl shadow-2xl p-8 w-full max-w-lg mx-4 transform transition-all max-h-[80vh] overflow-y-auto">
           <div class="flex items-center justify-between mb-6">
-            <h3 class="text-2xl font-bold text-gray-900">Role Details</h3>
+            <h3 class="text-2xl font-bold text-gray-900">Main Content Details</h3>
             <button @click="closeViewModal"
               class="p-2 text-gray-500 transition rounded-full hover:text-gray-700 hover:bg-gray-100" title="Close">
               <i class="fas fa-times"></i>
             </button>
           </div>
-          <div v-if="selectedRole" class="pt-5 space-y-5 border-t border-gray-200">
+          <div v-if="selectedMainContent" class="pt-5 space-y-5 border-t border-gray-200">
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
-                <label class="text-sm font-semibold text-gray-600">Name</label>
-                <p class="font-medium text-gray-900">{{ selectedRole.name }}</p>
+                <label class="text-sm font-semibold text-gray-600">Type</label>
+                <p class="font-medium text-gray-900">{{ selectedMainContent.type }}</p>
+              </div>
+              <div>
+                <label class="text-sm font-semibold text-gray-600">Title</label>
+                <p class="font-medium text-gray-900">{{ selectedMainContent.title }}</p>
               </div>
               <div class="sm:col-span-2">
-                <label class="text-sm font-semibold text-gray-600">Permissions</label>
-                <p class="font-medium text-gray-900">
-                  {{ selectedRole.permissions.map(p => permissionLabels[p] || p).join(', ') }}
-                </p>
+                <label class="text-sm font-semibold text-gray-600">Description</label>
+                <p class="font-medium text-gray-900">{{ selectedMainContent.description }}</p>
+              </div>
+              <div>
+                <label class="text-sm font-semibold text-gray-600">Status</label>
+                <p class="font-medium text-gray-900">{{ selectedMainContent.status }}</p>
               </div>
             </div>
           </div>
@@ -153,13 +167,15 @@
       </div>
     </transition>
 
+    <!-- Modal for Create/Update Main Content -->
     <transition name="modal">
       <div style="background-color: rgb(0 0 0 / 0.5);" v-if="showCreateModal"
         class="fixed inset-0 z-50 flex items-center justify-center bg-opacity-60" @click.self="closeCreateModal">
-        <div class="w-full max-w-lg p-8 mx-4 transition-all transform bg-white shadow-2xl rounded-xl">
+        <div
+          class="bg-white rounded-xl shadow-2xl p-8 w-full max-w-lg mx-4 transform transition-all max-h-[80vh] overflow-y-auto">
           <div class="flex items-center justify-between mb-6">
             <h3 class="text-2xl font-bold text-gray-900">
-              {{ isEditing ? 'Edit Role' : 'Create Role' }}
+              {{ isEditing ? 'Edit Main Content' : 'Create Main Content' }}
             </h3>
             <button @click="closeCreateModal"
               class="p-2 text-gray-500 transition rounded-full hover:text-gray-700 hover:bg-gray-100" title="Close">
@@ -168,20 +184,30 @@
           </div>
           <div class="pt-5 space-y-5 border-t border-gray-200">
             <div>
-              <label class="text-sm font-semibold text-gray-600">Name</label>
-              <input v-model="form.name" type="text"
+              <label class="text-sm font-semibold text-gray-600">Type</label>
+              <input v-model="form.type" type="text"
                 class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                placeholder="Enter name" />
+                placeholder="Enter content type" />
             </div>
             <div>
-              <label class="text-sm font-semibold text-gray-600">Permissions</label>
-              <div class="grid grid-cols-2 gap-4 mt-2">
-                <div v-for="perm in availablePermissions" :key="perm" class="flex items-center">
-                  <input type="checkbox" :id="`perm-${perm}`" :value="perm" v-model="form.permissions"
-                    class="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500" />
-                  <label :for="`perm-${perm}`" class="ml-2 text-sm text-gray-700">{{ permissionLabels[perm] }}</label>
-                </div>
-              </div>
+              <label class="text-sm font-semibold text-gray-600">Title</label>
+              <input v-model="form.title" type="text"
+                class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                placeholder="Enter content title" />
+            </div>
+            <div>
+              <label class="text-sm font-semibold text-gray-600">Description</label>
+              <textarea v-model="form.description"
+                class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                placeholder="Enter content description" rows="3"></textarea>
+            </div>
+            <div>
+              <label class="text-sm font-semibold text-gray-600">Status</label>
+              <select v-model="form.status"
+                class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                <option value="ACTIVE">Active</option>
+                <option value="INACTIVE">Inactive</option>
+              </select>
             </div>
           </div>
           <div class="flex justify-end gap-4 mt-8">
@@ -189,7 +215,7 @@
               class="px-6 py-2 font-medium text-gray-800 transition duration-200 bg-gray-200 rounded-lg hover:bg-gray-300">
               Cancel
             </button>
-            <button @click="saveRole" :disabled="loading"
+            <button @click="saveMainContent" :disabled="loading"
               class="px-6 py-2 font-medium text-white transition duration-200 bg-indigo-600 rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed">
               {{ isEditing ? 'Update' : 'Create' }}
             </button>
@@ -198,6 +224,7 @@
       </div>
     </transition>
 
+    <!-- Modal for Delete Confirmation -->
     <transition name="modal">
       <div style="background-color: rgb(0 0 0 / 0.5);" v-if="showDeleteModal"
         class="fixed inset-0 z-50 flex items-center justify-center bg-opacity-60" @click.self="closeDeleteModal">
@@ -205,14 +232,14 @@
           <div class="text-center">
             <i class="mb-4 text-5xl text-red-500 fas fa-exclamation-triangle"></i>
             <h3 class="mb-2 text-2xl font-bold text-gray-900">Confirm Deletion</h3>
-            <p class="text-gray-600">Are you sure you want to delete this role? This action cannot be undone.</p>
+            <p class="text-gray-600">Are you sure you want to delete this main content? This action cannot be undone.</p>
           </div>
           <div class="flex justify-center gap-4 mt-8">
             <button @click="closeDeleteModal"
               class="px-6 py-2 font-medium text-gray-800 transition duration-200 bg-gray-200 rounded-lg hover:bg-gray-300">
               Cancel
             </button>
-            <button @click="deleteRole" :disabled="loading"
+            <button @click="deleteMainContentConfirmed" :disabled="loading"
               class="px-6 py-2 font-medium text-white transition duration-200 bg-red-600 rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed">
               Delete
             </button>
@@ -224,7 +251,7 @@
 </template>
 
 <script>
-import { getAllRole, createRole, updateRole, deleteRole } from '@/apis/role';
+import { getAllMainContent, createMainContent, updateMainContent, getOneMainContent, deleteMainContent } from '@/apis/main-content';
 
 export default {
   data() {
@@ -236,62 +263,47 @@ export default {
       showViewModal: false,
       showDeleteModal: false,
       isEditing: false,
-      selectedRole: null,
-      roleToDeleteId: null,
+      selectedMainContent: null,
+      mainContentToDeleteId: null,
       form: {
-        name: '',
-        permissions: []
+        id: null,
+        type: '',
+        title: '',
+        description: '',
+        status: 'ACTIVE'
       },
-      roles: [],
-      availablePermissions: [
-        'DASHBOARD',
-        'APPLICANTS',
-        'JOBS',
-        'REQUEST_LEAVE',
-        'STAFF_REQUEST_LEAVE',
-        'LEAVE_REPORT',
-        'HOLIDAY',
-        'SETTING',
-        'WEBSITE_CONTROL'
-      ],
-      permissionLabels: {
-        'DASHBOARD': 'Dashboard',
-        'APPLICANTS': 'Applicants',
-        'JOBS': 'Jobs',
-        'REQUEST_LEAVE': 'Request Leave',
-        'STAFF_REQUEST_LEAVE': 'Staff Request Leave',
-        'LEAVE_REPORT': 'Leave Report',
-        'HOLIDAY': 'Holiday',
-        'SETTING': 'Setting',
-        'WEBSITE_CONTROL': 'Website Control'
-      },
+      mainContents: [],
       loading: true,
       successMessage: '',
       errorMessage: ''
     };
   },
   computed: {
-    filteredRoles() {
-      if (!Array.isArray(this.roles)) {
+    filteredMainContents() {
+      if (!Array.isArray(this.mainContents)) {
         return [];
       }
-      return this.roles.filter((role) => {
-        const matchSearch =
+      const query = this.searchQuery.toLowerCase();
+      return this.mainContents.filter((content) => {
+        return (
           this.searchQuery === '' ||
-          (role.name && role.name.toLowerCase().includes(this.searchQuery.toLowerCase()));
-        return matchSearch;
+          (content.type && content.type.toLowerCase().includes(query)) ||
+          (content.title && content.title.toLowerCase().includes(query)) ||
+          (content.description && content.description.toLowerCase().includes(query))
+        );
       });
     },
-    paginatedRoles() {
+    paginatedMainContents() {
       const start = (this.currentPage - 1) * this.itemsPerPage;
       const end = start + this.itemsPerPage;
-      return this.filteredRoles.slice(start, end);
+      return this.filteredMainContents.slice(start, end);
     },
     totalPages() {
-      return Math.ceil(this.filteredRoles.length / this.itemsPerPage) || 1;
+      return Math.ceil(this.filteredMainContents.length / this.itemsPerPage) || 1;
     }
   },
   methods: {
+    // Unified alert system
     alert(message, type = 'success') {
       if (type === 'success') {
         this.successMessage = message;
@@ -305,95 +317,114 @@ export default {
         this.errorMessage = '';
       }, 3000);
     },
-    async fetchRoles() {
+
+    // Fetch all main contents
+    async fetchMainContents() {
       this.loading = true;
       try {
-        const response = await getAllRole();
+        const response = await getAllMainContent();
         if (response && response.status === 1) {
-          this.roles = response.roles.map(role => ({
-            ...role,
-            id: role._id
+          this.mainContents = response.data.map(content => ({
+            id: content._id,
+            type: content.type,
+            title: content.title,
+            description: content.description,
+            status: content.status
           }));
         } else {
-          this.alert('Failed to fetch roles. Invalid response format.', 'error');
-          this.roles = [];
+          console.error('Invalid response format:', {
+            status: response?.status,
+            data: response?.data
+          });
+          this.alert('Failed to load main contents. Invalid response format.', 'error');
+          this.mainContents = [];
         }
       } catch (error) {
-        console.error('Error fetching roles:', error);
-        this.alert('Error fetching roles: ' + error.message, 'error');
-        this.roles = [];
+        console.error('Error fetching main contents:', error);
+        this.alert('Error fetching main contents: ' + error.message, 'error');
+        this.mainContents = [];
       } finally {
         this.loading = false;
       }
     },
-    async saveRole() {
-      if (!this.form.name || this.form.permissions.length === 0) {
-        this.alert('Please fill in all required fields (Name and Permissions).', 'error');
+
+    // Save (Create/Update) Main Content
+    async saveMainContent() {
+      if (!this.form.type || !this.form.title || !this.form.description || !this.form.status) {
+        this.alert('Please fill in all required fields (Type, Title, Description, Status).', 'error');
         return;
       }
       this.loading = true;
       try {
         if (this.isEditing) {
-          const updatedRole = await updateRole(this.form.id, {
-            name: this.form.name,
-            permissions: this.form.permissions
-          });
-          if (updatedRole && updatedRole.status === 1) {
-            await this.fetchRoles();
-            this.alert('Role updated successfully!');
+          // Use raw JSON for update
+          const updateData = {
+            type: this.form.type,
+            title: this.form.title,
+            description: this.form.description,
+            status: this.form.status
+          };
+          const updatedContent = await updateMainContent(this.form.id, updateData);
+          if (updatedContent && updatedContent.status === 1) {
+            await this.fetchMainContents();
+            this.alert('Main content updated successfully!');
           } else {
-            this.alert('Failed to update role. Please try again.', 'error');
+            this.alert('Failed to update main content. Please try again.', 'error');
           }
         } else {
-          const newRole = await createRole({
-            name: this.form.name,
-            permissions: this.form.permissions
-          });
-          if (newRole && newRole.status === 1) {
-            await this.fetchRoles();
-            this.alert('Role created successfully!');
+          const { id, ...formData } = this.form;
+          const newContent = await createMainContent(formData);
+          if (newContent && newContent.status === 1) {
+            await this.fetchMainContents();
+            this.alert('Main content created successfully!');
           } else {
-            this.alert('Failed to create role. Please try again.', 'error');
+            this.alert('Failed to create main content. Please try again.', 'error');
           }
         }
         this.closeCreateModal();
       } catch (error) {
-        console.error('Error saving role:', error);
-        this.alert('Error saving role: ' + error.message, 'error');
+        console.error('Error saving main content:', error);
+        this.alert('Error saving main content: ' + error.message, 'error');
       } finally {
         this.loading = false;
       }
     },
-    async deleteRole() {
-      if (!this.roleToDeleteId) {
-        this.alert('No role selected for deletion.', 'error');
+
+    // Open delete confirmation modal
+    confirmDelete(id) {
+      if (!id) {
+        this.alert('Invalid main content ID.', 'error');
+        return;
+      }
+      this.mainContentToDeleteId = id;
+      this.showDeleteModal = true;
+    },
+
+    // Execute delete after confirmation
+    async deleteMainContentConfirmed() {
+      if (!this.mainContentToDeleteId) {
+        this.alert('No main content selected for deletion.', 'error');
         return;
       }
       this.loading = true;
       try {
-        const result = await deleteRole(this.roleToDeleteId);
+        const result = await deleteMainContent(this.mainContentToDeleteId);
         if (result && [1].includes(result.status)) {
-          await this.fetchRoles();
-          this.alert('Role deleted successfully!');
+          await this.fetchMainContents();
+          this.alert('Main content deleted successfully!');
         } else {
-          this.alert(`Failed to delete role. Status: ${result?.status || 'unknown'}`, 'error');
+          this.alert(`Failed to delete main content. Status: ${result?.status || 'unknown'}`, 'error');
         }
       } catch (error) {
-        console.error('Error deleting role:', error);
-        this.alert('Error deleting role: ' + error.message, 'error');
+        console.error('Error deleting main content:', error);
+        this.alert('Error deleting main content: ' + error.message, 'error');
       } finally {
         this.loading = false;
         this.closeDeleteModal();
       }
     },
-    confirmDelete(id) {
-      if (!id) {
-        this.alert('Invalid role ID.', 'error');
-        return;
-      }
-      this.roleToDeleteId = id;
-      this.showDeleteModal = true;
-    },
+
+    // Filter and Reset
     filterData() {
       this.currentPage = 1;
     },
@@ -401,50 +432,97 @@ export default {
       this.searchQuery = '';
       this.currentPage = 1;
     },
+
+    // Modal Handlers
     openCreateModal() {
       this.isEditing = false;
       this.form = {
-        name: '',
-        permissions: []
+        id: null,
+        type: '',
+        title: '',
+        description: '',
+        status: 'ACTIVE'
       };
       this.showCreateModal = true;
     },
-    openEditModal(role) {
-      if (!role.id) {
-        this.alert('Invalid role ID.', 'error');
+    async openEditModal(content) {
+      if (!content.id) {
+        this.alert('Invalid main content ID.', 'error');
         return;
       }
-      this.isEditing = true;
-      this.form = {
-        ...role,
-        permissions: [...role.permissions]
-      };
-      this.showCreateModal = true;
+      this.loading = true;
+      try {
+        const result = await getOneMainContent(content.id);
+        if (result && result.status === 1 && result.data) {
+          const contentData = result.data;
+          this.isEditing = true;
+          this.form = {
+            id: contentData._id,
+            type: contentData.type || '',
+            title: contentData.title || '',
+            description: contentData.description || '',
+            status: contentData.status || 'ACTIVE'
+          };
+          this.showCreateModal = true;
+        } else {
+          this.alert('Failed to fetch main content for editing. Please try again.', 'error');
+        }
+      } catch (error) {
+        console.error('Error fetching main content for edit:', error);
+        this.alert('Error fetching main content for editing: ' + error.message, 'error');
+      } finally {
+        this.loading = false;
+      }
     },
-    openViewModal(role) {
-      if (!role.id) {
-        this.alert('Invalid role ID.', 'error');
+    async openViewModal(content) {
+      if (!content.id) {
+        this.alert('Invalid main content ID.', 'error');
         return;
       }
-      this.selectedRole = { ...role };
-      this.showViewModal = true;
+      this.loading = true;
+      try {
+        const result = await getOneMainContent(content.id);
+        if (result && result.status === 1 && result.data) {
+          const contentData = result.data;
+          this.selectedMainContent = {
+            id: contentData._id,
+            type: contentData.type || '',
+            title: contentData.title || '',
+            description: contentData.description || '',
+            status: contentData.status || 'ACTIVE'
+          };
+          this.showViewModal = true;
+        } else {
+          this.alert('Failed to fetch main content for viewing. Please try again.', 'error');
+        }
+      } catch (error) {
+        console.error('Error fetching main content for view:', error);
+        this.alert('Error fetching main content for viewing: ' + error.message, 'error');
+      } finally {
+        this.loading = false;
+      }
     },
     closeCreateModal() {
       this.showCreateModal = false;
       this.isEditing = false;
       this.form = {
-        name: '',
-        permissions: []
+        id: null,
+        type: '',
+        title: '',
+        description: '',
+        status: 'ACTIVE'
       };
     },
     closeViewModal() {
       this.showViewModal = false;
-      this.selectedRole = null;
+      this.selectedMainContent = null;
     },
     closeDeleteModal() {
       this.showDeleteModal = false;
-      this.roleToDeleteId = null;
+      this.mainContentToDeleteId = null;
     },
+
+    // Pagination Handlers
     prevPage() {
       if (this.currentPage > 1) this.currentPage--;
     },
@@ -456,7 +534,7 @@ export default {
     }
   },
   mounted() {
-    this.fetchRoles();
+    this.fetchMainContents();
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
         if (this.showCreateModal) this.closeCreateModal();
@@ -493,5 +571,29 @@ td {
 .modal-enter-from .modal-content,
 .modal-leave-to .modal-content {
   transform: translateY(-20px);
+}
+
+/* Custom scrollbar for modals */
+.max-h-\[80vh\] {
+  scrollbar-width: thin;
+  scrollbar-color: #888 #f1f1f1;
+}
+
+.max-h-\[80vh\]::-webkit-scrollbar {
+  width: 8px;
+}
+
+.max-h-\[80vh\]::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.max-h-\[80vh\]::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+.max-h-\[80vh\]::-webkit-scrollbar-thumb:hover {
+  background: #555;
 }
 </style>

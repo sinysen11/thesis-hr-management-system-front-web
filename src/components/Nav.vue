@@ -102,11 +102,6 @@ export default {
               path: '/jobs/job_title',
               icon: 'fas fa-tag'
             }
-            // {
-            //   name: 'Job Categories',
-            //   path: '/jobs/job_category',
-            //   icon: 'fas fa-list'
-            // }
           ]
         },
         {
@@ -158,6 +153,29 @@ export default {
               name: 'Tracking Log',
               path: '/users/user-activity-log',
               icon: 'fas fa-clipboard-list'
+            }
+          ]
+        },
+        {
+          name: 'Website Control',
+          icon: 'fa-solid fa-globe', // Updated icon
+          permission: 'WEBSITE_CONTROL',
+          open: false,
+          children: [
+            {
+              name: 'Main Content',
+              path: '/website-control/main-content',
+              icon: 'fa-solid fa-file' // Updated to more relevant icon
+            },
+            {
+              name: 'Tab Content',
+              path: '/website-control/tab-content',
+              icon: 'fa-solid fa-table' // Updated to more relevant icon
+            },
+            {
+              name: 'Upload Image',
+              path: '/website-control/upload-image',
+              icon: 'fa-solid fa-image' // Updated to more relevant icon
             }
           ]
         }

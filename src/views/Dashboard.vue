@@ -8,20 +8,20 @@
         <h3 class="text-lg font-semibold flex items-center gap-2">
           <i class="fas fa-users text-blue-600"></i> Total Employees
         </h3>
-        <p class="text-3xl font-bold text-blue-600">150</p>
+        <p class="text-3xl font-bold text-blue-600">{{ totalEmployees }}</p>
       </div>
       <div class="bg-white p-6 rounded-lg shadow">
         <h3 class="text-lg font-semibold flex items-center gap-2">
           <i class="fas fa-building text-green-600"></i> Departments
         </h3>
-        <p class="text-3xl font-bold text-green-600">8</p>
+        <p class="text-3xl font-bold text-green-600">{{ totalDepartments }}</p>
       </div>
-      <div class="bg-white p-6 rounded-lg shadow">
+      <!-- <div class="bg-white p-6 rounded-lg shadow">
         <h3 class="text-lg font-semibold flex items-center gap-2">
           <i class="fas fa-tasks text-yellow-600"></i> Active Projects
         </h3>
         <p class="text-3xl font-bold text-yellow-600">12</p>
-      </div>
+      </div> -->
     </div>
 
     <!-- Charts -->
@@ -93,7 +93,10 @@
 
       <div class="bg-white p-6 rounded-lg shadow">
         <h3 class="text-lg font-semibold mb-2">🎂 Upcoming Birthdays</h3>
-        <ul>
+        <div v-if="isLoading" class="py-4 text-center">
+          <i class="text-4xl text-green-700 fas fa-spinner fa-spin"></i>
+        </div>
+        <ul v-else-if="upcomingBirthdays.length > 0">
           <li
             v-for="(b, i) in upcomingBirthdays"
             :key="i"
@@ -105,6 +108,9 @@
             </div>
           </li>
         </ul>
+        <p v-else class="text-gray-500 text-sm italic">
+          No upcoming birthdays found.
+        </p>
       </div>
     </div>
   </div>
@@ -115,32 +121,79 @@ import { getUserInfoCookie } from '@/services/authentication';
 import Chart from 'chart.js/auto';
 import moment from 'moment';
 import { getStaffRequestForApprover } from '@/apis/request-leave';
-
+import { getAllDepartment } from '@/apis/department';
+import { getAllUser } from '@/apis/user';
 export default {
   name: 'Dashboard',
   data() {
     return {
       leaveRequests: [],
-      upcomingBirthdays: [
-        { name: 'Chan Danaroth', date: 'Feb 14, 2025' },
-        { name: 'Sok Rithy', date: 'Mar 03, 2025' },
-        { name: 'Phan Dara', date: 'Apr 21, 2025' },
-        { name: 'Kim Sreyna', date: 'May 10, 2025' },
-        { name: 'Long Vannak', date: 'Jun 18, 2025' },
-        { name: 'Mao Sokha', date: 'Jul 29, 2025' },
-        { name: 'Neang Bopha', date: 'Aug 07, 2025' }
-      ],
+      upcomingBirthdays: [],
       userInfo: null,
-      isLoading: false
+      isLoading: false,
+      totalEmployees: 0,
+      totalDepartments: 0 // Initialize total departments
     };
   },
   methods: {
+    // Fetch all users to count total employees and populate upcoming birthdays
+    async fetchTotalEmployees() {
+      try {
+        const response = await getAllUser();
+        console.log('getAllUser response:', response); // Debug log
+        if (response && response.data && Array.isArray(response.data)) {
+          this.totalEmployees = response.data.length; // Count total users
+          // Map user data to upcomingBirthdays, showing only upcoming or recent birthdays
+          this.upcomingBirthdays = response.data
+            .filter(user => user.dob && moment(user.dob).isValid())
+            .map(user => ({
+              name: `${user.first_name_en} ${user.last_name_en}`.trim(),
+              date: moment(user.dob).format('MMM DD, YYYY')
+            }))
+            .sort((a, b) => {
+              const today = moment();
+              const aDate = moment(a.date, 'MMM DD, YYYY').year(today.year());
+              const bDate = moment(b.date, 'MMM DD, YYYY').year(today.year());
+              // Adjust for birthdays that have passed this year
+              if (aDate.isBefore(today)) aDate.add(1, 'year');
+              if (bDate.isBefore(today)) bDate.add(1, 'year');
+              return aDate.diff(bDate);
+            })
+            .slice(0, 7); // Limit to 7 birthdays
+          console.log('Processed upcomingBirthdays:', this.upcomingBirthdays); // Debug log
+        } else {
+          console.warn('No valid user data received:', response);
+          this.totalEmployees = 0;
+          this.upcomingBirthdays = [];
+        }
+      } catch (error) {
+        console.error('Error fetching users:', error);
+        this.totalEmployees = 0;
+        this.upcomingBirthdays = [];
+      }
+    },
+    // Fetch all departments to count total departments
+    async fetchTotalDepartments() {
+      try {
+        const response = await getAllDepartment();
+        if (response && response.departments) {
+          this.totalDepartments = response.departments.length; // Count total departments
+        } else {
+          console.warn('No valid department data received:', response);
+          this.totalDepartments = 0;
+        }
+      } catch (error) {
+        console.error('Error fetching departments:', error);
+        this.totalDepartments = 0;
+      }
+    },
     async fetchLeaveRequests(user_id) {
       this.isLoading = true;
       try {
         const response = await getStaffRequestForApprover(user_id, {
           limit: 5 // Fetch only the 5 most recent requests
         });
+        console.log('getStaffRequestForApprover response:', response); // Debug log
         if (response && response.data) {
           this.leaveRequests = response.data.map((request) => {
             let departmentName = 'N/A';
@@ -171,6 +224,7 @@ export default {
             };
           });
         } else {
+          console.warn('No leave requests data received:', response);
           this.leaveRequests = [];
         }
       } catch (error) {
@@ -199,7 +253,7 @@ export default {
       return date ? moment(date).format('DD-MMM-YYYY') : 'N/A';
     }
   },
-  created() {
+  async created() {
     const userInfoCookie = getUserInfoCookie();
     if (userInfoCookie) {
       try {
@@ -209,7 +263,11 @@ export default {
       }
     }
     if (this.userInfo && this.userInfo._id) {
-      this.fetchLeaveRequests(this.userInfo._id);
+      await Promise.all([
+        this.fetchLeaveRequests(this.userInfo._id),
+        this.fetchTotalEmployees(),
+        this.fetchTotalDepartments()
+      ]);
     }
   },
   mounted() {

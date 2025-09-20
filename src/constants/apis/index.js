@@ -1,3 +1,4 @@
+
 module.exports = {
     jobs: {
         createJob: {
@@ -253,6 +254,56 @@ module.exports = {
         deleteRole: {
             url: 'roles',
             method: 'delete' // Changed from 'get' to 'delete'
+        }
+    },
+    mainContent: {
+          getAllMainContent: {
+            url: 'web-modify/main-content',
+            method: 'get'
+        },
+        getOneMainContent: {
+            url: 'web-modify/main-content',
+            method: 'get'
+        },
+        createMainContent: {
+            url: 'web-modify/main-content',
+            method: 'post'
+        },
+        updateMainContent: {
+            url: 'web-modify/main-content/update',
+            method: 'post' // Changed from 'get' to 'put'
+        },
+        deleteMainContent: {
+            url: 'web-modify/main-content/delete',
+            method: 'post' // Changed from 'get' to 'delete'
+        }
+    },
+    tabContent: {
+            getAllTabContent: {
+            url: 'web-modify/tab-content',
+            method: 'get'
+        },
+        getOneTabContent: {
+            url: 'web-modify/tab-content',
+            method: 'get'
+        },
+        createTabContent: {
+            url: 'web-modify/tab-content',
+            method: 'post'
+        },
+        updateTabContent: {
+            url: 'web-modify/tab-content',
+            method: 'post' // Changed from 'get' to 'put'
+        },
+        deleteTabContent: {
+            url: 'web-modify/tab-content',
+            method: 'post' // Changed from 'get' to 'delete'
+        }
+    },
+    uploadImage: {
+        createUploadImage: {
+            url: 'upload-image',
+            method: 'post'
         }
     }
 };

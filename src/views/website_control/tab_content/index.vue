@@ -251,8 +251,7 @@ export default {
         'STAFF_REQUEST_LEAVE',
         'LEAVE_REPORT',
         'HOLIDAY',
-        'SETTING',
-        'WEBSITE_CONTROL'
+        'SETTING'
       ],
       permissionLabels: {
         'DASHBOARD': 'Dashboard',
@@ -262,8 +261,7 @@ export default {
         'STAFF_REQUEST_LEAVE': 'Staff Request Leave',
         'LEAVE_REPORT': 'Leave Report',
         'HOLIDAY': 'Holiday',
-        'SETTING': 'Setting',
-        'WEBSITE_CONTROL': 'Website Control'
+        'SETTING': 'Setting'
       },
       loading: true,
       successMessage: '',
@@ -309,7 +307,7 @@ export default {
       this.loading = true;
       try {
         const response = await getAllRole();
-        if (response && response.status === 1) {
+        if (response && response.status === 1 && Array.isArray(response.roles)) {
           this.roles = response.roles.map(role => ({
             ...role,
             id: role._id
@@ -338,7 +336,7 @@ export default {
             name: this.form.name,
             permissions: this.form.permissions
           });
-          if (updatedRole && updatedRole.status === 1) {
+          if (updatedRole && updatedRole.status === 200) {
             await this.fetchRoles();
             this.alert('Role updated successfully!');
           } else {
@@ -349,7 +347,7 @@ export default {
             name: this.form.name,
             permissions: this.form.permissions
           });
-          if (newRole && newRole.status === 1) {
+          if (newRole && newRole.status === 201) {
             await this.fetchRoles();
             this.alert('Role created successfully!');
           } else {
@@ -372,7 +370,7 @@ export default {
       this.loading = true;
       try {
         const result = await deleteRole(this.roleToDeleteId);
-        if (result && [1].includes(result.status)) {
+        if (result && [200, 204].includes(result.status)) {
           await this.fetchRoles();
           this.alert('Role deleted successfully!');
         } else {

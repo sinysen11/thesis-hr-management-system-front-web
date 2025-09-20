@@ -4,7 +4,7 @@ import SignUp from '@/views/signUp';
 import ForgotPassword from '@/views/forgot_password';
 import ResetPassword from '@/views/reset_password';
 import Dashboard from '@/views/Dashboard.vue';
-import Employees from '@/views/Employees.vue';
+// import Employees from '@/views/Employees.vue';
 // import Departments from '@/views/Department.vue';
 import Profile from '@/views/Profile.vue';
 import MainLayout from '@/layouts/MainLayout.vue';
@@ -23,7 +23,9 @@ import Roles from '@/views/user_management/roles';
 import UserManagement from '@/views/user_management/users';
 // import NotFound from '@/views/NotFound.vue';
 import ActivityLog from '@/views/user_management/activity_log';
-
+import MainContent from '@/views/website_control/main_content';
+import TabContent from '@/views/website_control/tab_content';
+import UploadImage from '@/views/website_control/upload_image';
 const routes = [
   {
     path: '/login',
@@ -155,11 +157,32 @@ const routes = [
         component: ActivityLog,
         meta: { requiresAuth: true }
       },
+            {
+        path: '/website-control/main-content',
+        name: 'main-content',
+        component: MainContent,
+        meta: { 
+          requiresAuth: true,
+          permission: 'WEBSITE_CONTROL'
+        }
+      },
       {
-        path: '/profile',
-        component: Profile,
+        path: '/website-control/tab-content',
+        name: 'tab-content',
+        component: TabContent,
+        meta: { requiresAuth: true }
+      },
+      {
+        path: '/website-control/upload-image',
+        name: 'upload-image',
+        component: UploadImage,
         meta: { requiresAuth: true }
       }
+      // {
+      //   path: '/profile',
+      //   component: Profile,
+      //   meta: { requiresAuth: true }
+      // }
     ]
   },
   {
