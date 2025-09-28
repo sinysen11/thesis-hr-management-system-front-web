@@ -34,7 +34,7 @@
 
             <div class="flex-1">
               <label class="block mb-2 font-semibold text-gray-700">
-                Approver <span class="text-red-600">*</span>
+                Approve By <span class="text-red-600">*</span>
               </label>
               <select v-model="leaveForm.approver" required @change="clearError('approver')"
                 class="w-full p-3 mb-1 transition border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-green-700 focus:border-green-700">
@@ -52,8 +52,11 @@
               <label class="block mb-2 font-semibold text-gray-700">
                 From Date <span class="text-red-600">*</span>
               </label>
-              <input type="date" v-model="leaveForm.fromDate" required @change="clearError('fromDate')"
-                class="w-full p-3 mb-1 transition border border-gray-300 rounded-lg appearance-none cursor-pointer focus:outline-none focus:ring-1 focus:ring-green-700 focus:border-green-700" />
+              <Datepicker v-model="leaveForm.fromDate" :disabled-dates="isDisabled" :day-class="dayClass"
+                placeholder="Select From Date" :enable-time-picker="false"
+                :input-class="['w-full p-3 mb-1 border border-gray-300 rounded-lg focus:ring-1 focus:ring-green-700 focus:border-green-700']"
+                @update:model-value="clearError('fromDate')" />
+
               <p v-if="errors.fromDate" class="mb-4 text-sm text-red-600">{{ errors.fromDate }}</p>
             </div>
 
@@ -61,47 +64,48 @@
               <label class="block mb-2 font-semibold text-gray-700">
                 To Date <span class="text-red-600">*</span>
               </label>
-              <input type="date" v-model="leaveForm.toDate" required @change="clearError('toDate')"
-                class="w-full p-3 mb-1 transition border border-gray-300 rounded-lg appearance-none cursor-pointer focus:outline-none focus:ring-1 focus:ring-green-700 focus:border-green-700" />
+              <Datepicker v-model="leaveForm.toDate" :disabled-dates="isDisabled" :day-class="dayClass"
+                placeholder="Select To Date" :enable-time-picker="false"
+                :input-class="['w-full p-3 mb-1 border border-gray-300 rounded-lg focus:ring-1 focus:ring-green-700 focus:border-green-700']"
+                @update:model-value="clearError('toDate')" />
+
               <p v-if="errors.toDate" class="mb-4 text-sm text-red-600">{{ errors.toDate }}</p>
             </div>
           </div>
 
-          <div class="flex flex-col gap-4 mb-5 sm:flex-row sm:gap-6">
-            <div class="flex-1">
-              <label class="block mb-2 font-semibold text-gray-700">
-                Day Type <span class="text-red-600">*</span>
-              </label>
-              <select v-model="leaveForm.dayType" required @change="clearError('dayType')"
-                class="w-full p-3 mb-1 transition border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-green-700 focus:border-green-700">
-                <option value="" disabled>Select</option>
-                <option value="morning">Morning</option>
-                <option value="afternoon">Afternoon</option>
-                <option value="full">Full Day</option>
-              </select>
-              <p v-if="errors.dayType" class="mb-4 text-sm text-red-600">{{ errors.dayType }}</p>
-            </div>
-
-            <div class="flex-1"></div>
+          <div class="mb-5">
+            <label class="block mb-2 font-semibold text-gray-700">
+              Day Type <span class="text-red-600">*</span>
+            </label>
+            <select v-model="leaveForm.dayType" required @change="clearError('dayType')"
+              :disabled="!isSameDay"
+              :class="{'bg-gray-100': !isSameDay}"
+              class="w-full p-3 mb-1 transition border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-green-700 focus:border-green-700">
+              <option value="" disabled>Select</option>
+              <option value="full">Full Day</option>
+              <option value="morning" :disabled="!isSameDay" :hidden="!isSameDay">Half Day (Morning)</option>
+              <option value="afternoon" :disabled="!isSameDay" :hidden="!isSameDay">Half Day (Afternoon)</option>
+            </select>
+            <p v-if="errors.dayType" class="mb-4 text-sm text-red-600">{{ errors.dayType }}</p>
           </div>
-
           <label class="block mb-2 font-semibold text-gray-700">
             Reason <span class="text-red-600">*</span>
           </label>
-          <textarea v-model="leaveForm.reason" required @change="clearError('reson')"
+          <textarea v-model="leaveForm.reason" required @change="clearError('reason')"
             class="w-full p-3 mb-1 transition border border-gray-300 rounded-lg resize-y focus:outline-none focus:ring-1 focus:ring-green-700 focus:border-green-700"
             rows="4">
           </textarea>
           <p v-if="errors.reason" class="mb-4 text-sm text-red-600">{{ errors.reason }}</p>
 
           <div class="flex justify-end gap-4">
-            <button @click="openCloseModal"
-              class="px-5 py-2 font-semibold text-gray-700 transition bg-gray-300 rounded-lg cursor-pointer hover:bg-gray-400">
+            <button @click="openCloseModal" :disabled="isSubmitting"
+              class="px-5 py-2 font-semibold text-gray-700 transition bg-gray-300 rounded-lg cursor-pointer hover:bg-gray-400 disabled:opacity-70 disabled:cursor-not-allowed">
               Cancel
             </button>
-            <button @click="submitLeaveRequest"
-              class="px-6 py-2 font-semibold text-white transition bg-indigo-600 rounded-lg cursor-pointer hover:bg-indigo-700">
-              Submit
+            <button @click="submitLeaveRequest" :disabled="isSubmitting" class="px-6 py-2 font-semibold text-white transition rounded-lg cursor-pointer focus:outline-none 
+                 " :class="isSubmitting ? 'bg-indigo-400 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700'">
+              <i v-if="isSubmitting" class="mr-2 fas fa-spinner fa-spin"></i>
+              {{ isSubmitting ? 'Submitting...' : 'Submit' }}
             </button>
           </div>
         </div>
@@ -181,7 +185,6 @@
                 </span>
               </td>
 
-              <!-- Actions -->
               <td class="flex gap-1 px-3 py-4">
                 <button @click="openViewModal(request)"
                   class="p-1 text-green-600 transition rounded-full cursor-pointer hover:bg-green-100 hover:text-green-800"
@@ -189,16 +192,10 @@
                   <i class="text-xl fas fa-eye"></i>
                 </button>
 
-                <!-- <button v-if="request.status === 'PENDING'" @click="openEditModal(user)" :disabled="loading"
-                  class="p-2 text-indigo-600 transition rounded-full hover:bg-indigo-100 hover:text-indigo-800 disabled:opacity-50 disabled:cursor-not-allowed"
-                  title="Edit User">
-                  <i class="fas fa-edit"></i>
-                </button> -->
-
                 <button v-if="request.status === 'PENDING'" @click="confirmCancel(request)"
                   class="p-1 text-red-600 transition rounded-full cursor-pointer hover:bg-red-100 hover:text-red-800"
                   title="Delete User">
-                  <i class="text-xl fas fa-cancel"></i>
+                  <i class="text-xl fa-solid fa-xmark"></i>
                 </button>
               </td>
             </tr>
@@ -269,15 +266,16 @@
           </div>
 
           <div class="flex justify-end gap-3 mt-8">
-            <button @click="closeViewModal"
-              class="px-6 py-2 font-medium text-indigo-700 transition bg-indigo-100 rounded-lg cursor-pointer hover:bg-indigo-200">
+            <button @click="closeViewModal" :disabled="isSubmitting"
+              class="px-6 py-2 font-medium text-indigo-700 transition bg-indigo-100 rounded-lg cursor-pointer hover:bg-indigo-200 disabled:opacity-70 disabled:cursor-not-allowed">
               <i class="mr-1 fas fa-arrow-left"></i> Close
             </button>
 
-            <button v-if="selectedRequest.status === 'PENDING'" @click="confirmCancel(request)"
-              class="px-6 py-2 font-medium text-red-700 transition bg-red-100 rounded-lg cursor-pointer hover:bg-red-200"
-              title="Delete User">
-              <i class="text-xl fas fa-cancel"></i> Cancel Request
+            <button v-if="selectedRequest.status === 'PENDING'" @click="confirmCancel(selectedRequest)"
+              :disabled="isSubmitting"
+              class="px-6 py-2 font-medium text-red-700 transition bg-red-100 rounded-lg cursor-pointer hover:bg-red-200 disabled:opacity-70 disabled:cursor-not-allowed"
+              title="Cancel Request">
+              <i class="text-xl fa-solid fa-xmark"></i> Cancel Request
             </button>
           </div>
         </div>
@@ -291,13 +289,14 @@
           <h3 class="mb-4 text-lg font-semibold">Confirm Cancellation</h3>
           <p class="mb-6">Are you sure you want to cancel this leave request?</p>
           <div class="flex justify-end gap-4">
-            <button @click="cancelConfirm"
-              class="px-4 py-2 transition bg-gray-300 rounded cursor-pointer hover:bg-gray-400">
+            <button @click="cancelConfirm" :disabled="isSubmitting"
+              class="px-4 py-2 transition bg-gray-300 rounded cursor-pointer hover:bg-gray-400 disabled:opacity-70 disabled:cursor-not-allowed">
               No
             </button>
-            <button @click="onCancelledRequest()"
-              class="px-4 py-2 text-white transition bg-red-600 rounded cursor-pointer hover:bg-red-700">
-              Yes
+            <button @click="onCancelledRequest()" :disabled="isSubmitting" class="px-4 py-2 text-white transition rounded cursor-pointer focus:outline-none 
+                 " :class="isSubmitting ? 'bg-red-400 cursor-not-allowed' : 'bg-red-600 hover:bg-red-700'">
+              <i v-if="isSubmitting" class="mr-2 fas fa-spinner fa-spin"></i>
+              {{ isSubmitting ? 'Cancelling...' : 'Yes' }}
             </button>
           </div>
         </div>
@@ -344,20 +343,28 @@ import {
   createLeaveRequest,
   allowStaffRequestLeave
 } from '@/apis/request-leave';
+import Datepicker from '@vuepic/vue-datepicker';
+import '@vuepic/vue-datepicker/dist/main.css';
 import { getUserInfoCookie } from '@/services/authentication';
 import moment from 'moment';
-
+import { getHolidayDate } from '@/apis/publicHoliday';
 export default {
+  components: { Datepicker },
   data() {
     return {
       userInfo: null,
+      holidays: [],
+      disabledDates: [],
+      holidayDateStrings: new Set(),
       leaveBalances: [],
       leaveRequests: [],
       isLoading: false,
+      isSubmitting: false,
       currentPage: 1,
       itemsPerPage: 10,
       showViewModal: false,
       showCreateModal: false,
+      selectedRequest: null,
       leaveForm: {
         type: '',
         approver: '',
@@ -394,6 +401,26 @@ export default {
     },
     endIndex() {
       return Math.min(this.startIndex + this.itemsPerPage, this.leaveRequests.length);
+    },
+    isSameDay() {
+      const { fromDate, toDate } = this.leaveForm;
+      if (!fromDate || !toDate) return true; 
+
+      const from = moment(fromDate).startOf('day');
+      const to = moment(toDate).startOf('day');
+
+      return from.isSame(to);
+    }
+  },
+
+  watch: {
+    isSameDay(newIsSameDay) {
+      if (newIsSameDay === false) {
+        if (this.leaveForm.dayType !== 'full') {
+          this.leaveForm.dayType = 'full';
+          this.clearError('dayType');
+        }
+      }
     }
   },
 
@@ -401,26 +428,46 @@ export default {
 
     validateForm() {
       this.errors = {};
-      if (!this.leaveForm.type) {
+      const { type, approver, fromDate, toDate, reason, dayType } = this.leaveForm;
+      let isValid = true;
+
+      if (!type) {
         this.errors.type = 'Leave Type is required.';
+        isValid = false;
       }
-      if (!this.leaveForm.approver) {
+      if (!approver) {
         this.errors.approver = 'Approver is required.';
+        isValid = false;
       }
-      if (!this.leaveForm.fromDate) {
+      if (!fromDate) {
         this.errors.fromDate = 'From Date is required.';
+        isValid = false;
       }
-      if (!this.leaveForm.toDate) {
+      if (!toDate) {
         this.errors.toDate = 'To Date is required.';
+        isValid = false;
       }
-      if (!this.leaveForm.reason) {
+      if (!reason) {
         this.errors.reason = 'Reason is required.';
+        isValid = false;
       }
-      if (!this.leaveForm.dayType) {
+      if (!dayType) {
         this.errors.dayType = 'Day Type is required.';
+        isValid = false;
       }
 
-      return Object.keys(this.errors).length === 0;
+      // Date Range Check: To Date cannot be before From Date.
+      if (fromDate && toDate && new Date(fromDate) > new Date(toDate)) {
+        this.errors.toDate = 'To Date cannot be before From Date.';
+        isValid = false;
+      }
+
+      if (!this.isSameDay && dayType !== 'full') {
+        this.errors.dayType = 'Day Type must be Full Day for a multi-day leave request.';
+        isValid = false;
+      }
+
+      return isValid && Object.keys(this.errors).length === 0;
     },
 
     clearError(field) {
@@ -444,7 +491,8 @@ export default {
         approver: '',
         fromDate: '',
         toDate: '',
-        reason: ''
+        reason: '',
+        dayType: ''
       };
     },
 
@@ -452,61 +500,69 @@ export default {
       if (!this.validateForm()) {
         return;
       }
+
+      this.isSubmitting = true;
+
       try {
         let time = {};
-        if (this.leaveForm.dayType === 'morning') time = { isMorning: true };
-        else if (this.leaveForm.dayType === 'afternoon') time = { isNoon: true };
-        else if (this.leaveForm.dayType === 'full') time = { isFull: true };
+        if (this.leaveForm.dayType === 'morning') time = { isMorning: true, isNoon: false, isFull: false };
+        else if (this.leaveForm.dayType === 'afternoon') time = { isMorning: false, isNoon: true, isFull: false };
+        else if (this.leaveForm.dayType === 'full') time = { isMorning: false, isNoon: false, isFull: true };
         const payload = { ...this.leaveForm, ...time };
+
         const res = await createLeaveRequest(payload);
 
         if (res.status === 1) {
-          this.showCreateModal = false;
+          this.openCloseModal();
+
+          this.isLoading = true;
           await this.getOwnLeaveRequests(this.userInfo._id);
           await this.getLeaveBalanceForUser(this.userInfo._id);
-          this.leaveForm = {
-            type: '',
-            approver: '',
-            fromDate: '',
-            toDate: '',
-            reason: '',
-            dayType: ''
-          };
-          this.errors = {};
+
+          this.showNotification('Leave request submitted successfully!', 'success');
+        } else {
+          this.showNotification('Failed to submit leave request.', 'error');
         }
       } catch (error) {
-        console.log(error);
+        console.error('Error submitting leave request:', error);
+        this.showNotification('An error occurred during submission.', 'error');
+      } finally {
+        this.isSubmitting = false;
+        this.isLoading = false;
       }
     },
 
     async onCancelledRequest() {
       if (!this.cancelRequestId) return;
-      this.showConfirmCancel = false;
 
+      this.isSubmitting = true;
       try {
         const status = 'CANCELLED';
         const response = await allowStaffRequestLeave(this.cancelRequestId, status);
-        console.log(response)
-        if (response.status === 1) {
-          console.log(response.status)
 
+        if (response.status === 1) {
           this.isLoading = true;
-          this.cancelConfirm()
-          this.getOwnLeaveRequests(this.userInfo._id);
-          this.getLeaveBalanceForUser(this.userInfo._id);
+          this.closeViewModal();
+          this.cancelConfirm();
+
+          await this.getOwnLeaveRequests(this.userInfo._id);
+          await this.getLeaveBalanceForUser(this.userInfo._id);
+
           this.showNotification(`Leave request ${status.toLowerCase()} successfully`);
+        } else {
+          this.showNotification('Failed to update leave request.', 'error');
         }
       } catch (error) {
         console.error('Error allowing leave request:', error);
-        this.cancelConfirm()
-        this.showNotification('Failed to update leave request.', 'error');
+        this.showNotification('An error occurred during cancellation.', 'error');
       } finally {
+        this.isSubmitting = false;
         this.isLoading = false;
-        this.cancelRequestId = null;
       }
     },
 
     confirmCancel(request) {
+      this.showViewModal = false;
       this.cancelRequestId = request.id;
       this.showConfirmCancel = true;
     },
@@ -587,7 +643,7 @@ export default {
           this.approvers = response.data;
         }
       } catch (error) {
-        console.error('Error fetching leave requests:', error);
+        console.error('Error fetching approvers:', error);
       }
     },
 
@@ -598,8 +654,48 @@ export default {
           this.leaveTypes = response.leaveTypes;
         }
       } catch (error) {
-        console.error('Error fetching leave requests:', error);
+        console.error('Error fetching leave types:', error);
       }
+    },
+
+    async fetchHolidayDates() {
+      try {
+        const res = await getHolidayDate();
+        if (res.status === 1 && res.dates) {
+          // 1. Store Date objects
+          this.disabledDates = res.dates.map(d => new Date(d));
+
+          // 2. CRITICAL OPTIMIZATION: Convert all holiday Date objects to 
+          //    formatted string keys in a Set for super-fast lookup.
+          this.holidayDateStrings = new Set(
+            res.dates.map(d => moment(d).format('YYYY-MM-DD'))
+          );
+        }
+      } catch (error) {
+        console.error('Failed to fetch holidays:', error);
+      }
+    },
+    isDisabled(date) {
+      if (date.getDay() === 0 || date.getDay() === 6) {
+        return true; 
+      }
+
+      const formattedDateString = moment(date).format('YYYY-MM-DD');
+      return this.holidayDateStrings.has(formattedDateString); // Returns true for holidays
+    },
+    dayClass(date) {
+      const formattedDateString = moment(date).format('YYYY-MM-DD');
+
+      const isSpecialDay =
+        date.getDay() === 0 ||
+        date.getDay() === 6 ||
+        this.holidayDateStrings.has(formattedDateString);
+
+      if (isSpecialDay) {
+        return 'dp__cell_inner bg-red-100 text-red-600';
+      }
+
+      return '';
     },
 
     adjustCurrentPage() {
@@ -663,9 +759,30 @@ export default {
       this.getLeaveBalanceForUser(this.userInfo._id);
       this.getOwnLeaveRequests(this.userInfo._id);
     }
-
+    this.fetchHolidayDates();
     this.getAllApprover();
     this.getLeaveType();
   }
 };
 </script>
+
+<style scoped>
+.modal-enter-active,
+.modal-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.modal-enter-from,
+.modal-leave-to {
+  opacity: 0;
+}
+
+:deep(.dp__cell_inner.bg-red-100) {
+  background-color: #fee2e2 !important;
+  color: #dc2626 !important;
+}
+
+:deep(.dp__calendar_item .dp--disabled) {
+  color: #dc2626 !important;
+}
+</style>

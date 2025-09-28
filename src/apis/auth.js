@@ -2,7 +2,7 @@ import request from '@/services/request';
 import { users } from '@/constants/apis';
 import axios from 'axios';
 
-const API_BASE_URL = process.env.VUE_APP_BASE_API || 'https://thesis-posting-and-leave-request-api.onrender.com/api';
+const API_BASE_URL = process.env.VUE_APP_BASE_API || 'http://localhost:3000/api';
 
 export const verifyToken = async (token) => {
   const response = await axios.post(

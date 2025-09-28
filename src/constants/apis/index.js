@@ -305,5 +305,27 @@ module.exports = {
             url: 'upload-image',
             method: 'post'
         }
+    },
+    publicHoliday: {
+        createPublicHoliday: {
+            url: 'public-holiday',
+            method: 'post'
+        },
+        getAllPublicHoliday: {
+            url: 'public-holiday',
+            method: 'get'
+        },
+        updatePublicHoliday: {
+            url: 'public-holiday/update',
+            method: 'post'
+        },
+        deletePublicHoliday: {
+            url: 'public-holiday/delete',
+            method: 'post'
+        },
+        getHolidayDate: {
+            url: 'public-holiday/date',
+            method: 'get'
+        }
     }
 };
