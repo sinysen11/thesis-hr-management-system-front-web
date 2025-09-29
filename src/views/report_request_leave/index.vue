@@ -24,7 +24,7 @@
           <label class="block mb-2 text-sm font-medium text-gray-700">Search</label>
           <input type="text" v-model="filters.name"
             class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-            placeholder="Search by employee, leave type, or reason" />
+            placeholder="Search by approver, employee" />
         </div>
 
         <div class="flex-1">
