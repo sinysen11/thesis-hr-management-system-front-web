@@ -60,3 +60,11 @@ export function changePassword(data) {
     data
   })
 }
+
+export function updateStatus(data) {
+  return request({
+    url: user.updateStatus.url,
+    method: user.updateStatus.method,
+    data
+  })
+}

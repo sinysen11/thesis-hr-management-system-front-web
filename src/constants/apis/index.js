@@ -266,6 +266,10 @@ module.exports = {
         changePassword: {
             url: 'users/change-password',
             method: 'post'
+        },
+        updateStatus: {
+            url: 'users/update-status',
+            method: 'post'
         }
     },
     mainContent: {
