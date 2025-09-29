@@ -5,15 +5,10 @@
         Leave Report
       </h2>
 
-      <button
-        @click="exportToExcel"
+      <button @click="exportToExcel"
         class="relative py-3 font-semibold text-white transition duration-300 ease-in-out transform shadow-md cursor-pointer px-7 rounded-2xl bg-gradient-to-r from-indigo-600 to-indigo-700 hover:scale-105 hover:from-indigo-700 hover:to-indigo-800 focus:outline-none focus:ring-4 focus:ring-indigo-300 disabled:opacity-50 disabled:cursor-not-allowed"
-        :disabled="isExporting"
-      >
-        <span
-          v-if="isExporting"
-          class="absolute inset-0 flex items-center justify-center"
-        >
+        :disabled="isExporting">
+        <span v-if="isExporting" class="absolute inset-0 flex items-center justify-center">
           <i class="text-xl text-white fas fa-spinner fa-spin"></i>
         </span>
         <span v-else>
@@ -26,44 +21,27 @@
     <div class="p-6 mb-8 bg-white rounded-lg shadow-sm">
       <div class="flex flex-col w-full gap-4 sm:flex-row sm:items-end">
         <div class="flex-1">
-          <label class="block mb-2 text-sm font-medium text-gray-700"
-            >Search</label
-          >
-          <input
-            type="text"
-            v-model="filters.name"
+          <label class="block mb-2 text-sm font-medium text-gray-700">Search</label>
+          <input type="text" v-model="filters.name"
             class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-            placeholder="Search by employee, leave type, or reason"
-          />
+            placeholder="Search by employee, leave type, or reason" />
         </div>
 
         <div class="flex-1">
-          <label class="block mb-2 text-sm font-medium text-gray-700"
-            >Leave Type</label
-          >
-          <select
-            v-model="filters.type"
-            class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-          >
+          <label class="block mb-2 text-sm font-medium text-gray-700">Leave Type</label>
+          <select v-model="filters.type"
+            class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
             <option value="">All</option>
-            <option
-              v-for="type in leaveTypes"
-              :key="type.code"
-              :value="type.code"
-            >
+            <option v-for="type in leaveTypes" :key="type.code" :value="type.code">
               {{ type.name }}
             </option>
           </select>
         </div>
 
         <div class="flex-1">
-          <label class="block mb-2 text-sm font-medium text-gray-700"
-            >Status</label
-          >
-          <select
-            v-model="filters.status"
-            class="w-full px-4 py-2 transition border border-gray-300 rounded-lg cursor-pointer focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-          >
+          <label class="block mb-2 text-sm font-medium text-gray-700">Status</label>
+          <select v-model="filters.status"
+            class="w-full px-4 py-2 transition border border-gray-300 rounded-lg cursor-pointer focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
             <option value="">All</option>
             <option value="PENDING">Pending</option>
             <option value="APPROVED">Approved</option>
@@ -71,17 +49,25 @@
           </select>
         </div>
 
+        <div class="flex-1">
+          <label class="block mb-2 text-sm font-medium text-gray-700">From Date</label>
+          <input type="date" v-model="filters.fromDate"
+            class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
+        </div>
+
+        <div class="flex-1">
+          <label class="block mb-2 text-sm font-medium text-gray-700">To Date</label>
+          <input type="date" v-model="filters.toDate"
+            class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
+        </div>
+
         <div class="flex gap-4">
-          <button
-            @click="resetFilters"
-            class="px-6 py-2 font-medium text-gray-800 transition duration-200 bg-gray-200 rounded-lg cursor-pointer hover:bg-gray-300"
-          >
+          <button @click="resetFilters"
+            class="px-6 py-2 font-medium text-gray-800 transition duration-200 bg-gray-200 rounded-lg cursor-pointer hover:bg-gray-300">
             Reset
           </button>
-          <button
-            @click="applyFilters"
-            class="px-6 py-2 font-medium text-white transition duration-200 bg-indigo-600 rounded-lg cursor-pointer hover:bg-indigo-700"
-          >
+          <button @click="applyFilters"
+            class="px-6 py-2 font-medium text-white transition duration-200 bg-indigo-600 rounded-lg cursor-pointer hover:bg-indigo-700">
             Search
           </button>
         </div>
@@ -98,9 +84,7 @@
     <div v-else class="overflow-hidden bg-white rounded-lg shadow-sm">
       <div class="overflow-x-auto">
         <table class="min-w-full text-sm rounded-lg shadow-md table-auto">
-          <thead
-            class="text-xs font-semibold text-gray-700 uppercase bg-gray-200"
-          >
+          <thead class="text-xs font-semibold text-gray-700 uppercase bg-gray-200">
             <tr>
               <th class="px-5 py-4 text-left text-green-700">No</th>
               <th class="px-5 py-4 text-left text-green-700">Approver</th>
@@ -122,11 +106,8 @@
               </td>
             </tr>
 
-            <tr
-              v-for="(request, index) in leaveRequests"
-              :key="request.id"
-              class="transition border-b border-gray-200 hover:bg-gray-50"
-            >
+            <tr v-for="(request, index) in leaveRequests" :key="request.id"
+              class="transition border-b border-gray-200 hover:bg-gray-50">
               <td class="px-5 py-4 font-medium">
                 {{ index + 1 + (pagination.page - 1) * pagination.limit }}
               </td>
@@ -141,29 +122,25 @@
               </td>
 
               <td class="px-5 py-4">
-                <span
-                  :class="[
-                    'px-5 py-2 rounded-full text-xs font-medium',
-                    request.status === 'APPROVED'
-                      ? 'bg-green-200 text-green-800'
-                      : request.status === 'PENDING'
+                <span :class="[
+                  'px-5 py-2 rounded-full text-xs font-medium',
+                  request.status === 'APPROVED'
+                    ? 'bg-green-200 text-green-800'
+                    : request.status === 'PENDING'
                       ? 'bg-blue-200 text-blue-800'
                       : request.status === 'CANCELLED' ||
                         request.status === 'DRAFT'
-                      ? 'bg-yellow-200 text-yellow-800'
-                      : 'bg-red-200 text-red-800'
-                  ]"
-                >
+                        ? 'bg-yellow-200 text-yellow-800'
+                        : 'bg-red-200 text-red-800'
+                ]">
                   {{ request.status }}
                 </span>
               </td>
 
               <td class="flex gap-1 px-3 py-4">
-                <button
-                  @click="openViewModal(request)"
+                <button @click="openViewModal(request)"
                   class="p-1 text-green-600 transition rounded-full cursor-pointer hover:bg-green-100 hover:text-green-800"
-                  title="View Request"
-                >
+                  title="View Request">
                   <i class="text-xl fas fa-eye"></i>
                 </button>
               </td>
@@ -172,42 +149,28 @@
         </table>
       </div>
     </div>
-    <div
-      class="flex items-center justify-between mt-6"
-      v-if="!isLoading && !isExporting && totalPages"
-    >
+    <div class="flex items-center justify-between mt-6" v-if="!isLoading && !isExporting && totalPages">
       <div class="text-sm text-gray-600">
         Showing {{ startIndex + 1 }} to {{ endIndex }} of
         {{ leaveRequests.length }} requests
       </div>
       <div class="flex gap-2">
-        <button
-          @click="prevPage"
-          :disabled="pagination.page === 1"
-          class="px-4 py-2 text-gray-800 transition duration-200 bg-gray-200 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-300"
-        >
+        <button @click="prevPage" :disabled="pagination.page === 1"
+          class="px-4 py-2 text-gray-800 transition duration-200 bg-gray-200 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-300">
           Previous
         </button>
 
-        <button
-          v-for="page in totalPages"
-          :key="page"
-          @click="goToPage(page)"
-          :class="[
-            'px-4 py-2 rounded-lg transition duration-200',
-            pagination.page === page
-              ? 'bg-indigo-600 text-white'
-              : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
-          ]"
-        >
+        <button v-for="page in totalPages" :key="page" @click="goToPage(page)" :class="[
+          'px-4 py-2 rounded-lg transition duration-200',
+          pagination.page === page
+            ? 'bg-indigo-600 text-white'
+            : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
+        ]">
           {{ page }}
         </button>
 
-        <button
-          @click="nextPage"
-          :disabled="pagination.page === totalPages"
-          class="px-4 py-2 text-gray-800 transition duration-200 bg-gray-200 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-300"
-        >
+        <button @click="nextPage" :disabled="pagination.page === totalPages"
+          class="px-4 py-2 text-gray-800 transition duration-200 bg-gray-200 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-300">
           Next
         </button>
       </div>
@@ -217,7 +180,7 @@
 <script>
 import { getLeaveRequestsReport, getLeaveType } from '@/apis/request-leave';
 import moment from 'moment';
-import * as XLSX from 'xlsx-js-style'; // Import from xlsx-js-style for styling
+import * as XLSX from 'xlsx-js-style';
 
 export default {
   name: 'LeaveRequestsReport',
@@ -228,7 +191,9 @@ export default {
       filters: {
         name: '',
         type: '',
-        status: ''
+        status: '',
+        fromDate: '',
+        toDate: ''
       },
       pagination: {
         total: 0,
@@ -263,7 +228,9 @@ export default {
           type: this.filters.type || undefined,
           status: this.filters.status || undefined,
           page: this.pagination.page,
-          limit: this.pagination.limit
+          limit: this.pagination.limit,
+          ...(this.filters.fromDate && { fromDate: moment(this.filters.fromDate).startOf('day').toISOString() }),
+          ...(this.filters.toDate && { toDate: moment(this.filters.toDate).endOf('day').toISOString() })
         };
         const res = await getLeaveRequestsReport(params);
 
@@ -274,8 +241,7 @@ export default {
               id: request._id || '',
               employeeId: request.user?._id || '',
               employeeName: request.user
-                ? `${request.user.first_name_en || ''} ${
-                    request.user.last_name_en || ''
+                ? `${request.user.first_name_en || ''} ${request.user.last_name_en || ''
                   }`.trim()
                 : 'Unknown Employee',
               department: departmentName,
@@ -285,8 +251,7 @@ export default {
               endDate: this.formatDate(request.toDate),
               approverId: request.approver?._id || '',
               approverName: request.approver
-                ? `${request.approver.first_name_en || ''} ${
-                    request.approver.last_name_en || ''
+                ? `${request.approver.first_name_en || ''} ${request.approver.last_name_en || ''
                   }`.trim()
                 : 'N/A',
               status: request.status || 'PENDING',
@@ -324,107 +289,106 @@ export default {
       }
     },
 
-      async exportToExcel() {
-  try {
-    this.isExporting = true;
+    async exportToExcel() {
+      try {
+        this.isExporting = true;
 
-    // Fetch all data for export, overriding pagination
-    const exportParams = {
-      name: this.filters.name || undefined,
-      type: this.filters.type || undefined,
-      status: this.filters.status || undefined,
-      page: 1, // Start from the first page
-      limit: 99999 // Set a very high limit to get all records
-    };
+        const exportParams = {
+          name: this.filters.name || undefined,
+          type: this.filters.type || undefined,
+          status: this.filters.status || undefined,
+          page: 1,
+          limit: 99999,
+          ...(this.filters.fromDate && { fromDate: moment(this.filters.fromDate).startOf('day').toISOString() }),
+          ...(this.filters.toDate && { toDate: moment(this.filters.toDate).endOf('day').toISOString() })
+        };
 
-    const res = await getLeaveRequestsReport(exportParams);
+        const res = await getLeaveRequestsReport(exportParams);
 
-    // Check if the request was successful and contains data
-    if (!res || !res.data || res.data.length === 0) {
-      console.error('No data to export.');
-      this.isExporting = false;
-      return;
-    }
+        if (!res || !res.data || res.data.length === 0) {
+          console.error('No data to export.');
+          this.isExporting = false;
+          return;
+        }
 
-    // Now, use the full dataset for export
-    const allLeaveRequests = res.data;
+        const allLeaveRequests = res.data;
 
-    const header = [
-      'No.',
-      'Approver',
-      'Employee',
-      'Department',
-      'Leave Type',
-      'Start Date',
-      'End Date',
-      'Reason',
-      'Status'
-    ];
+        const header = [
+          'No.',
+          'Approver',
+          'Employee',
+          'Department',
+          'Leave Type',
+          'Start Date',
+          'End Date',
+          'Reason',
+          'Status'
+        ];
 
-    const dataRows = allLeaveRequests.map((request, index) => {
-      const departmentName = request.user?.department?.name_en || 'N/A';
-      const employeeName = request.user
-        ? `${request.user.first_name_en || ''} ${request.user.last_name_en || ''}`.trim()
-        : 'Unknown Employee';
-      const approverName = request.approver
-        ? `${request.approver.first_name_en || ''} ${request.approver.last_name_en || ''}`.trim()
-        : 'N/A';
+        const dataRows = allLeaveRequests.map((request, index) => {
+          const departmentName = request.user?.department?.name_en || 'N/A';
+          const employeeName = request.user
+            ? `${request.user.first_name_en || ''} ${request.user.last_name_en || ''}`.trim()
+            : 'Unknown Employee';
+          const approverName = request.approver
+            ? `${request.approver.first_name_en || ''} ${request.approver.last_name_en || ''}`.trim()
+            : 'N/A';
 
-      return [
-        index + 1, // Use index + 1 for numbering
-        approverName,
-        employeeName,
-        departmentName,
-        request.type?.name || 'Unknown Type',
-        this.formatDate(request.fromDate),
-        this.formatDate(request.toDate),
-        request.reason || 'No reason provided',
-        request.status || 'PENDING'
-      ];
-    });
+          return [
+            index + 1,
+            approverName,
+            employeeName,
+            departmentName,
+            request.type?.name || 'Unknown Type',
+            this.formatDate(request.fromDate),
+            this.formatDate(request.toDate),
+            request.reason || 'No reason provided',
+            request.status || 'PENDING'
+          ];
+        });
 
-    const wsData = [header, ...dataRows];
-    const worksheet = XLSX.utils.aoa_to_sheet(wsData);
+        const wsData = [header, ...dataRows];
+        const worksheet = XLSX.utils.aoa_to_sheet(wsData);
 
-    const wscols = [
-      { wch: 5 }, // "No."
-      { wch: 20 }, // "Approver"
-      { wch: 25 }, // "Employee"
-      { wch: 20 }, // "Department"
-      { wch: 15 }, // "Leave Type"
-      { wch: 15 }, // "Start Date"
-      { wch: 15 }, // "End Date"
-      { wch: 40 }, // "Reason"
-      { wch: 15 } // "Status"
-    ];
-    worksheet['!cols'] = wscols;
+        const wscols = [
+          { wch: 5 },
+          { wch: 20 },
+          { wch: 25 },
+          { wch: 20 },
+          { wch: 15 },
+          { wch: 15 },
+          { wch: 15 },
+          { wch: 40 },
+          { wch: 15 }
+        ];
+        worksheet['!cols'] = wscols;
 
-    const headerStyle = {
-      fill: { fgColor: { rgb: '0000FF' }},
-      font: {
-        bold: true,
-        color: { rgb: 'FFFFFF' }
+        const headerStyle = {
+          fill: { fgColor: { rgb: '0000FF' }},
+          font: {
+            bold: true,
+            color: { rgb: 'FFFFFF' }
+          }
+        };
+
+        for (let C = 0; C < header.length; ++C) {
+          const cellRef = XLSX.utils.encode_cell({ c: C, r: 0 });
+          if (worksheet[cellRef]) {
+            worksheet[cellRef].s = headerStyle;
+          }
+        }
+
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Leave Requests');
+        XLSX.writeFile(
+          workbook,
+          `Leave_Requests_${moment().format('YYYY-MM-DD')}.xlsx`
+        );
+      } catch (err) {
+        console.error('Error exporting to Excel:', err);
+      } finally {
+        this.isExporting = false;
       }
-    };
-
-    for (let C = 0; C < header.length; ++C) {
-      const cellRef = XLSX.utils.encode_cell({ c: C, r: 0 });
-      if (worksheet[cellRef]) {
-        worksheet[cellRef].s = headerStyle;
-      }
-    }
-
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Leave Requests');
-    XLSX.writeFile(
-      workbook,
-      `Leave_Requests_${moment().format('YYYY-MM-DD')}.xlsx`
-    );
-  } catch (err) {
-    console.error('Error exporting to Excel:', err);
-  } finally {
-    this.isExporting = false;
-  }
     },
     applyFilters() {
       this.pagination.page = 1;
@@ -432,7 +396,7 @@ export default {
     },
 
     resetFilters() {
-      this.filters = { name: '', type: '', status: '' };
+      this.filters = { name: '', type: '', status: '', fromDate: '', toDate: '' };
       this.pagination.page = 1;
       this.getLeaveRequestsReport();
     },
