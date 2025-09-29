@@ -253,7 +253,19 @@ module.exports = {
         },
         deleteRole: {
             url: 'roles',
-            method: 'delete' // Changed from 'get' to 'delete'
+            method: 'delete'
+        },
+        updateUserInfo: {
+            url: 'users/update-info',
+            method: 'post'
+        },
+        getUserInfo: {
+            url: 'users/info',
+            method: 'get'
+        }, 
+        changePassword: {
+            url: 'users/change-password',
+            method: 'post'
         }
     },
     mainContent: {

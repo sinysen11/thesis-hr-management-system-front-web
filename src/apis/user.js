@@ -37,3 +37,26 @@ export function deleteUser(id) {
     method: user.deleteUser.method
   });
 }
+
+export function getUserInfo(id) {
+  return request({
+    url: `${user.getUserInfo.url}/${id}`,
+    method: user.getUserInfo.method
+  });
+}
+
+export function updateUserInfo(data) {
+  return request({
+    url: user.updateUserInfo.url,
+    method: user.updateUserInfo.method,
+    data
+  });
+}
+
+export function changePassword(data) {
+  return request({
+    url: user.changePassword.url,
+    method: user.changePassword.method,
+    data
+  })
+}
