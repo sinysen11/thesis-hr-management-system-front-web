@@ -17,9 +17,9 @@ export function getAllJob() {
   });
 }
 
-export function getOneJob(data) {
+export function getOneJob(id) {
   return request({
-    url: `${jobs.getOneJob.url}/${data}`,
+    url: `${jobs.getOneJob.url}/${id}`,
     method: jobs.getOneJob.method
   });
 }

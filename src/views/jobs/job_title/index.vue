@@ -7,25 +7,8 @@
         :disabled="loading"
         class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-medium transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        Create Job Title
+        Create
       </button>
-    </div>
-
-    <div class="fixed top-4 right-4 z-50 space-y-4 w-full max-w-xs">
-      <div
-        v-if="successMessage"
-        class="p-4 rounded-lg shadow-md bg-green-500 text-white transition-opacity duration-500 ease-in-out"
-        :class="{ 'opacity-0': !successMessage }"
-      >
-        {{ successMessage }}
-      </div>
-      <div
-        v-if="errorMessage"
-        class="p-4 rounded-lg shadow-md bg-red-500 text-white transition-opacity duration-500 ease-in-out"
-        :class="{ 'opacity-0': !errorMessage }"
-      >
-        {{ errorMessage }}
-      </div>
     </div>
 
     <div class="bg-white shadow-sm rounded-lg p-6 mb-8">

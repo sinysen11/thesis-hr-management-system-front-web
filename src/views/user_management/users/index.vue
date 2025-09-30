@@ -559,13 +559,14 @@ export default {
       }, 3000);
     },
 
+    // 🚀 CRITICAL FIX: Ensure search is passed AND total count is read correctly
     async getAllUsers(page = this.currentPage, query = this.searchQuery) {
       this.loading = true;
       try {
         const result = await getAllUser({
           page,
           limit: this.itemsPerPage,
-          search: query || undefined
+          search: query || undefined // Pass search query to API
         });
 
         if (result && result.status === 1) {
@@ -880,10 +881,8 @@ export default {
     },
     // Server-side navigation method
     nextPage() {
-  if (this.currentPage < this.totalPages) {
-    this.goToPage(this.currentPage + 1);
-  }
-},
+      this.goToPage(this.currentPage + 1);
+    },
     // ⚠️ Central navigation method to fetch new data, passing the current search query
     goToPage(page) {
       if (page >= 1 && page <= this.totalPages) {

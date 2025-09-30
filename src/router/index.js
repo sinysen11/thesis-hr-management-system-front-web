@@ -26,7 +26,8 @@ import ActivityLog from '@/views/user_management/activity_log';
 import MainContent from '@/views/website_control/main_content';
 import TabContent from '@/views/website_control/tab_content';
 import UploadImage from '@/views/website_control/upload_image';
-import PersonalInfo from '@/views/personal_info/index.vue'
+import PersonalInfo from '@/views/personal_info/index.vue';
+import JobPostingDetail from '@/views/jobs/job_detail/index.vue'
 const routes = [
   {
     path: '/login',
@@ -82,8 +83,15 @@ const routes = [
         meta: { 
           requiresAuth: true,
           permission: 'JOBS'
-        } 
-      }, 
+        }
+      },
+      {
+        path: '/jobs/job_posting/:id',
+        name: 'job_posting_detail',
+        component: JobPostingDetail,
+        meta: { requiresAuth: true, permission: 'JOBS' }
+      },
+
       { 
         path: '/jobs/job_title', 
         name: 'job_title', component: 

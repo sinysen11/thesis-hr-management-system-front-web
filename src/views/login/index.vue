@@ -90,7 +90,7 @@
       </div>
       <div class="relative z-10 text-center text-white p-6 rounded-lg">
         <h2 class="text-5xl font-extrabold mb-3 leading-tight drop-shadow-lg">
-          <span class="text-amber-200">SunFlex(Cambodia) Co., Ltd.</span>
+          <span class="text-green-500">SunFlex(Cambodia) Co., Ltd.</span>
         </h2>
         <p class="text-xl font-light mb-6">
           Your partner in innovative information systems.
