@@ -25,7 +25,6 @@ import UserManagement from '@/views/user_management/users';
 import ActivityLog from '@/views/user_management/activity_log';
 import MainContent from '@/views/website_control/main_content';
 import TabContent from '@/views/website_control/tab_content';
-import UploadImage from '@/views/website_control/upload_image';
 const routes = [
   {
     path: '/login',
@@ -170,12 +169,6 @@ const routes = [
         path: '/website-control/tab-content',
         name: 'tab-content',
         component: TabContent,
-        meta: { requiresAuth: true }
-      },
-      {
-        path: '/website-control/upload-image',
-        name: 'upload-image',
-        component: UploadImage,
         meta: { requiresAuth: true }
       }
       // {

@@ -60,6 +60,7 @@
               <th class="px-4 py-3 text-left">Type</th>
               <th class="px-4 py-3 text-left">Title</th>
               <th class="px-4 py-3 text-left">Description</th>
+              <th class="px-4 py-3 text-left">Images</th>
               <th class="px-4 py-3 text-left">Status</th>
               <th class="px-4 py-3 text-left">Actions</th>
             </tr>
@@ -73,6 +74,7 @@
               <td class="px-4 py-3">{{ content.type }}</td>
               <td class="px-4 py-3">{{ content.title }}</td>
               <td class="px-4 py-3">{{ content.description }}</td>
+              <td class="px-4 py-3">{{ content.images ? content.images.join(', ') : 'None' }}</td>
               <td class="px-4 py-3">{{ content.status }}</td>
               <td class="flex gap-2 px-4 py-3">
                 <button @click="openViewModal(content)"
@@ -151,6 +153,10 @@
                 <label class="text-sm font-semibold text-gray-600">Description</label>
                 <p class="font-medium text-gray-900">{{ selectedMainContent.description }}</p>
               </div>
+              <div class="sm:col-span-2">
+                <label class="text-sm font-semibold text-gray-600">Images</label>
+                <p class="font-medium text-gray-900">{{ selectedMainContent.images ? selectedMainContent.images.join(', ') : 'None' }}</p>
+              </div>
               <div>
                 <label class="text-sm font-semibold text-gray-600">Status</label>
                 <p class="font-medium text-gray-900">{{ selectedMainContent.status }}</p>
@@ -200,6 +206,14 @@
               <textarea v-model="form.description"
                 class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                 placeholder="Enter content description" rows="3"></textarea>
+            </div>
+            <div>
+              <label class="text-sm font-semibold text-gray-600">Select Image</label>
+              <input type="file" @change="handleImageChange" accept="image/*"
+                class="w-full px-4 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
+              <div v-if="imagePreview" class="mt-2">
+                <img :src="imagePreview" alt="Image Preview" class="max-w-full h-auto rounded-lg" />
+              </div>
             </div>
             <div>
               <label class="text-sm font-semibold text-gray-600">Status</label>
@@ -252,6 +266,7 @@
 
 <script>
 import { getAllMainContent, createMainContent, updateMainContent, getOneMainContent, deleteMainContent } from '@/apis/main-content';
+import { createUploadImage } from '@/apis/upload-image';
 
 export default {
   data() {
@@ -270,10 +285,13 @@ export default {
         type: '',
         title: '',
         description: '',
-        status: 'ACTIVE'
+        images: [],
+        status: 'ACTIVE',
+        image: null
       },
+      imagePreview: null,
       mainContents: [],
-      loading: true,
+      loading: false,
       successMessage: '',
       errorMessage: ''
     };
@@ -318,6 +336,60 @@ export default {
       }, 3000);
     },
 
+    // Handle image file selection and preview with stricter validation
+    handleImageChange(event) {
+      const file = event.target.files[0];
+      this.form.image = null;
+      this.imagePreview = null;
+
+      if (file) {
+        // Validate file type is an image
+        if (!file.type.startsWith('image/')) {
+          this.alert('Please select a valid image file (e.g., JPG, PNG, GIF).', 'error');
+          return;
+        }
+
+        // Optional: Add file size limit (e.g., 5MB)
+        const maxSizeInMB = 5;
+        const maxSizeInBytes = maxSizeInMB * 1024 * 1024;
+        if (file.size > maxSizeInBytes) {
+          this.alert(`File size exceeds ${maxSizeInMB}MB limit.`, 'error');
+          return;
+        }
+
+        this.form.image = file;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          this.imagePreview = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    },
+
+    // Upload image and return the image ID
+    async uploadImage() {
+      if (!this.form.image) {
+        this.alert('Please select an image to upload.', 'error');
+        return null;
+      }
+      try {
+        const formData = new FormData();
+        formData.append('image', this.form.image);
+        const response = await createUploadImage(formData);
+        if (response && response.status === 1 && response.data && response.data._id) {
+          this.alert('Image uploaded successfully!');
+          return response.data._id;
+        } else {
+          this.alert('Failed to upload image. Please try again.', 'error');
+          return null;
+        }
+      } catch (error) {
+        console.error('Error uploading image:', error.response || error);
+        this.alert(`Error uploading image: ${error.message || 'Request failed'}`, 'error');
+        return null;
+      }
+    },
+
     // Fetch all main contents
     async fetchMainContents() {
       this.loading = true;
@@ -329,6 +401,7 @@ export default {
             type: content.type,
             title: content.title,
             description: content.description,
+            images: content.images || [],
             status: content.status
           }));
         } else {
@@ -356,15 +429,23 @@ export default {
       }
       this.loading = true;
       try {
+        let imageId = null;
+        if (this.form.image) {
+          imageId = await this.uploadImage();
+          if (!imageId) {
+            this.loading = false;
+            return;
+          }
+        }
+        const formData = {
+          type: this.form.type,
+          title: this.form.title,
+          description: this.form.description,
+          status: this.form.status,
+          images: imageId ? [...(this.isEditing ? this.form.images : []), imageId] : (this.isEditing ? this.form.images : [])
+        };
         if (this.isEditing) {
-          // Use raw JSON for update
-          const updateData = {
-            type: this.form.type,
-            title: this.form.title,
-            description: this.form.description,
-            status: this.form.status
-          };
-          const updatedContent = await updateMainContent(this.form.id, updateData);
+          const updatedContent = await updateMainContent(this.form.id, formData);
           if (updatedContent && updatedContent.status === 1) {
             await this.fetchMainContents();
             this.alert('Main content updated successfully!');
@@ -372,7 +453,6 @@ export default {
             this.alert('Failed to update main content. Please try again.', 'error');
           }
         } else {
-          const { id, ...formData } = this.form;
           const newContent = await createMainContent(formData);
           if (newContent && newContent.status === 1) {
             await this.fetchMainContents();
@@ -441,8 +521,11 @@ export default {
         type: '',
         title: '',
         description: '',
-        status: 'ACTIVE'
+        images: [],
+        status: 'ACTIVE',
+        image: null
       };
+      this.imagePreview = null;
       this.showCreateModal = true;
     },
     async openEditModal(content) {
@@ -461,8 +544,11 @@ export default {
             type: contentData.type || '',
             title: contentData.title || '',
             description: contentData.description || '',
-            status: contentData.status || 'ACTIVE'
+            images: contentData.images || [],
+            status: contentData.status || 'ACTIVE',
+            image: null
           };
+          this.imagePreview = null;
           this.showCreateModal = true;
         } else {
           this.alert('Failed to fetch main content for editing. Please try again.', 'error');
@@ -489,6 +575,7 @@ export default {
             type: contentData.type || '',
             title: contentData.title || '',
             description: contentData.description || '',
+            images: contentData.images || [],
             status: contentData.status || 'ACTIVE'
           };
           this.showViewModal = true;
@@ -510,8 +597,11 @@ export default {
         type: '',
         title: '',
         description: '',
-        status: 'ACTIVE'
+        images: [],
+        status: 'ACTIVE',
+        image: null
       };
+      this.imagePreview = null;
     },
     closeViewModal() {
       this.showViewModal = false;

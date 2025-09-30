@@ -280,23 +280,23 @@ module.exports = {
     },
     tabContent: {
             getAllTabContent: {
-            url: 'web-modify/tab-content',
+            url: 'web-modify/main-content',
             method: 'get'
         },
         getOneTabContent: {
-            url: 'web-modify/tab-content',
+            url: 'web-modify/main-content',
             method: 'get'
         },
         createTabContent: {
-            url: 'web-modify/tab-content',
+            url: 'web-modify/main-content/tabs',
             method: 'post'
         },
         updateTabContent: {
-            url: 'web-modify/tab-content',
+            url: 'web-modify/main-content/tabs/update',
             method: 'post' // Changed from 'get' to 'put'
         },
         deleteTabContent: {
-            url: 'web-modify/tab-content',
+            url: 'web-modify/main-content/tabs/delete',
             method: 'post' // Changed from 'get' to 'delete'
         }
     },
