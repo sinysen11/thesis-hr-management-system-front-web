@@ -9,10 +9,11 @@ export function createUser(data) {
   });
 }
 
-export function getAllUser() {
+export function getAllUser(params) {
   return request({
     url: user.getAllUser.url,
-    method: user.getAllUser.method
+    method: user.getAllUser.method,
+    params
   });
 }
 

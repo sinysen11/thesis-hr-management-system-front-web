@@ -1,10 +1,11 @@
 import request from '@/services/request';
 import { activityLog } from '@/constants/apis';
 
-export function getAllActivityLog() {
+export function getAllActivityLog(params) {
   return request({
     url: activityLog.getAllActivityLog.url,
-    method: activityLog.getAllActivityLog.method
+    method: activityLog.getAllActivityLog.method,
+    params
   });
 }
 

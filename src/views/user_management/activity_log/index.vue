@@ -1,6 +1,5 @@
 <template>
   <div class="w-full">
-    <!-- Fixed-Position Alerts -->
     <div class="fixed z-50 w-full max-w-xs space-y-4 top-4 right-4">
       <div
         v-if="successMessage"
@@ -19,10 +18,11 @@
     </div>
 
     <div class="flex items-center justify-between mb-6">
-      <h2 class="text-3xl font-extrabold text-gray-900">Activity Log</h2>
+      <h2 class="text-2xl font-extrabold tracking-tight text-green-700">
+        Activity
+      </h2>
     </div>
 
-    <!-- Filter Section -->
     <div class="p-6 mb-8 bg-white rounded-lg shadow-sm">
       <div class="flex flex-col items-end gap-4 sm:flex-row">
         <div>
@@ -57,7 +57,6 @@
       <i class="text-6xl text-green-700 fas fa-spinner fa-spin"></i>
     </div>
 
-    <!-- Table Section -->
     <div class="overflow-hidden bg-white rounded-lg shadow-sm">
       <div class="overflow-x-auto">
         <table class="min-w-full text-sm table-auto">
@@ -115,12 +114,12 @@
       </div>
     </div>
 
-    <!-- Pagination Controls -->
     <div class="flex items-center justify-between mt-6">
       <div class="text-sm text-gray-600">
-        Showing {{ (currentPage - 1) * itemsPerPage + 1 }} to
-        {{ Math.min(currentPage * itemsPerPage, filteredLogs.length) }}
-        of {{ filteredLogs.length }} logs
+        Showing 
+        {{ totalLogs === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1 }} to
+        {{ (currentPage - 1) * itemsPerPage + filteredLogs.length }}
+        of {{ totalLogs }} logs
       </div>
       <div class="flex gap-2">
         <button
@@ -130,19 +129,23 @@
         >
           Previous
         </button>
-        <button
-          v-for="page in totalPages"
-          :key="page"
-          @click="goToPage(page)"
-          :class="[
-            'px-4 py-2 rounded-lg transition duration-200',
-            currentPage === page
-              ? 'bg-indigo-600 text-white'
-              : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
-          ]"
-        >
-          {{ page }}
-        </button>
+        
+        <template v-for="(page, index) in visiblePages" :key="index">
+          <span v-if="page === '...'" class="px-4 py-2 text-gray-500">...</span>
+          <button
+            v-else
+            @click="goToPage(page)"
+            :class="[
+              'px-4 py-2 rounded-lg transition duration-200',
+              currentPage === page
+                ? 'bg-indigo-600 text-white'
+                : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
+            ]"
+          >
+            {{ page }}
+          </button>
+        </template>
+
         <button
           @click="nextPage"
           :disabled="currentPage === totalPages"
@@ -153,7 +156,6 @@
       </div>
     </div>
 
-    <!-- Modal for View Log -->
     <transition name="modal">
       <div
         style="background-color: rgb(0 0 0 / 0.5)"
@@ -282,9 +284,9 @@ export default {
   data() {
     return {
       searchQuery: '',
-      currentPage: 1,
+      currentPage: 1, 
       itemsPerPage: 10,
-      totalLogs: 0,
+      totalLogs: 0, 
       showViewModal: false,
       selectedLog: null,
       logs: [],
@@ -311,12 +313,122 @@ export default {
       });
     },
     paginatedLogs() {
-      const start = (this.currentPage - 1) * this.itemsPerPage;
-      const end = start + this.itemsPerPage;
-      return this.filteredLogs.slice(start, end);
+      return this.filteredLogs;
     },
     totalPages() {
-      return Math.ceil(this.filteredLogs.length / this.itemsPerPage) || 1;
+      return Math.ceil(this.totalLogs / this.itemsPerPage) || 1;
+    },
+    /**
+     * ⚠️ NEW: Generates a list of page numbers to display, limited to 5 buttons max, 
+     * using an ellipsis (...) for skipping pages.
+     */
+    visiblePages() {
+      const total = this.totalPages;
+      const current = this.currentPage;
+      const maxButtons = 5;
+      const pages = [];
+
+      if (total <= maxButtons) {
+        // Case 1: Total pages is 5 or less, show all pages
+        for (let i = 1; i <= total; i++) {
+          pages.push(i);
+        }
+      } else {
+        // Case 2: Total pages is greater than 5
+
+        // Always add the first page
+        pages.push(1);
+        
+        // Define the window of visible pages around the current page
+        const startWindow = Math.max(2, current - 1);
+        const endWindow = Math.min(total - 1, current + 1);
+
+        // Add ellipsis if the window starts after the second page
+        if (startWindow > 2) {
+          pages.push('...');
+        }
+
+        // Add pages within the window
+        for (let i = startWindow; i <= endWindow; i++) {
+            // Ensure we don't duplicate the first page or exceed 5 total buttons 
+            // (1st page + ellipsis + 3 central pages + last page = 6, so we need logic)
+            if (pages.length < maxButtons - (current > 1 && current < total ? 0 : 1)) {
+              pages.push(i);
+            }
+        }
+        
+        // Final sanity check for the ellipsis, ensuring max 3 central pages (2 around current)
+        const centralPages = pages.filter(p => p !== 1 && p !== total && p !== '...').length;
+        if (centralPages < 3 && current > 2 && current < total - 1) {
+            // This happens when the window is too small, force 3 around current if possible
+            const windowStart = Math.max(2, current - (2 - (total - current === 1 ? 1 : 0)));
+            const windowEnd = Math.min(total - 1, current + (2 - (current === 2 ? 1 : 0)));
+            
+            pages.length = 0;
+            pages.push(1);
+            if (windowStart > 2) pages.push('...');
+            for (let i = windowStart; i <= windowEnd; i++) {
+                if (i !== 1 && i !== total) pages.push(i);
+            }
+        }
+        
+        // Re-check for ellipsis before the last page
+        if (pages[pages.length - 1] < total - 1) {
+            // Avoid adding ellipsis if we are only skipping one page (e.g., [1, 2, ..., 4, 5])
+            if (pages[pages.length - 1] !== total - 2) {
+                pages.push('...');
+            }
+        }
+
+        // Always add the last page if it's not already included
+        if (pages[pages.length - 1] !== total) {
+            pages.push(total);
+        }
+        
+        // Simple and robust logic for the common case (reset pages array and rebuild)
+        const simplePages = [];
+        const delta = 2; // Number of pages to show before and after current
+        const leftBound = Math.max(1, current - delta);
+        const rightBound = Math.min(total, current + delta);
+        
+        if (total > maxButtons) {
+             // Always show page 1
+            if (leftBound > 1) simplePages.push(1);
+            if (leftBound > 2) simplePages.push('...'); // Ellipsis after 1
+
+            // Show central pages
+            for (let i = leftBound; i <= rightBound; i++) {
+                simplePages.push(i);
+            }
+            
+            // Ellipsis before last page
+            if (rightBound < total - 1) simplePages.push('...');
+            // Always show last page
+            if (rightBound < total) simplePages.push(total);
+
+            // Filter out duplicates and ensure max 5 buttons (simple overflow fix)
+            const uniquePages = [...new Set(simplePages)];
+            
+            // This is a simpler view: Always center around current, add ellipsis
+            const finalPages = [];
+            finalPages.push(1);
+            
+            if (current > delta + 1) finalPages.push('...');
+            
+            let i = Math.max(2, current - 1);
+            while (i <= total && finalPages.length < maxButtons - 1) {
+                if (i !== 1 && i !== total) finalPages.push(i);
+                i++;
+            }
+            
+            if (finalPages[finalPages.length - 1] < total - 1) finalPages.push('...');
+            if (finalPages[finalPages.length - 1] !== total) finalPages.push(total);
+            
+            return [...new Set(finalPages)].filter(p => p !== undefined).slice(0, maxButtons);
+        }
+        return pages; // Use the simple pages array if total <= 5
+      }
+      return pages;
     }
   },
   methods: {
@@ -333,10 +445,11 @@ export default {
         this.errorMessage = '';
       }, 3000);
     },
-    async getAllLogs(page = 1) {
+    async getAllLogs(page = this.currentPage) {
       this.loading = true;
       try {
         const result = await getAllActivityLog({ page, limit: this.itemsPerPage });
+        
         if (result && result.status === 1) {
           this.logs = result.data.map((log) => ({
             _id: log._id || null,
@@ -350,15 +463,18 @@ export default {
             responseMessage: log.responseMessage || 'N/A',
             statusCode: log.statusCode || null
           }));
-          this.currentPage = result.pagination?.page || 1;
-          this.itemsPerPage = result.pagination?.limit || 10;
-          this.totalLogs = result.pagination?.total || this.logs.length;
+          this.currentPage = result.pagination?.page || page;
+          this.totalLogs = result.pagination?.total || this.logs.length; 
         } else {
           this.alert('Failed to load logs. Invalid response format.', 'error');
+          this.logs = [];
+          this.totalLogs = 0;
         }
       } catch (error) {
         console.error('Error fetching logs:', error);
         this.alert('Error fetching logs: ' + error.message, 'error');
+        this.logs = [];
+        this.totalLogs = 0;
       } finally {
         this.loading = false;
       }
@@ -400,36 +516,31 @@ export default {
       this.selectedLog = null;
     },
     filterData() {
-      this.currentPage = 1;
+      // If implementing server-side search, call this.goToPage(1) here.
     },
     resetFilters() {
       this.searchQuery = '';
-      this.currentPage = 1;
+      this.goToPage(1);
     },
     prevPage() {
-      if (this.currentPage > 1) {
-        this.currentPage--;
-      }
+      this.goToPage(this.currentPage - 1);
     },
     nextPage() {
-      if (this.currentPage < this.totalPages) {
-        this.currentPage++;
-      }
+      this.goToPage(this.currentPage + 1);
     },
     goToPage(page) {
-      this.currentPage = page;
+      if (page >= 1 && page <= this.totalPages && page !== this.currentPage) {
+        this.currentPage = page;
+        this.getAllLogs(page);
+      } else if (page === 1 && this.currentPage !== 1) {
+        this.currentPage = 1;
+        this.getAllLogs(1);
+      }
     }
   },
   async mounted() {
-    this.loading = true;
-    try {
-      await this.getAllLogs();
-    } catch (error) {
-      console.error('Error during initial data fetch:', error);
-      this.alert('Failed to load initial data: ' + error.message, 'error');
-    } finally {
-      this.loading = false;
-    }
+    await this.getAllLogs(); 
+    
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
         if (this.showViewModal) this.closeViewModal();

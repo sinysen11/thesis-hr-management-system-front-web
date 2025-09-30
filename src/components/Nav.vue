@@ -117,7 +117,7 @@ export default {
           permission: 'STAFF_REQUEST_LEAVE'
         },
         {
-          name: 'Report Request Leave',
+          name: 'Leave Reports',
           path: '/report-request-leave',
           icon: 'fa-solid fa-file-circle-check',
           permission: 'LEAVE_REPORT'
