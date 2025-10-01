@@ -6,9 +6,9 @@ import ResetPassword from '@/views/reset_password';
 import Dashboard from '@/views/Dashboard.vue';
 // import Employees from '@/views/Employees.vue';
 // import Departments from '@/views/Department.vue';
-import Profile from '@/views/Profile.vue';
 import MainLayout from '@/layouts/MainLayout.vue';
 import Applicant from '@/views/applicants/index.vue';
+import ApplicantDetail from '@/views/applicant_detail/index.vue';
 import JobPosting from '@/views/jobs/job_post';
 import JobTitle from '@/views/jobs/job_title';
 import JobCategory from '@/views/jobs/job_category';
@@ -75,6 +75,12 @@ const routes = [
           requiresAuth: true,
           permission: 'APPLICANTS'
         }
+      },
+      {
+        path: '/applicant/:id',
+        name: 'applicant_detail',
+        component: ApplicantDetail,
+        meta: { requiresAuth: true, permission: 'APPLICANTS' }
       },
       { 
         path: '/jobs/job_posting', 

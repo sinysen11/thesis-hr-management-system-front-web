@@ -70,9 +70,17 @@ module.exports = {
             url: 'get-applicant',
             get: 'get'
         },
+        getApplicantById: {
+            url: 'get-applicant',
+            method: 'get'
+        },
+        updateApplyStatus: {
+            url: 'get-applicant/update',
+            method: 'post'
+        },
         getOneResume: {
             url: 'get-applicant',
-            get: 'get'
+            method: 'get'
         }
     },
     department: {
