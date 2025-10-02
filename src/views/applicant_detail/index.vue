@@ -13,27 +13,28 @@
 
             <div class="action-buttons">
                 <button v-if="applicantData.status === 'SUBMITTED'" @click="shortlistApplicant(applicantData._id)"
-                    :disabled="isProcessing" class="btn-shortlist">
-                    <i v-if="isProcessing" class="fas fa-spinner fa-spin icon-left"></i>
+                    :disabled="isShortlisting || isHiring || isRejecting || isProcessing" class="btn-shortlist">
+                    <i v-if="isShortlisting" class="fas fa-spinner fa-spin icon-left"></i>
                     <i v-else class="fas fa-star icon-left"></i>
                     Shortlist
                 </button>
 
-                <button v-if="['SUBMITTED', 'SHORTLISTED'].includes(applicantData.status)"
-                    @click="openScheduleModal(applicantData._id)" :disabled="isProcessing" class="btn-interview">
+                <button v-if="['SHORTLISTED'].includes(applicantData.status)"
+                    @click="openScheduleModal(applicantData._id)"
+                    :disabled="isHiring || isRejecting || isShortlisting || isProcessing" class="btn-interview">
                     <i class="fas fa-calendar-alt icon-left"></i>
                     Call Interview
                 </button>
 
                 <button v-if="applicantData.status === 'INTERVIEWING'" @click="hireApplicant(applicantData._id)"
-                    :disabled="isProcessing" class="btn-hired">
-                    <i v-if="isProcessing" class="fas fa-spinner fa-spin icon-left"></i>
+                    :disabled="isHiring || isRejecting || isShortlisting || isProcessing" class="btn-hired">
+                    <i v-if="isHiring" class="fas fa-spinner fa-spin icon-left"></i>
                     <i v-else class="fas fa-check-circle icon-left"></i>
                     Hired
                 </button>
                 <button v-if="applicantData.status === 'INTERVIEWING'" @click="rejectApplicant(applicantData._id)"
-                    :disabled="isProcessing" class="btn-reject">
-                    <i v-if="isProcessing" class="fas fa-spinner fa-spin icon-left"></i>
+                    :disabled="isRejecting || isHiring || isShortlisting || isProcessing" class="btn-reject">
+                    <i v-if="isRejecting" class="fas fa-spinner fa-spin icon-left"></i>
                     <i v-else class="fas fa-times-circle icon-left"></i>
                     Reject
                 </button>
@@ -61,12 +62,12 @@
                 <p><strong>Applied For:</strong> <span class="highlight-position">{{
                     applicantData.apply_position
                         }}</span></p>
-                <p><strong>Job Title (Internal):</strong> {{ applicantData.jobId.title.des_en }} ({{
-                    applicantData.jobId.department.name_en }} Dept.)</p>
+                <p><strong>Job Title (Internal):</strong> {{ applicantData.jobId?.title?.des_en }} ({{
+                    applicantData.jobId?.department?.name_en }} Dept.)</p>
                 <p><strong>Job Salary Range:</strong> <span class="salary-range">${{
-                    applicantData.jobId.salary
+                    applicantData.jobId?.salary
                         }}</span></p>
-                <p><strong>Requested Location:</strong> {{ applicantData.requested_location }}</p>
+                <p><strong>Requested Location:</strong> {{ applicantData?.requested_location }}</p>
                 <p><strong>Expected Salary:</strong> <span class="salary-range">${{
                     applicantData.expected_salary
                         }}</span></p>
@@ -84,6 +85,16 @@
             </div>
         </section>
 
+        <section class="card interview-details" v-if="applicantData.interview && applicantData.interview.date">
+            <h2><i class="fas fa-calendar-check icon-left"></i>Interview Details</h2>
+            <div class="detail-grid">
+                <p><strong>Date:</strong> {{ formatDate(applicantData.interview.date) }}</p>
+                <p><strong>Time:</strong> {{ applicantData.interview.time }}</p>
+                <p><strong>Mode:</strong> {{ applicantData.interview.mode }}</p>
+                <p><strong>Location/Link:</strong> {{ applicantData.interview.location }}</p>
+                <p class="full-width"><strong>Notes:</strong> {{ applicantData.interview.notes || 'N/A' }}</p>
+            </div>
+        </section>
         <section class="card education">
             <h2><i class="fas fa-graduation-cap icon-left"></i>Education</h2>
             <div class="detail-grid">
@@ -162,6 +173,24 @@
         </div>
     </div>
 
+    <div v-if="confirmDialog.show" class="modal-overlay" @click.self="confirmDialog.show = false">
+        <div class="modal-content modal-dialog-small">
+            <div class="modal-header">
+                <h3>Confirm Action</h3>
+                <button @click="cancelConfirmation" class="modal-close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p class="dialog-message">{{ confirmDialog.message }}</p>
+            </div>
+            <div class="modal-footer">
+                <button @click="cancelConfirmation" class="btn-secondary">Cancel</button>
+                <button @click="executeConfirmedAction" :class="['btn-primary', confirmDialog.styleClass]">
+                    Confirm {{ confirmDialog.actionLabel }}
+                </button>
+            </div>
+        </div>
+    </div>
+
     <div v-if="isLoading && !applicantData" class="py-12 text-center loading-message">
         <i class="text-6xl text-indigo-600 fas fa-spinner fa-spin"></i>
         <p class="mt-4 text-gray-600">Loading applicant details...</p>
@@ -169,16 +198,26 @@
     <div v-else-if="!applicantData" class="error-message">
         <i class="fas fa-exclamation-triangle"></i> Could not load applicant data.
     </div>
+
+    <div v-if="snackbar.show"
+        :class="['snackbar', { 'snackbar-success': snackbar.type === 'success', 'snackbar-error': snackbar.type === 'error' }]">
+        <i :class="['icon-left', snackbar.type === 'success' ? 'fas fa-check-circle' : 'fas fa-times-circle']"></i>
+        {{ snackbar.message }}
+    </div>
 </template>
 
 <script>
 import { getApplicantById, updateInterviewStatus } from '@/apis/applicant';
+
 export default {
     data() {
         return {
             applicantData: null,
             isLoading: true,
             isProcessing: false,
+            isShortlisting: false,
+            isHiring: false,
+            isRejecting: false,
             showScheduleModal: false,
             selectedJobId: null,
             interviewDetails: {
@@ -187,6 +226,20 @@ export default {
                 location: '',
                 mode: '',
                 notes: ''
+            },
+            snackbar: {
+                show: false,
+                message: '',
+                type: 'success'
+            },
+            snackbarTimeout: null,
+            // NEW CUSTOM DIALOG STATE
+            confirmDialog: {
+                show: false,
+                message: '',
+                action: null, // Function to execute on confirmation
+                actionLabel: '',
+                styleClass: ''
             }
         };
     },
@@ -197,11 +250,11 @@ export default {
             this.isLoading = false;
             return;
         }
-
         await this.fetchApplicantData(applicantId);
     },
 
     methods: {
+        // --- Data Fetching ---
         async fetchApplicantData(id) {
             this.isLoading = true;
             try {
@@ -219,10 +272,95 @@ export default {
             }
         },
 
+        async updateStatus(applicantId, status, interviewData = null, processingKey = 'isProcessing') {
+            if (!applicantId) return false;
+
+            this[processingKey] = true;
+
+            const actionName = status === 'INTERVIEWING' ? 'Schedule Interview' : status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
+
+            try {
+                const payload = {
+                    status: status,
+                    ...(interviewData && { interview: interviewData })
+                };
+
+                const res = await updateInterviewStatus(applicantId, payload);
+                if (res.status === 1) {
+                    this.isLoading = true;
+                    await this.fetchApplicantData(applicantId);
+
+                    this.showSnackbar(`${actionName} successfully!`, 'success');
+
+                    return true;
+                } else {
+                    this.showSnackbar(`Failed to perform action: ${actionName}. ${res.message}`, 'error');
+                    return false;
+                }
+            } catch (err) {
+                const apiErrorMessage = err.response?.data?.message || err.response?.data?.error;
+
+                const errorMessage = apiErrorMessage || err.message || `An unexpected network error occurred during ${actionName.toLowerCase()}.`;
+
+                this.showSnackbar(`Error: ${errorMessage}`, 'error');
+                return false;
+            } finally {
+                this[processingKey] = false;
+            }
+        },
+
+        showConfirmation(message, actionLabel, styleClass, actionFunction) {
+            this.confirmDialog.message = message;
+            this.confirmDialog.actionLabel = actionLabel;
+            this.confirmDialog.styleClass = styleClass;
+            this.confirmDialog.action = actionFunction;
+            this.confirmDialog.show = true;
+        },
+
+        executeConfirmedAction() {
+            if (this.confirmDialog.action) {
+                this.confirmDialog.action();
+            }
+            this.confirmDialog.show = false;
+            this.confirmDialog.action = null;
+        },
+
+        cancelConfirmation() {
+            this.confirmDialog.show = false;
+            this.confirmDialog.action = null;
+        },
+
+        shortlistApplicant(applicantId) {
+            this.showConfirmation(
+                `Are you sure you want to SHORTLIST this applicant? This marks them ready for an interview.`,
+                'Shortlist',
+                'btn-shortlist',
+                () => this.updateStatus(applicantId, 'SHORTLISTED', null, 'isShortlisting')
+            );
+        },
+
+        hireApplicant(applicantId) {
+            this.showConfirmation(
+                `Are you sure you want to HIRE this applicant? This is a final action and updates their status to 'HIRED'.`,
+                'Hire',
+                'btn-hired',
+                () => this.updateStatus(applicantId, 'HIRED', null, 'isHiring')
+            );
+        },
+
+        rejectApplicant(applicantId) {
+            this.showConfirmation(
+                `Are you sure you want to REJECT this applicant? They will be removed from the active hiring pipeline.`,
+                'Reject',
+                'btn-reject',
+                () => this.updateStatus(applicantId, 'REJECTED', null, 'isRejecting')
+            );
+        },
+
         openScheduleModal(applicantId) {
             this.selectedJobId = applicantId;
             this.showScheduleModal = true;
-            this.interviewDetails = { // Reset details
+            this.interviewDetails = {
                 date: '',
                 time: '',
                 location: '',
@@ -235,55 +373,26 @@ export default {
             this.showScheduleModal = false;
         },
 
-        async updateStatus(applicantId, status, interviewData = null) {
-            if (!applicantId) return false;
-
-            this.isProcessing = true;
-
-            try {
-                const payload = {
-                    status: status,
-                    ...(interviewData && { interview: interviewData }) // Only include interview data if provided
-                };
-
-                const res = await updateInterviewStatus(applicantId, payload);
-                if (res.status === 1) {
-                    this.isLoading = true;
-                    await this.fetchApplicantData(applicantId);
-                    return true;
-                } else {
-                    this.$toast.error(res.message);
-                    return false;
-                }
-            } catch (err) {
-                this.$toast.error(err.response?.message || `Error updating status to ${status}.`);
-                return false;
-            } finally {
-                this.isProcessing = false;
-            }
-        },
-
-        async shortlistApplicant(applicantId) {
-            await this.updateStatus(applicantId, 'SHORTLISTED');
-        },
-
-        async hireApplicant(applicantId) {
-            await this.updateStatus(applicantId, 'HIRED');
-        },
-
-        async rejectApplicant(applicantId) {
-            await this.updateStatus(applicantId, 'REJECTED');
-        },
-
         async scheduleInterview() {
             if (!this.selectedJobId) return;
 
-            // scheduleInterview uses updateStatus with interview details
-            const success = await this.updateStatus(this.selectedJobId, 'INTERVIEWING', this.interviewDetails);
+            const success = await this.updateStatus(this.selectedJobId, 'INTERVIEWING', this.interviewDetails, 'isProcessing');
 
             if (success) {
                 this.closeScheduleModal();
             }
+        },
+
+        showSnackbar(message, type = 'success') {
+            if (this.snackbarTimeout) clearTimeout(this.snackbarTimeout);
+
+            this.snackbar.message = message;
+            this.snackbar.type = type;
+            this.snackbar.show = true;
+
+            this.snackbarTimeout = setTimeout(() => {
+                this.snackbar.show = false;
+            }, 3000);
         },
 
         getStatusClass(status) {
@@ -339,7 +448,7 @@ export default {
 </script>
 
 <style scoped>
-/* --- MODAL STYLES --- */
+/* Modal & Dialog Base Styles */
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -360,6 +469,17 @@ export default {
     width: 90%;
     max-width: 500px;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* Custom Dialog Specific Styles */
+.modal-dialog-small {
+    max-width: 400px;
+}
+
+.dialog-message {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    color: #333;
 }
 
 .modal-header {
@@ -429,16 +549,24 @@ export default {
     margin-top: 20px;
 }
 
-.btn-primary {
+/* Base Button Styles */
+.btn-primary, .btn-secondary,
+.btn-interview, .btn-shortlist, .btn-hired, .btn-reject {
     padding: 10px 20px;
-    background-color: #4a69bd;
-    color: white;
     border: none;
     border-radius: 6px;
     cursor: pointer;
     font-size: 1rem;
     font-weight: 500;
     transition: background-color 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-primary {
+    background-color: #4a69bd;
+    color: white;
 }
 
 .btn-primary:hover:not(:disabled) {
@@ -446,22 +574,46 @@ export default {
 }
 
 .btn-secondary {
-    padding: 10px 20px;
     background-color: #f0f0f0;
     color: #444;
     border: 1px solid #ccc;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 1rem;
-    font-weight: 500;
-    transition: background-color 0.3s;
 }
 
 .btn-secondary:hover:not(:disabled) {
     background-color: #e0e0e0;
 }
 
-/* --- MAIN LAYOUT & DATA STYLES --- */
+/* Action Button Styles (used for primary actions AND dialog confirmation buttons) */
+.btn-shortlist {
+    background-color: #ffc107;
+    color: #343a40;
+}
+.btn-hired {
+    background-color: #28a745;
+    color: white;
+}
+.btn-reject {
+    background-color: #dc3545;
+    color: white;
+}
+.btn-interview {
+    background-color: #007bff;
+    color: white;
+}
+
+/* Disabled State */
+.btn-interview:disabled,
+.btn-shortlist:disabled,
+.btn-hired:disabled,
+.btn-reject:disabled,
+.btn-primary:disabled {
+    background-color: #ced4da;
+    cursor: not-allowed;
+    box-shadow: none;
+    color: #6c757d;
+}
+
+/* --- MAIN LAYOUT & DATA STYLES (Retained) --- */
 .applicant-detail-container {
     max-width: 1000px;
     margin: 20px auto;
@@ -485,7 +637,6 @@ export default {
     font-weight: 600;
 }
 
-/* New Action Buttons Container */
 .action-buttons {
     display: flex;
     gap: 10px;
@@ -552,76 +703,6 @@ h2 {
     color: #27ae60;
 }
 
-/* COMMON BUTTON STYLES FOR ACTIONS */
-.btn-interview,
-.btn-shortlist,
-.btn-hired,
-.btn-reject {
-    padding: 12px 25px;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 1rem;
-    font-weight: 500;
-    transition: all 0.3s ease;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    display: flex;
-    align-items: center;
-}
-
-/* Specific Button Styles */
-.btn-interview {
-    background-color: #007bff;
-    color: white;
-    box-shadow: 0 2px 4px rgba(0, 123, 255, 0.3);
-}
-
-.btn-interview:hover:not(:disabled) {
-    background-color: #0056b3;
-    box-shadow: 0 4px 8px rgba(0, 123, 255, 0.4);
-}
-
-.btn-shortlist {
-    background-color: #ffc107;
-    color: #343a40;
-    box-shadow: 0 2px 4px rgba(255, 193, 7, 0.3);
-}
-
-.btn-shortlist:hover:not(:disabled) {
-    background-color: #e0a800;
-}
-
-.btn-hired {
-    background-color: #28a745;
-    color: white;
-    box-shadow: 0 2px 4px rgba(40, 167, 69, 0.3);
-}
-
-.btn-hired:hover:not(:disabled) {
-    background-color: #1e7e34;
-}
-
-.btn-reject {
-    background-color: #dc3545;
-    color: white;
-    box-shadow: 0 2px 4px rgba(220, 53, 69, 0.3);
-}
-
-.btn-reject:hover:not(:disabled) {
-    background-color: #c82333;
-}
-
-.btn-interview:disabled,
-.btn-shortlist:disabled,
-.btn-hired:disabled,
-.btn-reject:disabled,
-.btn-primary:disabled {
-    background-color: #ced4da;
-    cursor: not-allowed;
-    box-shadow: none;
-    color: #6c757d;
-}
-
 .resume-link {
     color: #1a73e8;
     text-decoration: none;
@@ -642,5 +723,35 @@ h2 {
     padding: 80px;
     font-size: 1.4em;
     color: #888;
+}
+
+/* SNACKBAR STYLES */
+.snackbar {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    min-width: 300px;
+    padding: 15px 20px;
+    border-radius: 8px;
+    color: white;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    display: flex;
+    align-items: center;
+    z-index: 10000;
+    transition: opacity 0.3s, transform 0.3s;
+}
+
+.snackbar-success {
+    background-color: #28a745;
+}
+
+.snackbar-error {
+    background-color: #dc3545;
+}
+
+.snackbar .icon-left {
+    margin-right: 10px;
 }
 </style>
