@@ -1,9 +1,26 @@
 <template>
-  <div class="flex flex-col min-h-screen bg-gray-50">
-    <div class="w-full">
-      <h2 class="mb-2 text-3xl font-extrabold text-gray-900">
-        Applicant Dashboard
-      </h2>
+  <div class="flex flex-col min-h-scree">
+      <div class="w-full">
+        <div v-if="successMessage"
+        class="fixed bottom-5 left-1/2 transform -translate-x-1/2 z-[100] bg-green-500 text-white p-3 rounded-lg shadow-xl transition-all duration-300">
+        <i class="mr-2 fas fa-check-circle"></i>{{ successMessage }}
+      </div>
+      <div v-if="errorMessage"
+        class="fixed bottom-5 left-1/2 transform -translate-x-1/2 z-[100] bg-red-500 text-white p-3 rounded-lg shadow-xl transition-all duration-300">
+        <i class="mr-2 fas fa-times-circle"></i>{{ errorMessage }}
+      </div>
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="mb-2 text-2xl font-extrabold tracking-tight text-green-700">
+          List of Applyer
+        </h2>
+        <div class="flex gap-4">
+          <button @click="exportToExcel" :disabled="loading || applicants?.length === 0"
+            class="px-6 py-2 font-medium text-white transition duration-200 bg-green-600 rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed">
+            <i class="mr-2 fas fa-file-excel"></i>Export as Report
+          </button>
+        </div>
+      </div>
+
       <div class="p-6 mb-8 bg-white rounded-lg shadow-sm">
         <div class="grid grid-cols-1 gap-6 md:grid-cols-4">
           <div class="flex flex-col">
@@ -87,7 +104,7 @@
                   {{ applicant.applicant.first_name }}
                   {{ applicant.applicant.last_name }}
                 </td>
-                <td class="px-4 py-2">{{ applicant.job.title || 'N/A' }}</td>
+                <td class="px-4 py-2">{{ applicant.jobId.title.des_en || 'N/A' }}</td>
                 <td class="px-4 py-2">
                   {{ applicant.job.department || 'N/A' }}
                 </td>
@@ -122,10 +139,10 @@
                 </td>
               </tr>
               <tr v-if="applicants.length === 0">
-              <td colspan="9" class="px-5 py-4 text-center text-gray-500">
-                No applicants found matching your criteria.
-              </td>
-            </tr>
+                <td colspan="9" class="px-5 py-4 text-center text-gray-500">
+                  No applicants found matching your criteria.
+                </td>
+              </tr>
             </tbody>
           </table>
         </div>
@@ -251,6 +268,7 @@ import 'flatpickr/dist/flatpickr.css';
 import { getAllApplicant, getOneResume } from '@/apis/applicant';
 import { reactive } from 'vue';
 import { getAllJobTitle } from '@/apis/jobs';
+import * as XLSX from 'xlsx';
 
 export default {
   components: { FlatPickr },
@@ -339,7 +357,7 @@ export default {
           from: this.appliedFrom,
           position: this.jobTitleFilter,
           to: this.appliedTo,
-          status: this.statusFilter 
+          status: this.statusFilter
         }
         const response = await getAllApplicant(payload);
 
@@ -356,25 +374,20 @@ export default {
               }
             };
           });
-          console.log(this.applicants)
-          // 2. Read and update pagination state from API response
+          const test = JSON.stringify(this.applicants)
+          console.log(JSON.parse(test))
           if (response.pagination) {
             this.apiTotalItems = response.pagination.total || 0;
-            // Ensure currentPage is synchronized (though usually controlled by local state)
             this.currentPage = response.pagination.page || 1;
           } else {
-            // Fallback for non-paginated responses
             this.apiTotalItems = this.applicants.length;
           }
-
-          this.showAlert(`Successfully fetched ${this.applicants.length} applicants`);
         } else {
           this.error = 'Failed to fetch applicants: Invalid response status';
           this.showAlert(
             'Failed to fetch applicants: Invalid response status',
             'error'
           );
-          console.error('Invalid response status:', response);
         }
       } catch (error) {
         this.error = 'Error fetching applicants: ' + error.message;
@@ -383,6 +396,53 @@ export default {
       } finally {
         this.isLoading = false
       }
+    },
+
+    exportToExcel() {
+      if (this.applicants.length === 0) {
+        this.showAlert('No applicants to export for the report.', 'error');
+        return;
+      }
+
+      try {
+        const data = this.applicants.map((applicant, index) => ({
+          'No': index + 1 + (this.currentPage - 1) * this.limit,
+          'Applied Date': this.formatDate(applicant.createdAt),
+          'Name': `${applicant.applicant.first_name || ''} ${applicant.applicant.last_name || ''}`,
+          'Position': applicant.job.title || 'N/A',
+          'Department': applicant.job.department || 'N/A',
+          'Gender': applicant.applicant.sex || 'N/A',
+          'Phone': this.formatPhone(applicant.applicant.phone) || 'N/A',
+          'Status': applicant.status || 'N/A'
+        }));
+
+        const worksheet = XLSX.utils.json_to_sheet(data);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'ApplicantsReport');
+
+        XLSX.writeFile(
+          workbook,
+          `Applicants_Report_${new Date().toISOString().split('T')[0]}.xlsx`
+        );
+        this.alert('Applicants report exported successfully to Excel!');
+      } catch (error) {
+        console.error('Error during Excel export:', error);
+        this.alert('Failed to generate applicants report.', 'error');
+      }
+    },
+
+    alert(message, type = 'success') {
+      if (type === 'success') {
+        this.successMessage = message;
+        this.errorMessage = '';
+      } else {
+        this.errorMessage = message;
+        this.successMessage = '';
+      }
+      setTimeout(() => {
+        this.successMessage = '';
+        this.errorMessage = '';
+      }, 3000);
     },
 
     async downloadResume(applicantId, fileName = 'resume.pdf') {
@@ -484,6 +544,10 @@ export default {
   mounted() {
     this.fetchApplicants();
     this.handleGetAllJob();
+    if (this.$route.query.alert) {
+      this.alert(this.$route.query.alert, this.$route.query.type || 'success');
+      this.$router.replace({ query: {}}); 
+    }
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && this.showModal) {
         this.closeModal();
