@@ -6,9 +6,9 @@ import ResetPassword from '@/views/reset_password';
 import Dashboard from '@/views/Dashboard.vue';
 // import Employees from '@/views/Employees.vue';
 // import Departments from '@/views/Department.vue';
-import Profile from '@/views/Profile.vue';
 import MainLayout from '@/layouts/MainLayout.vue';
 import Applicant from '@/views/applicants/index.vue';
+import ApplicantDetail from '@/views/applicant_detail/index.vue';
 import JobPosting from '@/views/jobs/job_post';
 import JobTitle from '@/views/jobs/job_title';
 import JobCategory from '@/views/jobs/job_category';
@@ -25,6 +25,12 @@ import UserManagement from '@/views/user_management/users';
 import ActivityLog from '@/views/user_management/activity_log';
 import MainContent from '@/views/website_control/main_content';
 import TabContent from '@/views/website_control/tab_content';
+<<<<<<< HEAD
+=======
+import UploadImage from '@/views/website_control/upload_image';
+import PersonalInfo from '@/views/personal_info/index.vue';
+import JobPostingDetail from '@/views/jobs/job_detail/index.vue'
+>>>>>>> 95a4af15e3d8b0e93fd65ec7b4daadd593397f08
 const routes = [
   {
     path: '/login',
@@ -73,6 +79,12 @@ const routes = [
           permission: 'APPLICANTS'
         }
       },
+      {
+        path: '/applicant/:id',
+        name: 'applicant_detail',
+        component: ApplicantDetail,
+        meta: { requiresAuth: true, permission: 'APPLICANTS' }
+      },
       { 
         path: '/jobs/job_posting', 
         name: 'job_posting', 
@@ -80,8 +92,15 @@ const routes = [
         meta: { 
           requiresAuth: true,
           permission: 'JOBS'
-        } 
-      }, 
+        }
+      },
+      {
+        path: '/jobs/job_posting/:id',
+        name: 'job_posting_detail',
+        component: JobPostingDetail,
+        meta: { requiresAuth: true, permission: 'JOBS' }
+      },
+
       { 
         path: '/jobs/job_title', 
         name: 'job_title', component: 
@@ -170,6 +189,21 @@ const routes = [
         name: 'tab-content',
         component: TabContent,
         meta: { requiresAuth: true }
+<<<<<<< HEAD
+=======
+      },
+      {
+        path: '/website-control/upload-image',
+        name: 'upload-image',
+        component: UploadImage,
+        meta: { requiresAuth: true }
+      },
+      {
+        path: '/personal-info',
+        name: 'personal',
+        component: PersonalInfo,
+        meta: { requiresAuth: true }
+>>>>>>> 95a4af15e3d8b0e93fd65ec7b4daadd593397f08
       }
       // {
       //   path: '/profile',

@@ -70,9 +70,17 @@ module.exports = {
             url: 'get-applicant',
             get: 'get'
         },
+        getApplicantById: {
+            url: 'get-applicant',
+            method: 'get'
+        },
+        updateApplyStatus: {
+            url: 'get-applicant/update',
+            method: 'post'
+        },
         getOneResume: {
             url: 'get-applicant',
-            get: 'get'
+            method: 'get'
         }
     },
     department: {
@@ -253,7 +261,23 @@ module.exports = {
         },
         deleteRole: {
             url: 'roles',
-            method: 'delete' // Changed from 'get' to 'delete'
+            method: 'delete'
+        },
+        updateUserInfo: {
+            url: 'users/update-info',
+            method: 'post'
+        },
+        getUserInfo: {
+            url: 'users/info',
+            method: 'get'
+        }, 
+        changePassword: {
+            url: 'users/change-password',
+            method: 'post'
+        },
+        updateStatus: {
+            url: 'users/update-status',
+            method: 'post'
         }
     },
     mainContent: {
@@ -304,6 +328,28 @@ module.exports = {
         createUploadImage: {
             url: 'upload-image',
             method: 'post'
+        }
+    },
+    publicHoliday: {
+        createPublicHoliday: {
+            url: 'public-holiday',
+            method: 'post'
+        },
+        getAllPublicHoliday: {
+            url: 'public-holiday',
+            method: 'get'
+        },
+        updatePublicHoliday: {
+            url: 'public-holiday/update',
+            method: 'post'
+        },
+        deletePublicHoliday: {
+            url: 'public-holiday/delete',
+            method: 'post'
+        },
+        getHolidayDate: {
+            url: 'public-holiday/date',
+            method: 'get'
         }
     }
 };

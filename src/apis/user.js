@@ -9,10 +9,11 @@ export function createUser(data) {
   });
 }
 
-export function getAllUser() {
+export function getAllUser(params) {
   return request({
     url: user.getAllUser.url,
-    method: user.getAllUser.method
+    method: user.getAllUser.method,
+    params
   });
 }
 
@@ -36,4 +37,35 @@ export function deleteUser(id) {
     url: `${user.deleteUser.url}/${id}`,
     method: user.deleteUser.method
   });
+}
+
+export function getUserInfo(id) {
+  return request({
+    url: `${user.getUserInfo.url}/${id}`,
+    method: user.getUserInfo.method
+  });
+}
+
+export function updateUserInfo(data) {
+  return request({
+    url: user.updateUserInfo.url,
+    method: user.updateUserInfo.method,
+    data
+  });
+}
+
+export function changePassword(data) {
+  return request({
+    url: user.changePassword.url,
+    method: user.changePassword.method,
+    data
+  })
+}
+
+export function updateStatus(data) {
+  return request({
+    url: user.updateStatus.url,
+    method: user.updateStatus.method,
+    data
+  })
 }

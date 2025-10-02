@@ -15,10 +15,11 @@
     </div>
 
     <div class="flex items-center justify-between mb-6">
-      <h2 class="text-3xl font-extrabold text-gray-900">Departments</h2>
-      <button @click="openCreateModal" :disabled="loading"
+      <h2 class="text-2xl font-extrabold tracking-tight text-green-700">
+        Departments
+      </h2>      <button @click="openCreateModal" :disabled="loading"
         class="px-6 py-2 font-medium text-white transition duration-200 bg-indigo-600 rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed">
-        Create Department
+        Create
       </button>
     </div>
 

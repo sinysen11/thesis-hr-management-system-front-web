@@ -1,10 +1,30 @@
 import request from '@/services/request';
 import { applicant } from '@/constants/apis';
 
-export function getAllApplicant(data) {
+export function getAllApplicant(params) {
   return request({
     url: applicant.getAllApplicant.url,
     method: applicant.getAllApplicant.method,
+    params
+  });
+}
+export function getApplicantById(id) {
+  return request({
+    url: `${applicant.getApplicantById.url}/${id}`,
+    method: applicant.getApplicantById.method
+  });
+}
+export function updateInterviewStatus(id, data) {
+  return request({
+    url: `${applicant.updateApplyStatus.url}/${id}`,
+    method: applicant.updateApplyStatus.method,
+    data
+  });
+}
+export function updateApplicationStatus(data) {
+  return request({
+    url: applicant.getApplicantById.url,
+    method: applicant.getApplicantById.method,
     data
   });
 }

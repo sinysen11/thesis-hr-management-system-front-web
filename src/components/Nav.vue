@@ -1,63 +1,42 @@
 <template>
-  <aside
-    v-if="!isLoginPage"
-    class="flex flex-col w-64 py-6 overflow-y-auto bg-white border-r border-gray-200 shadow-sm"
-    style="min-height: 100vh"
-  >
+  <aside v-if="!isLoginPage" class="flex flex-col w-64 py-6 overflow-y-auto bg-white border-r border-gray-200 shadow-sm"
+    style="min-height: 100vh">
     <div class="mb-10 text-center">
       <img src="../assets/logo.png" alt="Logo" class="mx-auto h-14" />
     </div>
 
     <nav class="flex-1 px-5 space-y-3">
       <template v-for="item in filteredMenu" :key="item.name">
-        <router-link
-          v-if="!item.children"
-          :to="item.path"
-          class="flex items-center px-4 py-3 text-sm font-semibold transition-colors duration-200 rounded-md"
-          :class="
-            currentPath === item.path
+        <router-link v-if="!item.children" :to="item.path"
+          class="flex items-center px-4 py-3 text-sm font-semibold transition-colors duration-200 rounded-md" :class="currentPath === item.path
               ? 'bg-green-700 text-white shadow-md'
               : 'text-gray-600 hover:bg-green-100 hover:text-green-700'
-          "
-        >
+            ">
           <i :class="`mr-4 text-lg ${item.icon}`"></i>
           {{ item.name }}
         </router-link>
 
         <div v-else class="w-full">
-          <button
-            @click="toggleOpen(item)"
-            class="flex items-center w-full px-4 py-3 text-sm font-semibold text-gray-600 transition-colors duration-200 rounded-md hover:text-green-700 hover:bg-green-50 focus:outline-none"
-          >
+          <button @click="toggleOpen(item)"
+            class="flex items-center w-full px-4 py-3 text-sm font-semibold text-gray-600 transition-colors duration-200 rounded-md hover:text-green-700 hover:bg-green-50 focus:outline-none">
             <i :class="`mr-4 text-lg ${item.icon}`"></i>
             {{ item.name }}
-            <i
-              :class="[
-                'ml-auto transition-transform duration-300',
-                item.open ? 'rotate-180' : ''
-              ]"
-              class="text-base fas fa-chevron-down"
-            ></i>
+            <i :class="[
+              'ml-auto transition-transform duration-300',
+              item.open ? 'rotate-180' : ''
+            ]" class="text-base fas fa-chevron-down"></i>
           </button>
           <transition name="slide">
-            <div
-              v-if="item.open"
-              class="pl-6 mt-2 space-y-1 text-sm text-gray-700 rounded-md"
-            >
-              <router-link
-                v-for="child in item.children"
-                :key="child.name"
-                :to="child.path"
-                class="flex items-center px-4 py-2 transition-colors duration-200 rounded-md"
-                :class="
-                  currentPath === child.path
+            <div v-if="item.open" class="pl-6 mt-2 space-y-1 text-sm text-gray-700 rounded-md">
+              <router-link v-for="child in item.children" :key="child.name" :to="child.path"
+                class="flex items-center px-4 py-2 transition-colors duration-200 rounded-md" :class="currentPath.startsWith(child.path)
                     ? 'bg-green-700 text-white'
                     : 'hover:bg-green-100 hover:text-green-700'
-                "
-              >
+                  ">
                 <i :class="`mr-4 text-base ${child.icon}`"></i>
                 {{ child.name }}
               </router-link>
+
             </div>
           </transition>
         </div>
@@ -93,12 +72,12 @@ export default {
           open: false,
           children: [
             {
-              name: 'Job Posts',
+              name: 'Posts',
               path: '/jobs/job_posting',
               icon: 'fas fa-file-alt'
             },
             {
-              name: 'Job Titles',
+              name: 'Titles',
               path: '/jobs/job_title',
               icon: 'fas fa-tag'
             }
@@ -117,7 +96,7 @@ export default {
           permission: 'STAFF_REQUEST_LEAVE'
         },
         {
-          name: 'Report Request Leave',
+          name: 'Leave Reports',
           path: '/report-request-leave',
           icon: 'fa-solid fa-file-circle-check',
           permission: 'LEAVE_REPORT'
