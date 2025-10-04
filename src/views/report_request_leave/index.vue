@@ -4,8 +4,13 @@
       <h2 class="text-2xl font-extrabold tracking-tight text-green-700">
         Leave Report
       </h2>
-
-      <button @click="exportToExcel"
+      <button @click="exportToExcel" :disabled="isExporting"
+        class="px-6 py-2 font-medium text-white transition duration-200 bg-green-600 rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed">
+        <span>
+          <i class="mr-2 fas fa-file-excel"></i>Export as Report
+        </span>
+      </button>
+      <!-- <button @click="exportToExcel"
         class="relative py-3 font-semibold text-white transition duration-300 ease-in-out transform shadow-md cursor-pointer px-7 rounded-2xl bg-gradient-to-r from-indigo-600 to-indigo-700 hover:scale-105 hover:from-indigo-700 hover:to-indigo-800 focus:outline-none focus:ring-4 focus:ring-indigo-300 disabled:opacity-50 disabled:cursor-not-allowed"
         :disabled="isExporting">
         <span v-if="isExporting" class="absolute inset-0 flex items-center justify-center">
@@ -15,7 +20,7 @@
           <i class="fa-solid fa-download"></i>
           Export
         </span>
-      </button>
+      </button> -->
     </div>
 
     <div class="p-6 mb-8 bg-white rounded-lg shadow-sm">

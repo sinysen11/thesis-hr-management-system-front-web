@@ -148,6 +148,7 @@
               <th class="px-5 py-4 text-left text-green-700">Start Date</th>
               <th class="px-5 py-4 text-left text-green-700">End Date</th>
               <th class="px-5 py-4 text-left text-green-700">Reason</th>
+              <th class="px-5 py-4 text-left text-green-700">Comment</th>
               <th class="px-5 py-4 text-left text-green-700">Status</th>
               <th class="px-5 py-4 text-left text-green-700">Actions</th>
             </tr>
@@ -168,7 +169,8 @@
               <td class="px-5 py-4">{{ request.leaveTypeName }}</td>
               <td class="px-5 py-4">{{ request.startDate }}</td>
               <td class="px-5 py-4">{{ request.endDate }}</td>
-              <td class="px-5 py-4">{{ request.reason || 'No reason provided' }}</td>
+              <td class="px-5 py-4">{{ request.reason || '-' }}</td>
+              <td class="px-5 py-4">{{ request.comment || '-' }}</td>
 
               <td class="px-5 py-4">
                 <span :class="[
@@ -621,7 +623,8 @@ export default {
               approverId: request.approver?._id || '',
               approverName: request.approver ? `${request.approver.first_name_en || ''} ${request.approver.last_name_en || ''}`.trim() || 'N/A' : 'N/A',
               status: request.status || 'PENDING',
-              reason: request.reason || 'No reason provided'
+              reason: request.reason || '-',
+              comment: request.comment || '-'
             };
           });
         } else {
