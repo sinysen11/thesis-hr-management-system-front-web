@@ -240,21 +240,31 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
   const permissions = JSON.parse(localStorage.getItem('permissions') || '[]');
-  console.log(permissions)
+  console.log(permissions);
+  
   if (to.meta.requiresAuth) {
     if (to.path === '/' && !permissions.includes('DASHBOARD')) {
-      const allRoutes = router.getRoutes().filter(data => data.meta?.permission);
-      const firstPermitted = allRoutes.find(data => permissions.includes(data.meta.permission));
-      console.log(router.getRoutes())
+      const allBaseRoutes = router.getRoutes().filter(data => 
+        data.meta?.permission && !data.path.includes('/:'));
+
+      const firstPermitted = allBaseRoutes.find(data => 
+        permissions.includes(data.meta.permission));
+
       if (firstPermitted) {
         return next(firstPermitted.path);
       } else {
         return next('/login');
       }
     }
+    
+    if (to.meta.permission && !permissions.includes(to.meta.permission)) {
+      return next('/login');
+    }
+    
+    return next();
   }
-
-  next();
+  
+  return next();
 });
 
 export default router;

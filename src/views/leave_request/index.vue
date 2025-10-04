@@ -540,7 +540,10 @@ export default {
       this.isSubmitting = true;
       try {
         const status = 'CANCELLED';
-        const response = await allowStaffRequestLeave(this.cancelRequestId, status);
+        const payload = {
+          status: status
+        }
+        const response = await allowStaffRequestLeave(this.cancelRequestId, payload);
 
         if (response.status === 1) {
           this.isLoading = true;
