@@ -8,7 +8,10 @@
     <nav class="flex-1 px-5 space-y-3">
       <template v-for="item in filteredMenu" :key="item.name">
         <router-link v-if="!item.children" :to="item.path"
-          class="flex items-center px-4 py-3 text-sm font-semibold transition-colors duration-200 rounded-md" :class="currentPath === item.path
+          class="flex items-center px-4 py-3 text-sm font-semibold transition-colors duration-200 rounded-md"
+          :class="currentPath.startsWith(item.path) && item.path !== '/'
+              ? 'bg-green-700 text-white shadow-md'
+              : currentPath === '/' && item.path === '/'
               ? 'bg-green-700 text-white shadow-md'
               : 'text-gray-600 hover:bg-green-100 hover:text-green-700'
             ">

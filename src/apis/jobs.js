@@ -10,14 +10,15 @@ export function createJob(data) {
   });
 }
 
-export function getAllJob() {
+export function getAllJob(params) {
   return request({
     url: jobs.getAllJob.url,
-    method: jobs.getAllJob.method
+    method: jobs.getAllJob.method,
+    params
   });
 }
 
-export function getOneJob(id) {
+export function getJobById(id) {
   return request({
     url: `${jobs.getOneJob.url}/${id}`,
     method: jobs.getOneJob.method

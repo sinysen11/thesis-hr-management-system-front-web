@@ -25,6 +25,10 @@ import UserManagement from '@/views/user_management/users';
 import ActivityLog from '@/views/user_management/activity_log';
 import MainContent from '@/views/website_control/main_content';
 import TabContent from '@/views/website_control/tab_content';
+// import UploadImage from '@/views/website_control/upload_image';
+import PersonalInfo from '@/views/personal_info/index.vue';
+// import JobPostingDetail from '@/views/jobs/job_detail/index.vue';
+import CreateJobPost from '@/views/jobs/create_job/index.vue';
 const routes = [
   {
     path: '/login',
@@ -94,6 +98,31 @@ const routes = [
       //   component: JobPostingDetail,
       //   meta: { requiresAuth: true, permission: 'JOBS' }
       // },
+      {
+        path: '/jobs/job_posting/create',
+        name: 'create_job_posting',
+        component: CreateJobPost,
+        meta: { requiresAuth: true, permission: 'JOBS' }
+      },
+      {
+        path: '/jobs/job_posting/update/:jobId',
+        name: 'job_edit',
+        component: CreateJobPost,
+        props: (route) => ({ 
+          isEditing: true,
+          jobId: route.params.jobId
+        })
+      },
+      {
+        path: '/jobs/job_posting/:id',
+        name: 'job_posting_detail',
+        component: CreateJobPost,
+        props: (route) => ({ 
+          isEditing: false,
+          isViewing: true,
+          jobId: route.params.id
+        })
+      },
 
       {
         path: '/jobs/job_title',
@@ -183,12 +212,12 @@ const routes = [
         name: 'tab-content',
         component: TabContent,
         meta: { requiresAuth: true }
+      },
+      {
+        path: '/personal-info',
+        component: PersonalInfo,
+        meta: { requiresAuth: true }
       }
-      // {
-      //   path: '/profile',
-      //   component: Profile,
-      //   meta: { requiresAuth: true }
-      // }
     ]
   },
   {

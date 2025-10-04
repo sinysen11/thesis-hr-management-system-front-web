@@ -17,13 +17,11 @@ export function getStaffRequestForApprover(id, params) {
   });
 }
 
-export function allowStaffRequestLeave(request_id, status) {
+export function allowStaffRequestLeave(request_id, data) {
   return request({
     url: `${leaveRequest.allowStaffRequestLeave.url}/${request_id}`,
     method: `${leaveRequest.allowStaffRequestLeave.method}`,
-    data: {
-      status
-    }
+    data
   })
 }
 
