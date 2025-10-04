@@ -1,7 +1,7 @@
 <template>
   <div class="flex flex-col min-h-scree">
-      <div class="w-full">
-        <div v-if="successMessage"
+    <div class="w-full">
+      <div v-if="successMessage"
         class="fixed bottom-5 left-1/2 transform -translate-x-1/2 z-[100] bg-green-500 text-white p-3 rounded-lg shadow-xl transition-all duration-300">
         <i class="mr-2 fas fa-check-circle"></i>{{ successMessage }}
       </div>
@@ -129,7 +129,7 @@
                 </td>
                 <td class="px-4 py-2">
                   <button @click="
-                    downloadResume(applicant._id, applicant.resume?.fileName)
+                    downloadResume(applicant?.resume?._id, applicant.resume?.originalname)
                     "
                     class="relative p-2 text-indigo-600 transition rounded-full hover:text-indigo-800 hover:bg-indigo-100"
                     title="Download File" :disabled="loading[applicant._id]">
@@ -445,22 +445,22 @@ export default {
       }, 3000);
     },
 
-    async downloadResume(applicantId, fileName = 'resume.pdf') {
+    async downloadResume(applicantId, fileName) {
       try {
-        this.loading[applicantId] = true;
-        const response = await getOneResume(applicantId);
-        const blob = new Blob([response], { type: 'application/pdf' });
+        // Ensure getOneResume returns binary (PDF) data
+        const response = await getOneResume(applicantId, { responseType: 'applcation/pdf' });
+
+        const blob = new Blob([response.data], { type: 'application/pdf' });
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
-        link.download = fileName;
+        link.download = fileName || 'resume.pdf';
         link.click();
+
         URL.revokeObjectURL(link.href);
         this.showAlert(`Successfully downloaded ${fileName}`);
       } catch (error) {
         this.showAlert('Failed to download resume: ' + error.message, 'error');
         console.error('Download failed:', error);
-      } finally {
-        this.loading[applicantId] = false;
       }
     },
 
@@ -546,7 +546,7 @@ export default {
     this.handleGetAllJob();
     if (this.$route.query.alert) {
       this.alert(this.$route.query.alert, this.$route.query.type || 'success');
-      this.$router.replace({ query: {}}); 
+      this.$router.replace({ query: {}});
     }
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && this.showModal) {

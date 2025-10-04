@@ -32,7 +32,7 @@ export function getOneResume(id) {
   return request({
     url: `${applicant.getOneResume.url}/${id}/document`,
     method: applicant.getOneResume.method,
-    responseType: 'blob' // tells Axios to return binary data
+    responseType: 'blob'
   });
 }
 
