@@ -1,19 +1,5 @@
 <template>
   <div class="w-full">
-    <!-- Fixed-Position Alerts -->
-    <div class="fixed z-50 w-full max-w-xs space-y-4 top-4 right-4">
-      <div v-if="successMessage"
-        class="p-4 text-white transition-opacity duration-500 ease-in-out bg-green-500 rounded-lg shadow-md"
-        :class="{ 'opacity-0': !successMessage }">
-        {{ successMessage }}
-      </div>
-      <div v-if="errorMessage"
-        class="p-4 text-white transition-opacity duration-500 ease-in-out bg-red-500 rounded-lg shadow-md"
-        :class="{ 'opacity-0': !errorMessage }">
-        {{ errorMessage }}
-      </div>
-    </div>
-
     <div class="flex items-center justify-between mb-6">
       <h2 class="text-3xl font-extrabold text-gray-900">Main Content</h2>
       <button @click="openCreateModal" :disabled="loading"
@@ -188,7 +174,25 @@
               <i class="fas fa-times"></i>
             </button>
           </div>
-          <div class="pt-5 space-y-5 border-t border-gray-200">
+          <!-- Alerts Inside Modal -->
+          <div class="mb-4 space-y-2">
+            <div v-if="successMessage"
+              class="p-4 text-white transition-opacity duration-500 ease-in-out bg-green-500 rounded-lg shadow-md"
+              :class="{ 'opacity-0': !successMessage }">
+              {{ successMessage }}
+            </div>
+            <div v-if="errorMessage"
+              class="p-4 text-white transition-opacity duration-500 ease-in-out bg-red-500 rounded-lg shadow-md"
+              :class="{ 'opacity-0': !errorMessage }">
+              {{ errorMessage }}
+            </div>
+          </div>
+          <!-- Loading Spinner Inside Modal -->
+          <div v-if="modalLoading" class="py-4 text-center">
+            <i class="text-4xl text-green-700 fas fa-spinner fa-spin"></i>
+            <p class="mt-2 text-sm text-gray-600">Processing...</p>
+          </div>
+          <div v-else class="pt-5 space-y-5 border-t border-gray-200">
             <div>
               <label class="text-sm font-semibold text-gray-600">Type</label>
               <input v-model="form.type" type="text"
@@ -229,7 +233,7 @@
               class="px-6 py-2 font-medium text-gray-800 transition duration-200 bg-gray-200 rounded-lg hover:bg-gray-300">
               Cancel
             </button>
-            <button @click="saveMainContent" :disabled="loading"
+            <button @click="saveMainContent" :disabled="modalLoading"
               class="px-6 py-2 font-medium text-white transition duration-200 bg-indigo-600 rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed">
               {{ isEditing ? 'Update' : 'Create' }}
             </button>
@@ -292,6 +296,7 @@ export default {
       imagePreview: null,
       mainContents: [],
       loading: false,
+      modalLoading: false,
       successMessage: '',
       errorMessage: ''
     };
@@ -336,20 +341,18 @@ export default {
       }, 3000);
     },
 
-    // Handle image file selection and preview with stricter validation
+    // Handle image file selection and preview
     handleImageChange(event) {
       const file = event.target.files[0];
       this.form.image = null;
       this.imagePreview = null;
 
       if (file) {
-        // Validate file type is an image
         if (!file.type.startsWith('image/')) {
           this.alert('Please select a valid image file (e.g., JPG, PNG, GIF).', 'error');
           return;
         }
 
-        // Optional: Add file size limit (e.g., 5MB)
         const maxSizeInMB = 5;
         const maxSizeInBytes = maxSizeInMB * 1024 * 1024;
         if (file.size > maxSizeInBytes) {
@@ -369,24 +372,26 @@ export default {
     // Upload image and return the image ID
     async uploadImage() {
       if (!this.form.image) {
-        this.alert('Please select an image to upload.', 'error');
-        return null;
+        return null; // Allow creating content without an image
       }
       try {
+        this.modalLoading = true;
         const formData = new FormData();
         formData.append('image', this.form.image);
         const response = await createUploadImage(formData);
-        if (response && response.status === 1 && response.data && response.data._id) {
+        if (response && response.status === 1 && response.id) {
           this.alert('Image uploaded successfully!');
-          return response.data._id;
+          return response.id; // Return the image ID
         } else {
-          this.alert('Failed to upload image. Please try again.', 'error');
+          this.alert('Failed to upload image. Invalid response.', 'error');
           return null;
         }
       } catch (error) {
         console.error('Error uploading image:', error.response || error);
         this.alert(`Error uploading image: ${error.message || 'Request failed'}`, 'error');
         return null;
+      } finally {
+        this.modalLoading = false;
       }
     },
 
@@ -405,10 +410,7 @@ export default {
             status: content.status
           }));
         } else {
-          console.error('Invalid response format:', {
-            status: response?.status,
-            data: response?.data
-          });
+          console.error('Invalid response format:', response);
           this.alert('Failed to load main contents. Invalid response format.', 'error');
           this.mainContents = [];
         }
@@ -423,50 +425,59 @@ export default {
 
     // Save (Create/Update) Main Content
     async saveMainContent() {
+      // Validate required fields
       if (!this.form.type || !this.form.title || !this.form.description || !this.form.status) {
         this.alert('Please fill in all required fields (Type, Title, Description, Status).', 'error');
         return;
       }
-      this.loading = true;
+
+      this.modalLoading = true;
       try {
+        // Upload image if selected
         let imageId = null;
         if (this.form.image) {
           imageId = await this.uploadImage();
           if (!imageId) {
-            this.loading = false;
-            return;
+            return; // Stop if image upload fails
           }
         }
+
+        // Prepare form data for main content
         const formData = {
           type: this.form.type,
           title: this.form.title,
           description: this.form.description,
           status: this.form.status,
-          images: imageId ? [...(this.isEditing ? this.form.images : []), imageId] : (this.isEditing ? this.form.images : [])
+          images: imageId
+            ? [...(this.isEditing ? this.form.images : []), imageId]
+            : (this.isEditing ? this.form.images : [])
         };
+
+        let response;
         if (this.isEditing) {
-          const updatedContent = await updateMainContent(this.form.id, formData);
-          if (updatedContent && updatedContent.status === 1) {
+          response = await updateMainContent(this.form.id, formData);
+          if (response && response.status === 1) {
             await this.fetchMainContents();
             this.alert('Main content updated successfully!');
           } else {
             this.alert('Failed to update main content. Please try again.', 'error');
           }
         } else {
-          const newContent = await createMainContent(formData);
-          if (newContent && newContent.status === 1) {
+          response = await createMainContent(formData);
+          if (response && response.status === 1) {
             await this.fetchMainContents();
             this.alert('Main content created successfully!');
           } else {
             this.alert('Failed to create main content. Please try again.', 'error');
           }
         }
+
         this.closeCreateModal();
       } catch (error) {
         console.error('Error saving main content:', error);
-        this.alert('Error saving main content: ' + error.message, 'error');
+        this.alert(`Error saving main content: ${error.message || 'Request failed'}`, 'error');
       } finally {
-        this.loading = false;
+        this.modalLoading = false;
       }
     },
 
@@ -489,7 +500,7 @@ export default {
       this.loading = true;
       try {
         const result = await deleteMainContent(this.mainContentToDeleteId);
-        if (result && [1].includes(result.status)) {
+        if (result && result.status === 1) {
           await this.fetchMainContents();
           this.alert('Main content deleted successfully!');
         } else {
@@ -602,6 +613,9 @@ export default {
         image: null
       };
       this.imagePreview = null;
+      this.successMessage = '';
+      this.errorMessage = '';
+      this.modalLoading = false;
     },
     closeViewModal() {
       this.showViewModal = false;
@@ -635,55 +649,3 @@ export default {
   }
 };
 </script>
-
-<style scoped>
-th,
-td {
-  text-align: left;
-  white-space: nowrap;
-}
-
-.modal-enter-active,
-.modal-leave-active {
-  transition: opacity 0.3s ease;
-}
-
-.modal-enter-from,
-.modal-leave-to {
-  opacity: 0;
-}
-
-.modal-enter-active .modal-content,
-.modal-leave-active .modal-content {
-  transition: transform 0.3s ease;
-}
-
-.modal-enter-from .modal-content,
-.modal-leave-to .modal-content {
-  transform: translateY(-20px);
-}
-
-/* Custom scrollbar for modals */
-.max-h-\[80vh\] {
-  scrollbar-width: thin;
-  scrollbar-color: #888 #f1f1f1;
-}
-
-.max-h-\[80vh\]::-webkit-scrollbar {
-  width: 8px;
-}
-
-.max-h-\[80vh\]::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 4px;
-}
-
-.max-h-\[80vh\]::-webkit-scrollbar-thumb {
-  background: #888;
-  border-radius: 4px;
-}
-
-.max-h-\[80vh\]::-webkit-scrollbar-thumb:hover {
-  background: #555;
-}
-</style>

@@ -32,6 +32,22 @@
       </div>
       <div class="bg-white p-6 rounded-lg shadow">
         <h3 class="text-lg font-semibold mb-4">Leave Request Trends</h3>
+        <div class="flex gap-4 mb-4">
+          <div>
+            <label for="leaveTypeFilter" class="mr-2">Filter by Leave Type:</label>
+            <select v-model="selectedLeaveType" @change="updateLeaveRequestChart" id="leaveTypeFilter" class="border rounded p-1">
+              <option value="">All</option>
+              <option v-for="type in leaveTypes" :key="type._id" :value="type._id">{{ type.name }}</option>
+            </select>
+          </div>
+          <div>
+            <label for="statusFilter" class="mr-2">Filter by Status:</label>
+            <select v-model="selectedStatus" @change="updateLeaveRequestChart" id="statusFilter" class="border rounded p-1">
+              <option value="">All</option>
+              <option v-for="status in statuses" :key="status" :value="status">{{ status }}</option>
+            </select>
+          </div>
+        </div>
         <canvas id="leaveRequestChart"></canvas>
       </div>
     </div>
@@ -124,6 +140,8 @@ import { getStaffRequestForApprover } from '@/apis/request-leave';
 import { getAllDepartment } from '@/apis/department';
 import { getAllUser } from '@/apis/user';
 import { getAllApplicant } from '@/apis/applicant';
+import { getOwnerLeaveRequest } from '@/apis/request-leave';
+
 export default {
   name: 'Dashboard',
   data() {
@@ -133,22 +151,55 @@ export default {
       userInfo: null,
       isLoading: false,
       totalEmployees: 0,
-      totalDepartments: 0, // Initialize total departments,
-      totalApplicants: 0 // Initialize total applicants
+      totalDepartments: 0,
+      totalApplicants: 0,
+      leaveTypes: [],
+      selectedLeaveType: '',
+      selectedStatus: '',
+      leaveRequestChartInstance: null,
+      statuses: ['APPROVED', 'REJECTED', 'CANCELLED', 'PENDING', 'DRAFT']
     };
   },
   methods: {
-    // Fetch all users to count total employees and populate upcoming birthdays
+    async getOwnLeaveRequests(user_id) {
+      this.isLoading = true;
+      try {
+        const response = await getOwnerLeaveRequest(user_id);
+        if (response && response.data) {
+          // Map to consistent structure
+          const ownRequests = response.data.map((request) => ({
+            _id: request._id || '',
+            user: request.user || {},
+            type: request.type || {},
+            fromDate: request.fromDate,
+            toDate: request.toDate,
+            approver: request.approver || {},
+            reason: request.reason || 'No reason provided',
+            status: request.status || 'PENDING'
+          }));
+          // Merge with existing leaveRequests, avoiding duplicates
+          this.leaveRequests = [
+            ...this.leaveRequests,
+            ...ownRequests.filter(
+              (req) => !this.leaveRequests.some((existing) => existing._id === req._id)
+            )
+          ];
+          this.updateLeaveTypes();
+        }
+      } catch (error) {
+        console.error('Error fetching own leave requests:', error);
+      } finally {
+        this.isLoading = false;
+      }
+    },
     async fetchTotalEmployees() {
       try {
         const response = await getAllUser();
-        console.log('getAllUser response:', response); // Debug log
         if (response && response.data && Array.isArray(response.data)) {
-          this.totalEmployees = response.data.length; // Count total users
-          // Map user data to upcomingBirthdays, showing only upcoming or recent birthdays
+          this.totalEmployees = response.data.length;
           this.upcomingBirthdays = response.data
-            .filter(user => user.dob && moment(user.dob).isValid())
-            .map(user => ({
+            .filter((user) => user.dob && moment(user.dob).isValid())
+            .map((user) => ({
               name: `${user.first_name_en} ${user.last_name_en}`.trim(),
               date: moment(user.dob).format('MMM DD, YYYY')
             }))
@@ -156,15 +207,12 @@ export default {
               const today = moment();
               const aDate = moment(a.date, 'MMM DD, YYYY').year(today.year());
               const bDate = moment(b.date, 'MMM DD, YYYY').year(today.year());
-              // Adjust for birthdays that have passed this year
               if (aDate.isBefore(today)) aDate.add(1, 'year');
               if (bDate.isBefore(today)) bDate.add(1, 'year');
               return aDate.diff(bDate);
             })
-            .slice(0, 7); // Limit to 7 birthdays
-          console.log('Processed upcomingBirthdays:', this.upcomingBirthdays); // Debug log
+            .slice(0, 7);
         } else {
-          console.warn('No valid user data received:', response);
           this.totalEmployees = 0;
           this.upcomingBirthdays = [];
         }
@@ -174,14 +222,12 @@ export default {
         this.upcomingBirthdays = [];
       }
     },
-    // Fetch all departments to count total departments
     async fetchTotalDepartments() {
       try {
         const response = await getAllDepartment();
         if (response && response.departments) {
-          this.totalDepartments = response.departments.length; // Count total departments
+          this.totalDepartments = response.departments.length;
         } else {
-          console.warn('No valid department data received:', response);
           this.totalDepartments = 0;
         }
       } catch (error) {
@@ -193,23 +239,19 @@ export default {
       try {
         const response = await getAllApplicant();
         if (response && response.data) {
-          this.totalApplicants = response.data.length; // Count total departments
+          this.totalApplicants = response.data.length;
         } else {
-          console.warn('No valid department data received:', response);
           this.totalApplicants = 0;
         }
       } catch (error) {
-        console.error('Error fetching departments:', error);
+        console.error('Error fetching applicants:', error);
         this.totalApplicants = 0;
       }
     },
     async fetchLeaveRequests(user_id) {
       this.isLoading = true;
       try {
-        const response = await getStaffRequestForApprover(user_id, {
-          limit: 5 // Fetch only the 5 most recent requests
-        });
-        console.log('getStaffRequestForApprover response:', response); // Debug log
+        const response = await getStaffRequestForApprover(user_id, { limit: 5 });
         if (response && response.data) {
           this.leaveRequests = response.data.map((request) => {
             let departmentName = 'N/A';
@@ -217,12 +259,10 @@ export default {
               departmentName = request.user.department.name_en || 'N/A';
             }
             return {
-              id: request._id || '',
+              _id: request._id || '',
               employeeId: request.user?._id || '',
               employeeName: request.user
-                ? `${request.user.first_name_en || ''} ${
-                    request.user.last_name_en || ''
-                  }`.trim() || 'Unknown Employee'
+                ? `${request.user.first_name_en || ''} ${request.user.last_name_en || ''}`.trim() || 'Unknown Employee'
                 : 'Unknown Employee',
               department: departmentName,
               leaveTypeId: request.type?._id || '',
@@ -231,16 +271,17 @@ export default {
               endDate: this.formatDate(request.toDate),
               approverId: request.approver?._id || '',
               approverName: request.approver
-                ? `${request.approver.first_name_en || ''} ${
-                    request.approver.last_name_en || ''
-                  }`.trim() || 'N/A'
+                ? `${request.approver.first_name_en || ''} ${request.approver.last_name_en || ''}`.trim() || 'N/A'
                 : 'N/A',
               status: request.status || 'PENDING',
-              reason: request.reason || 'No reason provided'
+              reason: request.reason || 'No reason provided',
+              type: request.type || {}, // Keep raw type for filtering
+              fromDate: request.fromDate,
+              toDate: request.toDate
             };
           });
+          this.updateLeaveTypes();
         } else {
-          console.warn('No leave requests data received:', response);
           this.leaveRequests = [];
         }
       } catch (error) {
@@ -249,6 +290,28 @@ export default {
       } finally {
         this.isLoading = false;
       }
+    },
+    updateLeaveTypes() {
+      // Derive leave types from leaveRequests
+      const types = [...new Set(this.leaveRequests.map((r) => r.type))]
+        .filter((type) => type && type._id && type.name)
+        .map((type) => ({
+          _id: type._id,
+          name: type.name
+        }));
+      this.leaveTypes = types;
+    },
+    aggregateLeaveRequestsByDay(requests, filter = {}) {
+      const daysOfWeek = Array(7).fill(0); // Mon=0, Tue=1, ..., Sun=6
+      requests.forEach((request) => {
+        if (filter.type && request.type?._id !== filter.type) return;
+        if (filter.status && request.status !== filter.status) return;
+        if (moment(request.fromDate).isValid()) {
+          const day = moment(request.fromDate).day();
+          daysOfWeek[day === 0 ? 6 : day - 1]++;
+        }
+      });
+      return daysOfWeek;
     },
     statusClass(status) {
       switch (status) {
@@ -267,6 +330,52 @@ export default {
     },
     formatDate(date) {
       return date ? moment(date).format('DD-MMM-YYYY') : 'N/A';
+    },
+    updateLeaveRequestChart() {
+      const filter = {
+        type: this.selectedLeaveType || undefined,
+        status: this.selectedStatus || undefined
+      };
+      const leaveRequestData = this.aggregateLeaveRequestsByDay(this.leaveRequests, filter);
+
+      if (this.leaveRequestChartInstance) {
+        this.leaveRequestChartInstance.destroy();
+      }
+
+      this.leaveRequestChartInstance = new Chart(document.getElementById('leaveRequestChart'), {
+        type: 'line',
+        data: {
+          labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+          datasets: [
+            {
+              label: 'Leave Requests',
+              data: leaveRequestData,
+              borderColor: '#3B82F6',
+              backgroundColor: 'rgba(59, 130, 246, 0.1)',
+              fill: false,
+              tension: 0.4
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: {
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: 'Number of Leave Requests'
+              }
+            },
+            x: {
+              title: {
+                display: true,
+                text: 'Day of Week'
+              }
+            }
+          }
+        }
+      });
     }
   },
   async created() {
@@ -283,12 +392,12 @@ export default {
         this.fetchLeaveRequests(this.userInfo._id),
         this.fetchTotalEmployees(),
         this.fetchTotalDepartments(),
-        this.fetchTotalApplicant()
+        this.fetchTotalApplicant(),
+        this.getOwnLeaveRequests(this.userInfo._id)
       ]);
     }
   },
   mounted() {
-    // Attendance Chart
     new Chart(document.getElementById('attendanceChart'), {
       type: 'line',
       data: {
@@ -305,22 +414,7 @@ export default {
       }
     });
 
-    // Leave Request Chart
-    new Chart(document.getElementById('leaveRequestChart'), {
-      type: 'line',
-      data: {
-        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-        datasets: [
-          {
-            label: 'Leave Requests',
-            data: [2, 4, 6, 3, 5, 1, 3],
-            borderColor: '#3B82F6',
-            fill: false,
-            tension: 0.4
-          }
-        ]
-      }
-    });
+    this.updateLeaveRequestChart();
   }
 };
 </script>

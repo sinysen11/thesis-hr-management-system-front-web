@@ -1,7 +1,7 @@
 <template>
   <div class="w-full">
     <!-- Fixed-Position Alerts -->
-    <div class="fixed z-50 w-full max-w-xs space-y-4 top-4 right-4">
+    <div class="fixed z-60 w-full max-w-xs space-y-4 top-4 right-4">
       <div v-if="successMessage"
         class="p-4 text-white transition-opacity duration-500 ease-in-out bg-green-500 rounded-lg shadow-md"
         :class="{ 'opacity-0': !successMessage }">
@@ -176,7 +176,12 @@
               <i class="fas fa-times"></i>
             </button>
           </div>
-          <div class="pt-5 space-y-5 border-t border-gray-200">
+          <!-- Loading Spinner Inside Modal -->
+          <div v-if="modalLoading" class="py-4 text-center">
+            <i class="text-4xl text-green-700 fas fa-spinner fa-spin"></i>
+            <p class="mt-2 text-sm text-gray-600">Processing...</p>
+          </div>
+          <div v-else class="pt-5 space-y-5 border-t border-gray-200">
             <div>
               <label class="text-sm font-semibold text-gray-600">Main Content</label>
               <select v-model="form.mainContentId"
@@ -205,7 +210,7 @@
               class="px-6 py-2 font-medium text-gray-800 transition duration-200 bg-gray-200 rounded-lg hover:bg-gray-300">
               Cancel
             </button>
-            <button @click="saveTabContent" :disabled="loading"
+            <button @click="saveTabContent" :disabled="modalLoading"
               class="px-6 py-2 font-medium text-white transition duration-200 bg-indigo-600 rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed">
               {{ isEditing ? 'Update' : 'Create' }}
             </button>
@@ -271,6 +276,7 @@ export default {
       mainContents: [],
       tabContents: [],
       loading: false,
+      modalLoading: false, // New loading state for modal
       successMessage: '',
       errorMessage: ''
     };
@@ -282,7 +288,7 @@ export default {
       }
       const query = this.searchQuery.toLowerCase();
       return this.tabContents.filter((content) => {
-const mainContent = this.mainContents.find(mc => mc.id === content.mainContentId);
+        const mainContent = this.mainContents.find(mc => mc.id === content.mainContentId);
         const mainContentTitle = mainContent ? mainContent.title.toLowerCase() : '';
         return (
           this.searchQuery === '' ||
@@ -382,7 +388,7 @@ const mainContent = this.mainContents.find(mc => mc.id === content.mainContentId
         this.alert('Please fill in all required fields (Main Content, Title, Points).', 'error');
         return;
       }
-      this.loading = true;
+      this.modalLoading = true; // Activate modal-specific loading
       try {
         const formData = {
           mainContentId: this.form.mainContentId,
@@ -411,7 +417,7 @@ const mainContent = this.mainContents.find(mc => mc.id === content.mainContentId
         console.error('Error saving tab content:', error);
         this.alert('Error saving tab content: ' + error.message, 'error');
       } finally {
-        this.loading = false;
+        this.modalLoading = false; // Deactivate modal-specific loading
       }
     },
 
@@ -533,6 +539,7 @@ const mainContent = this.mainContents.find(mc => mc.id === content.mainContentId
         title: '',
         points: ''
       };
+      this.modalLoading = false; // Reset modal loading
     },
     closeViewModal() {
       this.showViewModal = false;
@@ -567,55 +574,3 @@ const mainContent = this.mainContents.find(mc => mc.id === content.mainContentId
   }
 };
 </script>
-
-<style scoped>
-th,
-td {
-  text-align: left;
-  white-space: nowrap;
-}
-
-.modal-enter-active,
-.modal-leave-active {
-  transition: opacity 0.3s ease;
-}
-
-.modal-enter-from,
-.modal-leave-to {
-  opacity: 0;
-}
-
-.modal-enter-active .modal-content,
-.modal-leave-active .modal-content {
-  transition: transform 0.3s ease;
-}
-
-.modal-enter-from .modal-content,
-.modal-leave-to .modal-content {
-  transform: translateY(-20px);
-}
-
-/* Custom scrollbar for modals */
-.max-h-\[80vh\] {
-  scrollbar-width: thin;
-  scrollbar-color: #888 #f1f1f1;
-}
-
-.max-h-\[80vh\]::-webkit-scrollbar {
-  width: 8px;
-}
-
-.max-h-\[80vh\]::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 4px;
-}
-
-.max-h-\[80vh\]::-webkit-scrollbar-thumb {
-  background: #888;
-  border-radius: 4px;
-}
-
-.max-h-\[80vh\]::-webkit-scrollbar-thumb:hover {
-  background: #555;
-}
-</style>

@@ -65,7 +65,7 @@
           >
             <tr>
               <th class="px-4 py-3 text-left">No</th>
-              <th class="px-4 py-3 text-left">User</th>
+              <th class="px-4 py-3 text-left">Username</th>
               <th class="px-4 py-3 text-left">Action</th>
               <th class="px-4 py-3 text-left">Request Username</th>
               <th class="px-4 py-3 text-left">Request Email</th>
@@ -88,11 +88,11 @@
                 {{ log.userId?.username || 'N/A' }}
               </td>
               <td class="px-4 py-3">{{ log.action || 'N/A' }}</td>
-              <td class="px-4 py-3">{{ log.requestBody?.username || 'N/A' }}</td>
-              <td class="px-4 py-3">{{ log.requestBody?.email || 'N/A' }}</td>
+              <td class="px-4 py-3">{{ log.userId?.username || 'N/A' }}</td>
+              <td class="px-4 py-3">{{ log.userId?.email || 'N/A' }}</td>
               <td class="px-4 py-3">
-                {{ log.requestBody?.first_name_en && log.requestBody?.last_name_en 
-                  ? `${log.requestBody.first_name_en} ${log.requestBody.last_name_en}` 
+                {{ log.userId?.first_name_en && log.userId?.last_name_en 
+                  ? `${log.userId.first_name_en} ${log.userId.last_name_en}` 
                   : 'N/A' }}
               </td>
               <td class="px-4 py-3">{{ log.ipAddress || 'N/A' }}</td>
@@ -182,7 +182,7 @@
           >
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
-                <label class="text-sm font-semibold text-gray-600">User</label>
+                <label class="text-sm font-semibold text-gray-600">Username</label>
                 <p class="font-medium text-gray-900">
                   {{ selectedLog.userId?.username || 'N/A' }}
                 </p>
@@ -220,45 +220,45 @@
               <div>
                 <label class="text-sm font-semibold text-gray-600">Request Username</label>
                 <p class="font-medium text-gray-900">
-                  {{ selectedLog.requestBody?.username || 'N/A' }}
+                  {{ selectedLog.userId?.username || 'N/A' }}
                 </p>
               </div>
               <div>
                 <label class="text-sm font-semibold text-gray-600">Request Email</label>
                 <p class="font-medium text-gray-900">
-                  {{ selectedLog.requestBody?.email || 'N/A' }}
+                  {{ selectedLog.userId?.email || 'N/A' }}
                 </p>
               </div>
               <div>
                 <label class="text-sm font-semibold text-gray-600">Request Name (EN)</label>
                 <p class="font-medium text-gray-900">
-                  {{ selectedLog.requestBody?.first_name_en && selectedLog.requestBody?.last_name_en 
-                    ? `${selectedLog.requestBody.first_name_en} ${selectedLog.requestBody.last_name_en}` 
+                  {{ selectedLog.userId?.first_name_en && selectedLog.userId?.last_name_en 
+                    ? `${selectedLog.userId.first_name_en} ${selectedLog.userId.last_name_en}` 
                     : 'N/A' }}
                 </p>
               </div>
               <div>
                 <label class="text-sm font-semibold text-gray-600">Request Gender</label>
                 <p class="font-medium text-gray-900">
-                  {{ selectedLog.requestBody?.gender || 'N/A' }}
+                  {{ selectedLog.userId?.gender || 'N/A' }}
                 </p>
               </div>
               <div>
                 <label class="text-sm font-semibold text-gray-600">Request Phone</label>
                 <p class="font-medium text-gray-900">
-                  {{ selectedLog.requestBody?.phone_number || 'N/A' }}
+                  {{ selectedLog.userId?.phone_number || 'N/A' }}
                 </p>
               </div>
               <div>
                 <label class="text-sm font-semibold text-gray-600">Request DOB</label>
                 <p class="font-medium text-gray-900">
-                  {{ selectedLog.requestBody?.dob ? new Date(selectedLog.requestBody.dob).toLocaleDateString() : 'N/A' }}
+                  {{ selectedLog.userId?.dob ? new Date(selectedLog.userId.dob).toLocaleDateString() : 'N/A' }}
                 </p>
               </div>
               <div class="sm:col-span-2">
                 <label class="text-sm font-semibold text-gray-600">Response Message</label>
                 <p class="font-medium text-gray-900">
-                  {{ selectedLog.responseMessage || 'N/A' }}
+                  {{ selectedLog.status || 'N/A' }}
                 </p>
               </div>
             </div>
@@ -307,8 +307,8 @@ export default {
           (log.userId?.username && log.userId.username.toLowerCase().includes(query)) ||
           (log.action && log.action.toLowerCase().includes(query)) ||
           (log.endpoint && log.endpoint.toLowerCase().includes(query)) ||
-          (log.requestBody?.username && log.requestBody.username.toLowerCase().includes(query)) ||
-          (log.requestBody?.email && log.requestBody.email.toLowerCase().includes(query))
+          (log.userId?.username && log.userId.username.toLowerCase().includes(query)) ||
+          (log.userId?.email && log.userId.email.toLowerCase().includes(query))
         );
       });
     },
@@ -453,13 +453,12 @@ export default {
         if (result && result.status === 1) {
           this.logs = result.data.map((log) => ({
             _id: log._id || null,
-            userId: log.userId || { username: 'N/A' },
             action: log.action || 'N/A',
             method: log.method || 'N/A',
             endpoint: log.endpoint || 'N/A',
             ipAddress: log.ipAddress || 'N/A',
             createdAt: log.createdAt || null,
-            requestBody: log.requestBody || null,
+            userId: log.userId || null,
             responseMessage: log.responseMessage || 'N/A',
             statusCode: log.statusCode || null
           }));
@@ -490,13 +489,12 @@ export default {
         if (result && result.status === 1) {
           this.selectedLog = {
             _id: result.data._id || null,
-            userId: result.data.userId || { username: 'N/A' },
             action: result.data.action || 'N/A',
             method: result.data.method || 'N/A',
             endpoint: result.data.endpoint || 'N/A',
             ipAddress: result.data.ipAddress || 'N/A',
             createdAt: result.data.createdAt || null,
-            requestBody: result.data.requestBody || null,
+            userId: result.data.userId || null,
             responseMessage: result.data.responseMessage || 'N/A',
             statusCode: result.data.statusCode || null
           };
