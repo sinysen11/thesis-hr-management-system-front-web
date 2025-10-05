@@ -152,12 +152,12 @@
         <div class="flex justify-end gap-4 pt-8 mt-8 border-t border-gray-200">
             <button @click="cancel"
                 class="px-8 py-3 font-semibold text-gray-700 transition duration-200 bg-white border border-gray-300 shadow-sm hover:bg-gray-100 rounded-xl">
-                Cancel
+                Back
             </button>
             <button @click="saveJob" v-if="!isViewing" :disabled="isLoading"
                 class="px-8 py-3 font-semibold text-white transition duration-200 bg-indigo-600 shadow-md hover:bg-indigo-700 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed">
                 <i v-if="isLoading" class="mr-2 fas fa-spinner fa-spin"></i>
-                {{ isEditing ? 'Save Changes' : 'Create Job Post' }}
+                {{ isEditing ? 'Update' : 'Create' }}
             </button>
         </div>
         

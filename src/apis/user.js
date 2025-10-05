@@ -17,6 +17,14 @@ export function getAllUser(params) {
   });
 }
 
+export function getAllApplicantUsers(params) {
+  return request({
+    url: user.getAllApplicantUsers.url,
+    method: user.getAllApplicantUsers.method,
+    params
+  });
+}
+
 export function getOneUser(id) {
   return request({
     url: `${user.getOneUser.url}/${id}`,

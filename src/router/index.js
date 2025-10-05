@@ -21,6 +21,7 @@ import Holiday from '@/views/hodiday_date';
 import Department from '@/views/user_management/department';
 import Roles from '@/views/user_management/roles';
 import UserManagement from '@/views/user_management/users';
+import ApplicantUser from '@/views/applicant_users'
 // import NotFound from '@/views/NotFound.vue';
 import ActivityLog from '@/views/user_management/activity_log';
 import MainContent from '@/views/website_control/main_content';
@@ -190,6 +191,12 @@ const routes = [
         path: '/users/user-management',
         name: 'user-management',
         component: UserManagement,
+        meta: { requiresAuth: true }
+      },
+      {
+        path: '/users/applicant-users',
+        name: 'applicant-users',
+        component: ApplicantUser,
         meta: { requiresAuth: true }
       },
       {

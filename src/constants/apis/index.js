@@ -226,6 +226,10 @@ module.exports = {
             url: 'users',
             method: 'get'
         },
+        getAllApplicantUsers: {
+            url: 'users/applicant-users',
+            method: 'get'
+        },
         getOneUser: {
             url: 'user',
             method: 'get'

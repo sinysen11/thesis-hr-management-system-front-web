@@ -131,6 +131,11 @@ export default {
               path: '/users/user-management',
               icon: 'fas fa-user'
             },
+                        {
+              name: 'Applicant Users',
+              path: '/users/applicant-users',
+              icon: 'fas fa-user'
+            },
             {
               name: 'Tracking Log',
               path: '/users/user-activity-log',

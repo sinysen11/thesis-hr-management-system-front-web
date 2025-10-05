@@ -32,7 +32,7 @@
                     <i v-else class="fas fa-check-circle icon-left"></i>
                     Hired
                 </button>
-                <button v-if="applicantData.status === 'INTERVIEWING'" @click="rejectApplicant(applicantData._id)"
+                <button v-if="applicantData.status === 'INTERVIEWING' || applicantData.status === 'SUBMITTED'" @click="rejectApplicant(applicantData._id)"
                     :disabled="isRejecting || isHiring || isShortlisting || isProcessing" class="btn-reject">
                     <i v-if="isRejecting" class="fas fa-spinner fa-spin icon-left"></i>
                     <i v-else class="fas fa-times-circle icon-left"></i>

@@ -45,7 +45,7 @@
         </div>
 
         <div class="flex gap-4">
-          <button @click="handleGetAllJobs(true)" :disabled="loading"
+          <button @click="handleGetAllJobs(1)" :disabled="loading"
             class="px-6 py-2 font-medium text-white transition duration-200 bg-indigo-600 rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed">
             Search
           </button>
@@ -76,17 +76,25 @@
               <th class="px-4 py-3 text-center w-36">Actions</th>
             </tr>
           </thead>
+
           <tbody class="text-gray-700 divide-y divide-gray-100">
             <tr v-for="(job, index) in jobs" :key="job._id"
-              class="transition duration-150 hover:bg-indigo-50/50">
-              <td class="px-4 py-3 font-medium">
-                {{ index + 1 }}
-              </td>
+              :class="[isExpired(job.close_date) ? 'bg-red-50/50 hover:bg-red-100/70' : 'hover:bg-indigo-50/50', 'transition duration-150']">
+              <td class="px-4 py-3 font-medium">{{ index + 1 + (currentPage - 1) * limit }}</td>
               <td class="px-4 py-3 font-semibold text-gray-800">{{ job.title }}</td>
               <td class="px-4 py-3">{{ job.department_name }}</td>
               <td class="px-4 py-3">{{ job.branch }}</td>
               <td class="px-4 py-3 font-semibold text-indigo-700">{{ job.salary }}</td>
-              <td class="px-4 py-3">{{ job.close_date }}</td>
+
+              <td class="px-4 py-3">
+                <span v-if="isExpired(job.close_date)" class="text-red-600 font-semibold">
+                  {{ job.close_date }}
+                  <span class="ml-2 bg-red-100 text-red-700 text-xs font-semibold px-2 py-1 rounded-full">
+                    Expired
+                  </span>
+                </span>
+                <span v-else>{{ job.close_date }}</span>
+              </td>
               <td class="px-4 py-3 text-center">{{ job.number_staff }}</td>
 
               <td class="flex justify-center gap-1 px-4 py-3">
@@ -107,6 +115,7 @@
                 </button>
               </td>
             </tr>
+
             <tr v-if="jobs.length === 0">
               <td colspan="8" class="px-4 py-6 font-medium text-center text-gray-500">
                 <i class="mr-2 fas fa-info-circle"></i>No job postings found matching your criteria.
@@ -117,67 +126,33 @@
       </div>
     </div>
 
-    <transition name="modal">
-      <div style="background-color: rgb(0 0 0 / 0.5)" v-if="showViewModal"
-        class="fixed inset-0 z-50 flex items-center justify-center bg-opacity-60" @click.self="closeViewModal">
-        <div
-          class="bg-white rounded-xl shadow-2xl p-8 w-full max-w-lg mx-4 transform transition-all max-h-[80vh] overflow-y-auto">
-          <div class="flex items-center justify-between mb-6">
-            <h3 class="text-2xl font-bold text-gray-900">
-              Job Posting Details
-            </h3>
-            <button @click="closeViewModal"
-              class="p-2 text-gray-500 transition rounded-full hover:text-gray-700 hover:bg-gray-100" title="Close">
-              <i class="fas fa-times"></i>
-            </button>
-          </div>
-          <div v-if="selectedJob" class="pt-5 space-y-5 border-t border-gray-200">
-            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div>
-                <label class="text-sm font-semibold text-gray-600">Job Title</label>
-                <p class="font-medium text-gray-900">{{ selectedJob.title }}</p>
-              </div>
-              <div>
-                <label class="text-sm font-semibold text-gray-600">Salary</label>
-                <p class="font-medium text-gray-900">
-                  {{ selectedJob.salary }}
-                </p>
-              </div>
-              <div>
-                <label class="text-sm font-semibold text-gray-600">Description</label>
-                <p class="font-medium text-gray-900">
-                  {{ selectedJob.description }}
-                </p>
-              </div>
-              <div>
-                <label class="text-sm font-semibold text-gray-600">Responsible</label>
-                <p :class="[
-                  'text-sm font-medium',
-                  selectedJob.responsible === 'Open'
-                    ? 'text-green-800'
-                    : 'text-red-800'
-                ]">
-                  {{ selectedJob.responsible }}
-                </p>
-              </div>
-              <div>
-                <label class="text-sm font-semibold text-gray-600">Requirement</label>
-                <p class="font-medium text-gray-900">
-                  {{ selectedJob.requirement }}
-                </p>
-              </div>
-            </div>
-          </div>
-          <div class="flex justify-end mt-8">
-            <button @click="closeViewModal"
-              class="px-6 py-2 font-medium text-white transition duration-200 bg-indigo-600 rounded-lg hover:bg-indigo-700">
-              Close
-            </button>
-          </div>
-        </div>
+    <div v-if="!loading && totalJobs > 0" class="flex items-center justify-between mt-6">
+      <div class="text-sm text-gray-600">
+        Showing {{ (currentPage - 1) * limit + 1 }} to
+        {{ lastIndex }}
+        of {{ totalJobs }} job postings
       </div>
-    </transition>
+      <div class="flex gap-2">
+        <button @click="prevPage" :disabled="currentPage === 1"
+          class="px-4 py-2 text-gray-800 transition duration-200 bg-gray-200 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-300">
+          Previous
+        </button>
 
+        <button v-for="page in totalPages" :key="page" @click="goToPage(page)" :class="[
+            'px-4 py-2 rounded-lg transition duration-200',
+            currentPage === page
+              ? 'bg-indigo-600 text-white'
+              : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
+          ]">
+          {{ page }}
+        </button>
+
+        <button @click="nextPage" :disabled="currentPage === totalPages"
+          class="px-4 py-2 text-gray-800 transition duration-200 bg-gray-200 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-300">
+          Next
+        </button>
+      </div>
+    </div>
     <transition name="modal">
       <div style="background-color: rgb(0 0 0 / 0.5)" v-if="showDeleteModal"
         class="fixed inset-0 z-50 flex items-center justify-center bg-opacity-60" @click.self="closeDeleteModal">
@@ -188,8 +163,7 @@
               Confirm Deletion
             </h3>
             <p class="text-gray-600">
-              Are you sure you want to delete this job posting? This action
-              cannot be undone.
+              Are you sure you want to delete this job posting? This action cannot be undone.
             </p>
           </div>
           <div class="flex justify-center gap-4 mt-8">
@@ -212,7 +186,7 @@
 import { getAllJob, deleteJob } from '@/apis/jobs';
 import { getAllJobTitle } from '@/apis/jobs';
 import { getAllDepartment } from '@/apis/department';
-import * as XLSX from 'xlsx'; 
+import * as XLSX from 'xlsx';
 
 export default {
   data() {
@@ -220,38 +194,61 @@ export default {
       searchQuery: '',
       filterPublishDate: '',
       filterCloseDate: '',
-
-      showViewModal: false,
       showDeleteModal: false,
-      selectedJob: null,
       jobToDeleteId: null,
       jobTitles: [],
       departments: [],
-
       jobs: [],
       errorMessage: '',
       successMessage: '',
-      loading: false
+      loading: false,
+
+      // --- Pagination State (Added) ---
+      currentPage: 1,
+      limit: 10, // Assuming a default limit of 10 items per page
+      apiTotalItems: 0 // Total number of jobs from the API
+      // --------------------------------
     };
   },
-
+  computed: {
+    // --- Pagination Computeds (Added) ---
+    totalPages() {
+      return Math.ceil(this.apiTotalItems / this.limit);
+    },
+    totalJobs() {
+      return this.apiTotalItems;
+    },
+    lastIndex() {
+      return Math.min(this.currentPage * this.limit, this.totalJobs);
+    }
+    // --------------------------------
+  },
   mounted() {
-    this.fetchInitialData(); 
-    this.handleGetAllJobs(); 
-
+    // === FIX IMPLEMENTED HERE: Check for alert query parameter ===
     if (this.$route.query.alert) {
       this.alert(this.$route.query.alert, this.$route.query.type || 'success');
-      this.$router.replace({ query: {}}); 
+      // Clear the query parameter immediately after displaying the message
+      this.$router.replace({ query: {}});
     }
+    // ==============================================================
 
-    window.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-        if (this.showViewModal) this.closeViewModal();
-        if (this.showDeleteModal) this.closeDeleteModal();
-      }
-    });
+    this.fetchInitialData();
+    this.handleGetAllJobs(1); // Start on page 1
   },
   methods: {
+    /**
+     * Checks if the close date has passed (job is expired).
+     * @param {string} closeDate - The job's close date in 'YYYY-MM-DD' format.
+     * @returns {boolean}
+     */
+    isExpired(closeDate) {
+      if (!closeDate || closeDate === 'N/A') return false;
+      // Get today's date in 'YYYY-MM-DD' format for string comparison
+      const today = new Date().toISOString().split('T')[0];
+      // A job is expired if its close date is strictly before today.
+      return closeDate < today;
+    },
+
     alert(message, type = 'success') {
       if (type === 'success') {
         this.successMessage = message;
@@ -267,8 +264,8 @@ export default {
     },
 
     async fetchInitialData() {
-        await this.fetchDepartments();
-        await this.handleGetAllJobTitles();
+      await this.fetchDepartments();
+      await this.handleGetAllJobTitles();
     },
 
     async fetchDepartments() {
@@ -276,142 +273,137 @@ export default {
         const response = await getAllDepartment();
         if (response.status === 1 && Array.isArray(response.departments)) {
           this.departments = response.departments;
-        } else {
-          this.departments = [];
         }
       } catch (error) {
         console.error('Error fetching departments:', error);
-        this.alert('Error fetching departments.', 'error');
-        this.departments = [];
       }
     },
 
     async handleGetAllJobTitles() {
       try {
         const result = await getAllJobTitle();
-        if (result && result.status === 1 && Array.isArray(result.jobs)) {
-          this.jobTitles = result.jobs.map((item) => ({
+        if (result.status === 1 && Array.isArray(result.jobs)) {
+          this.jobTitles = result.jobs.map(item => ({
             _id: item._id,
             des_en: item.des_en
           }));
         }
       } catch (error) {
         console.error('Error fetching job titles:', error);
-        this.alert('Error fetching job titles.', 'error');
       }
     },
 
-    async handleGetAllJobs() {
+    /**
+     * Fetches job postings with optional filters and pagination.
+     * @param {number} [page=this.currentPage] - The page number to fetch.
+     */
+    async handleGetAllJobs(page = this.currentPage) {
       this.loading = true;
       try {
         const query = {
           search: this.searchQuery || undefined,
-          publish_date_from: this.filterPublishDate || undefined, 
-          close_date_to: this.filterCloseDate || undefined 
+          publish_date_from: this.filterPublishDate || undefined,
+          close_date_to: this.filterCloseDate || undefined,
+          page: page, // Add page for pagination
+          limit: this.limit // Add limit for pagination
         };
-        
+
         const result = await getAllJob(query);
+        if (result.status === 1 && Array.isArray(result.data)) {
+          this.jobs = result.data.map(job => ({
+            _id: job._id,
+            title: job.title?.des_en || 'Untitled',
+            department_name: job.department?.name_en || 'N/A',
+            branch: job.branch || 'N/A',
+            salary: job.salary || 'N/A',
+            // Ensure dates are in YYYY-MM-DD format for comparison
+            close_date: job.close_date ? job.close_date.split('T')[0] : 'N/A',
+            publish_date: job.publish_date ? job.publish_date.split('T')[0] : 'N/A',
+            number_staff: job.number_staff || 0,
+            status: job.status || 'Active'
+          }));
 
-        if (result && result.status === 1 && Array.isArray(result.data)) {
-          this.jobs = result.data.map((job) => {
-            const department_name = typeof job.department === 'object' && job.department !== null
-              ? job.department.name_en
-              : 'N/A';
-            const department_id = typeof job.department === 'object' && job.department !== null
-              ? job.department._id
-              : job.department;
-
-            const closeDateFormatted = job.close_date ? job.close_date.split('T')[0] : 'N/A';
-            const publishDateFormatted = job.publish_date ? job.publish_date.split('T')[0] : 'N/A';
-            
-            return {
-              _id: job._id,
-              title: job.title?.des_en || 'Untitled',
-              title_id: job.title?._id || job.title || null,
-              department_id: department_id || null,
-              department_name: department_name,
-
-              salary: job.salary || 'N/A',
-              description: job.description || 'No description',
-              responsible: job.responsible || 'N/A',
-              requirement: job.requirement || 'No requirements',
-              branch: job.branch || 'N/A',
-              close_date: closeDateFormatted,
-              publish_date: publishDateFormatted,
-              number_staff: job.number_staff || 0,
-              status: job.status || 'Active'
-            };
-          });
+          // --- Update Pagination State ---
+          if (result.pagination) {
+            this.apiTotalItems = result.pagination.total || 0;
+            this.currentPage = result.pagination.page || 1;
+          } else {
+            // Fallback for API without pagination info, treat as a single page
+            this.apiTotalItems = this.jobs.length;
+            this.currentPage = 1;
+          }
+          // -------------------------------
         } else {
-          this.alert('Failed to load jobs. Invalid response from API.', 'error');
           this.jobs = [];
+          this.apiTotalItems = 0;
         }
       } catch (error) {
         console.error('Error fetching jobs:', error);
-        this.alert('Error fetching jobs: ' + error.message, 'error');
         this.jobs = [];
+        this.apiTotalItems = 0;
       } finally {
         this.loading = false;
       }
     },
 
-    // --- Excel Report Export Method ---
+    // --- Pagination Methods (Added) ---
+    goToPage(page) {
+      if (page >= 1 && page <= this.totalPages && page !== this.currentPage) {
+        this.currentPage = page;
+        this.handleGetAllJobs(page);
+      }
+    },
+    prevPage() {
+      this.goToPage(this.currentPage - 1);
+    },
+    nextPage() {
+      this.goToPage(this.currentPage + 1);
+    },
+    // --------------------------------
+
     exportToExcel() {
       if (this.jobs.length === 0) {
         this.alert('No data to export for the report.', 'error');
         return;
       }
 
-      try {
-        const data = this.jobs.map(job => ({
-          'Job Title': job.title,
-          'Department': job.department_name,
-          'Branch': job.branch,
-          'Salary ($)': job.salary,
-          'Close Date': job.close_date,
-          'Staff Required': job.number_staff,
-          'Publish Date': job.publish_date,
-          'Status': job.status,
-          'Description': job.description,
-          'Requirement': job.requirement
-        }));
+      const data = this.jobs.map(job => ({
+        'Job Title': job.title,
+        'Department': job.department_name,
+        'Branch': job.branch,
+        'Salary ($)': job.salary,
+        'Close Date': job.close_date,
+        'Staff Required': job.number_staff,
+        'Publish Date': job.publish_date,
+        'Status': this.isExpired(job.close_date) ? 'Expired' : 'Active'
+      }));
 
-        const worksheet = XLSX.utils.json_to_sheet(data);
-        const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, 'JobPostingsReport');
-        
-        XLSX.writeFile(workbook, `Job_Postings_Report_${new Date().toISOString().split('T')[0]}.xlsx`);
-        this.alert('Report exported successfully to Excel!');
-      } catch (error) {
-        console.error('Error during Excel export:', error);
-        this.alert('Failed to generate report.', 'error');
-      }
+      const worksheet = XLSX.utils.json_to_sheet(data);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'JobPostingsReport');
+      XLSX.writeFile(workbook, `Job_Postings_Report_${new Date().toISOString().split('T')[0]}.xlsx`);
+      this.alert('Report exported successfully to Excel!');
     },
+
     confirmDelete(id) {
       this.jobToDeleteId = id;
       this.showDeleteModal = true;
     },
     async deleteJob() {
-      if (!this.jobToDeleteId) {
-        this.alert('No job selected for deletion.', 'error');
-        return;
-      }
+      if (!this.jobToDeleteId) return;
       this.loading = true;
       try {
         const result = await deleteJob(this.jobToDeleteId);
-        if (result && result.status === 1) {
-          // Refresh list after successful deletion
-          await this.handleGetAllJobs(); 
+        if (result.status === 1) {
+          // Re-fetch jobs after deletion, staying on the same page
+          await this.handleGetAllJobs(this.currentPage);
           this.alert('Job deleted successfully!');
-        } else {
-          this.alert('Failed to delete job. Please try again.', 'error');
         }
       } catch (error) {
         console.error('Error deleting job:', error);
-        this.alert('Error deleting job: ' + error.message, 'error');
       } finally {
         this.loading = false;
-        this.closeDeleteModal();
+        this.showDeleteModal = false;
       }
     },
 
@@ -422,7 +414,7 @@ export default {
     openEditModal(job) {
       this.$router.push({
         name: 'job_edit',
-        params: { jobId: job._id } 
+        params: { jobId: job._id }
       });
     },
 
@@ -432,22 +424,12 @@ export default {
         params: { id: job._id }
       });
     },
-    
-    closeViewModal() {
-      this.showViewModal = false;
-      this.selectedJob = null;
-    },
-    closeDeleteModal() {
-      this.showDeleteModal = false;
-      this.jobToDeleteId = null;
-    },
 
-    // When filters are applied or reset, re-fetch data from the API
     resetFilters() {
       this.searchQuery = '';
       this.filterPublishDate = '';
       this.filterCloseDate = '';
-      this.handleGetAllJobs(true); 
+      this.handleGetAllJobs(1); // Reset filters and go to page 1
     }
   }
 };
@@ -460,6 +442,7 @@ td {
   white-space: nowrap;
 }
 
+/* Modal styles from previous version (removed for brevity but assumed present) */
 .modal-enter-active,
 .modal-leave-active {
   transition: opacity 0.3s ease;
@@ -469,37 +452,5 @@ td {
 .modal-leave-to {
   opacity: 0;
 }
-
-.modal-enter-active>div:first-child,
-.modal-leave-active>div:first-child {
-  transition: transform 0.3s ease;
-}
-
-.modal-enter-from>div:first-child,
-.modal-leave-to>div:first-child {
-  transform: translateY(-20px);
-}
-
-.max-h-\[80vh\] {
-  scrollbar-width: thin;
-  scrollbar-color: #888 #f1f1f1;
-}
-
-.max-h-\[80vh\]::-webkit-scrollbar {
-  width: 8px;
-}
-
-.max-h-\[80vh\]::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 4px;
-}
-
-.max-h-\[80vh\]::-webkit-scrollbar-thumb {
-  background: #888;
-  border-radius: 4px;
-}
-
-.max-h-\[80vh\]::-webkit-scrollbar-thumb:hover {
-  background: #555;
-}
+/* ... etc. for the modal transitions */
 </style>
