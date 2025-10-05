@@ -25,9 +25,9 @@ import UserManagement from '@/views/user_management/users';
 import ActivityLog from '@/views/user_management/activity_log';
 import MainContent from '@/views/website_control/main_content';
 import TabContent from '@/views/website_control/tab_content';
-import UploadImage from '@/views/website_control/upload_image';
+// import UploadImage from '@/views/website_control/upload_image';
 import PersonalInfo from '@/views/personal_info/index.vue';
-import JobPostingDetail from '@/views/jobs/job_detail/index.vue';
+// import JobPostingDetail from '@/views/jobs/job_detail/index.vue';
 import CreateJobPost from '@/views/jobs/create_job/index.vue';
 const routes = [
   {
@@ -83,15 +83,21 @@ const routes = [
         component: ApplicantDetail,
         meta: { requiresAuth: true, permission: 'APPLICANTS' }
       },
-      { 
-        path: '/jobs/job_posting', 
-        name: 'job_posting', 
-        component: JobPosting, 
-        meta: { 
+      {
+        path: '/jobs/job_posting',
+        name: 'job_posting',
+        component: JobPosting,
+        meta: {
           requiresAuth: true,
           permission: 'JOBS'
         }
       },
+      // {
+      //   path: '/jobs/job_posting/:id',
+      //   name: 'job_posting_detail',
+      //   component: JobPostingDetail,
+      //   meta: { requiresAuth: true, permission: 'JOBS' }
+      // },
       {
         path: '/jobs/job_posting/create',
         name: 'create_job_posting',
@@ -118,16 +124,16 @@ const routes = [
         })
       },
 
-      { 
-        path: '/jobs/job_title', 
-        name: 'job_title', component: 
-        JobTitle, meta: { requiresAuth: true } 
-      }, 
-      { 
-        path: '/jobs/job_category', 
-        name: 'job_category', 
-        component: JobCategory, 
-        meta: { requiresAuth: true } 
+      {
+        path: '/jobs/job_title',
+        name: 'job_title', component:
+          JobTitle, meta: { requiresAuth: true }
+      },
+      {
+        path: '/jobs/job_category',
+        name: 'job_category',
+        component: JobCategory,
+        meta: { requiresAuth: true }
       },
       {
         path: '/request-leave',
@@ -175,7 +181,7 @@ const routes = [
         path: '/users/roles',
         name: 'roles',
         component: Roles,
-        meta: { 
+        meta: {
           requiresAuth: true,
           permission: 'SETTING'
         }
@@ -192,11 +198,11 @@ const routes = [
         component: ActivityLog,
         meta: { requiresAuth: true }
       },
-            {
+      {
         path: '/website-control/main-content',
         name: 'main-content',
         component: MainContent,
-        meta: { 
+        meta: {
           requiresAuth: true,
           permission: 'WEBSITE_CONTROL'
         }
@@ -208,22 +214,10 @@ const routes = [
         meta: { requiresAuth: true }
       },
       {
-        path: '/website-control/upload-image',
-        name: 'upload-image',
-        component: UploadImage,
-        meta: { requiresAuth: true }
-      },
-      {
         path: '/personal-info',
-        name: 'personal',
         component: PersonalInfo,
         meta: { requiresAuth: true }
       }
-      // {
-      //   path: '/profile',
-      //   component: Profile,
-      //   meta: { requiresAuth: true }
-      // }
     ]
   },
   {

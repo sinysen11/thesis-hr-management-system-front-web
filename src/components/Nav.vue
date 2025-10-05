@@ -153,11 +153,6 @@ export default {
               name: 'Tab Content',
               path: '/website-control/tab-content',
               icon: 'fa-solid fa-table' // Updated to more relevant icon
-            },
-            {
-              name: 'Upload Image',
-              path: '/website-control/upload-image',
-              icon: 'fa-solid fa-image' // Updated to more relevant icon
             }
           ]
         }

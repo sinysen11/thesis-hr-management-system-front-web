@@ -5,6 +5,8 @@ import router from './router';
 import 'flatpickr/dist/flatpickr.css';
 import Toast from 'vue-toastification';
 import 'vue-toastification/dist/index.css';
+import Datepicker from '@vuepic/vue-datepicker'
+import '@vuepic/vue-datepicker/dist/main.css'
 
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
@@ -52,3 +54,4 @@ app.use(Toast, {
 });
 app.component('font-awesome-icon', FontAwesomeIcon);
 app.mount('#app');
+app.component('Datepicker', Datepicker);

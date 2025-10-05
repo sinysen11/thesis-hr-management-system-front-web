@@ -24,6 +24,13 @@ export function getOneTabContent(data) {
   });
 }
 
+// export function getOneTabContent(id) {
+//   return request({
+//     url: `{tabContent.getOneTabContent.url}/${id}`,
+//     method: tabContent.getOneTabContent.method
+//   });
+// }
+
 export function updateTabContent(id, data) {
   return request({
     url: `${tabContent.updateTabContent.url}/${id}`,
