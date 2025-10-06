@@ -32,10 +32,9 @@ export function getOneResume(id) {
   return request({
     url: `${applicant.getOneResume.url}/${id}/document`,
     method: applicant.getOneResume.method,
-    responseType: 'blob'
+    responseType: 'blob' 
   });
 }
-
 export function createApplicant(data) {
   return request({
     url: applicant.createApplicant.url,

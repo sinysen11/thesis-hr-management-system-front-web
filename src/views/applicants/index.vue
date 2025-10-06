@@ -445,25 +445,34 @@ export default {
       }, 3000);
     },
 
-    async downloadResume(applicantId, fileName) {
-      try {
-        // Ensure getOneResume returns binary (PDF) data
-        const response = await getOneResume(applicantId, { responseType: 'applcation/pdf' });
+async downloadResume(applicantId, fileName) {
+  try {
+    const response = await getOneResume(applicantId);
 
-        const blob = new Blob([response.data], { type: 'application/pdf' });
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = fileName || 'resume.pdf';
-        link.click();
+    // Handle both wrapped or direct response
+    const blob = response instanceof Blob ? response : response.data;
 
-        URL.revokeObjectURL(link.href);
-        this.showAlert(`Successfully downloaded ${fileName}`);
-      } catch (error) {
-        this.showAlert('Failed to download resume: ' + error.message, 'error');
-        console.error('Download failed:', error);
-      }
-    },
+    if (!blob || !(blob instanceof Blob)) {
+      throw new Error('Invalid or empty file response');
+    }
 
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.href = url;
+    link.download = fileName || 'resume.pdf';
+    document.body.appendChild(link); // required for Firefox
+    link.click();
+    document.body.removeChild(link);
+
+    // Revoke after a short delay to avoid timing issues
+    setTimeout(() => URL.revokeObjectURL(url), 3000);
+
+    this.showAlert(`Successfully downloaded ${fileName || 'resume.pdf'}`, 'success');
+  } catch (error) {
+    this.showAlert('Failed to download resume: ' + error.message, 'error');
+    console.error('Download failed:', error);
+  }
+},
     openViewModal(applicant) {
       this.$router.push({ name: 'applicant_detail', params: { id: applicant._id }});
     },
