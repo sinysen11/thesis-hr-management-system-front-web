@@ -33,13 +33,9 @@
           </label>
           <input type="text" v-model="searchQuery"
             class="border border-gray-300 rounded-lg px-4 py-2 w-[300px] focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
-            placeholder="Search by username, email, or name" />
+            placeholder="Search by username, email, or name" @input="filterData" />
         </div>
         <div class="flex gap-4">
-          <button @click="filterData"
-            class="px-6 py-2 font-medium text-white transition duration-200 bg-indigo-600 rounded-lg hover:bg-indigo-700">
-            Search
-          </button>
           <button @click="resetFilters"
             class="px-6 py-2 font-medium text-gray-800 transition duration-200 bg-gray-200 rounded-lg hover:bg-gray-300">
             Reset
@@ -88,7 +84,12 @@
               <td class="px-4 py-3">
                 <button @click="toggleStatus(user)"
                   class="relative cursor-pointer flex items-center w-12 h-6 rounded-full transition-colors duration-300 focus:outline-none"
-                  :class="user.status === 'Active' ? 'bg-green-500' : 'bg-red-500'" title="Toggle User Status">
+                  :class="[
+                    user.status === 'Active' ? 'bg-green-500' : 'bg-red-500',
+                    user.email.toLowerCase() === currentUserEmail.toLowerCase() ? 'opacity-50 cursor-not-allowed' : ''
+                  ]"
+                  :disabled="user.email.toLowerCase() === currentUserEmail.toLowerCase()"
+                  :title="user.email.toLowerCase() === currentUserEmail.toLowerCase() ? 'Cannot toggle status for the logged-in user' : 'Toggle User Status'">
                   <span
                     class="absolute w-5 h-5 bg-white rounded-full shadow-md transform transition-transform duration-300"
                     :class="user.status === 'Active' ? 'translate-x-6' : 'translate-x-1'"></span>
@@ -129,7 +130,6 @@
           class="px-4 py-2 text-gray-800 transition duration-200 bg-gray-200 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-300">
           Previous
         </button>
-
         <template v-for="(page, index) in visiblePages" :key="index">
           <span v-if="page === '...'" class="px-4 py-2 text-gray-500">...</span>
           <button v-else @click="goToPage(page)" :class="[
@@ -141,7 +141,6 @@
             {{ page }}
           </button>
         </template>
-
         <button @click="nextPage" :disabled="currentPage === totalPages"
           class="px-4 py-2 text-gray-800 transition duration-200 bg-gray-200 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-300">
           Next
@@ -263,7 +262,6 @@
               <i class="fas fa-times text-lg"></i>
             </button>
           </div>
-
           <div class="space-y-6">
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
               <div>
@@ -279,7 +277,6 @@
                   placeholder="Enter last name (KH)" />
               </div>
             </div>
-
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
               <div>
                 <label class="block mb-1 text-sm font-medium text-gray-700">First Name (EN) *</label>
@@ -294,7 +291,6 @@
                   placeholder="Enter last name (EN)" />
               </div>
             </div>
-
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
               <div>
                 <label class="block mb-1 text-sm font-medium text-gray-700">Username *</label>
@@ -309,7 +305,6 @@
                   placeholder="Enter email" />
               </div>
             </div>
-
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
               <div v-if="!isEditing" class="w-full">
                 <label class="block mb-1 text-sm font-medium text-gray-700">Password *</label>
@@ -328,7 +323,6 @@
                 </select>
               </div>
             </div>
-
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
               <div>
                 <label class="block mb-1 text-sm font-medium text-gray-700">Department *</label>
@@ -347,7 +341,6 @@
                   placeholder="Enter phone number" />
               </div>
             </div>
-
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
               <div>
                 <label class="block mb-1 text-sm font-medium text-gray-700">Gender</label>
@@ -365,17 +358,18 @@
                   placeholder="Enter date of birth" />
               </div>
             </div>
-
             <div class="w-full">
               <label class="block mb-1 text-sm font-medium text-gray-700">Status</label>
               <select v-model="form.status"
-                class="w-full px-4 py-2.5 transition border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm shadow-sm appearance-none bg-white">
+                class="w-full px-4 py-2.5 transition border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm shadow-sm appearance-none bg-white"
+                :class="{ 'opacity-50 cursor-not-allowed': isEditing && form.email.toLowerCase() === currentUserEmail.toLowerCase() }"
+                :disabled="isEditing && form.email.toLowerCase() === currentUserEmail.toLowerCase()"
+                :title="isEditing && form.email.toLowerCase() === currentUserEmail.toLowerCase() ? 'Cannot change status for the logged-in user' : 'Select Status'">
                 <option value="Active">Active</option>
                 <option value="Inactive">Inactive</option>
               </select>
             </div>
           </div>
-
           <div class="flex justify-end gap-4 pt-6 mt-8 border-t border-gray-100">
             <button @click="closeCreateModal"
               class="px-6 py-2.5 font-semibold text-gray-600 transition duration-200 bg-gray-100 rounded-xl hover:bg-gray-200">
@@ -402,8 +396,7 @@
               Confirm Deletion
             </h3>
             <p class="text-gray-600">
-              Are you sure you want to delete this user? This action cannot be
-              undone.
+              Are you sure you want to delete this user? This action cannot be undone.
             </p>
           </div>
           <div class="flex justify-center gap-4 mt-8">
@@ -426,6 +419,7 @@
 import { getAllUser, createUser, updateUser, deleteUser, updateStatus } from '@/apis/user';
 import { getAllRole } from '@/apis/role';
 import { getAllDepartment } from '@/apis/department';
+import Cookies from 'js-cookie';
 
 export default {
   data() {
@@ -433,7 +427,7 @@ export default {
       searchQuery: '',
       currentPage: 1,
       itemsPerPage: 10,
-      totalUsers: 0, // Now correctly updated from result.pagination.total
+      totalUsers: 0,
       showCreateModal: false,
       showViewModal: false,
       showDeleteModal: false,
@@ -456,40 +450,47 @@ export default {
         dob: '',
         status: 'Active'
       },
-      users: [], // Holds only the users for the CURRENT page
+      allUsers: [], // Store all users fetched from server
+      users: [], // Holds filtered users for current page
       roles: [],
       departments: [],
       errorMessage: '',
       successMessage: '',
-      loading: false
+      loading: false,
+      currentUserEmail: '' // Store the email of the logged-in user
     };
   },
+
   computed: {
-    // Kept to avoid breaking any table structure that might rely on this name.
     filteredUsers() {
-      return this.users;
+      if (!this.searchQuery.trim()) {
+        return this.allUsers;
+      }
+      const query = this.searchQuery.toLowerCase().trim();
+      return this.allUsers.filter(user =>
+        (user.first_name_kh?.toLowerCase() + ' ' + user.last_name_kh?.toLowerCase()).includes(query) ||
+        (user.first_name_en?.toLowerCase() + ' ' + user.last_name_en?.toLowerCase()).includes(query) ||
+        user.username?.toLowerCase().includes(query) ||
+        user.email?.toLowerCase().includes(query)
+      );
     },
-    // The data array loaded from the server is already paginated.
+
     paginatedUsers() {
-      return this.users;
+      const start = (this.currentPage - 1) * this.itemsPerPage;
+      const end = start + this.itemsPerPage;
+      return this.filteredUsers.slice(start, end);
     },
 
-    // Calculates total pages based on the total count from the server.
     totalPages() {
-      return Math.ceil(this.totalUsers / this.itemsPerPage) || 1;
+      return Math.ceil(this.filteredUsers.length / this.itemsPerPage) || 1;
     },
 
-    /**
-     * ✅ FIXED Logic: Displays a maximum of 5 page buttons (including ellipsis).
-     * This correctly ensures [1, 2] is shown for 11 total users.
-     */
     visiblePages() {
       const total = this.totalPages;
       const current = this.currentPage;
       const maxButtons = 5;
       const pages = [];
 
-      // Case 1: Total pages is 5 or less (e.g., 11 users -> total is 2)
       if (total <= maxButtons) {
         for (let i = 1; i <= total; i++) {
           pages.push(i);
@@ -497,13 +498,10 @@ export default {
         return pages;
       }
 
-      // Case 2: Total pages is greater than 5 (Ellipsis logic)
       const pageDelta = 1;
-
       let start = Math.max(2, current - pageDelta);
       let end = Math.min(total - 1, current + pageDelta);
 
-      // Adjust window to display 3 pages around the current page if near boundaries
       if (current <= 3) {
         end = Math.min(total - 1, 4);
         start = 2;
@@ -512,38 +510,32 @@ export default {
         end = total - 1;
       }
 
-      // Add page 1
       pages.push(1);
-
-      // Add first ellipsis if needed
       if (start > 2) {
         pages.push('...');
       }
 
-      // Add central pages
       for (let i = start; i <= end; i++) {
         if (i !== 1 && i !== total) {
           pages.push(i);
         }
       }
 
-      // Add second ellipsis if needed
       if (end < total - 1) {
         pages.push('...');
       }
 
-      // Add last page
       if (pages[pages.length - 1] !== total) {
         pages.push(total);
       }
 
-      // Remove duplicates and double ellipses
       return [...new Set(pages.filter(p => p))].filter((page, index, self) => {
         if (page === '...' && self[index - 1] === '...') return false;
         return true;
       });
     }
   },
+
   methods: {
     alert(message, type = 'success') {
       if (type === 'success') {
@@ -559,18 +551,24 @@ export default {
       }, 3000);
     },
 
-    // 🚀 CRITICAL FIX: Ensure search is passed AND total count is read correctly
-    async getAllUsers(page = this.currentPage, query = this.searchQuery) {
+    getCurrentUserEmail() {
+      try {
+        const userInfo = Cookies.get('userInfo');
+        if (!userInfo) return '';
+        const parsedUserInfo = JSON.parse(userInfo);
+        return parsedUserInfo.email || '';
+      } catch (error) {
+        console.error('Error parsing userInfo cookie:', error);
+        return '';
+      }
+    },
+
+    async getAllUsers(page = 1) {
       this.loading = true;
       try {
-        const result = await getAllUser({
-          page,
-          limit: this.itemsPerPage,
-          search: query || undefined // Pass search query to API
-        });
-
+        const result = await getAllUser({ page, limit: 1000 }); // Fetch all users
         if (result && result.status === 1) {
-          this.users = result.data.map((user) => ({
+          this.allUsers = result.data.map((user) => ({
             id: user._id || null,
             first_name_kh: user.first_name_kh || '',
             last_name_kh: user.last_name_kh || '',
@@ -583,28 +581,27 @@ export default {
             phone_number: user.phone_number || '',
             gender: user.gender || 'N/A',
             dob: user.dob || null,
-            status: user.status
+            status: user.status,
+            last_login: user.last_login || null
           }));
-
-          this.currentPage = result.pagination?.page || page;
-          this.itemsPerPage = result.pagination?.limit || this.itemsPerPage;
-          this.totalUsers = result.pagination?.total || this.users.length;
+          this.totalUsers = this.allUsers.length;
+          this.users = this.paginatedUsers; // Update displayed users
         } else {
           this.alert('Failed to load users. Invalid response format.', 'error');
+          this.allUsers = [];
           this.users = [];
           this.totalUsers = 0;
         }
       } catch (error) {
         console.error('Error fetching users:', error);
         this.alert('Error fetching users: ' + error.message, 'error');
+        this.allUsers = [];
         this.users = [];
         this.totalUsers = 0;
       } finally {
         this.loading = false;
       }
     },
-
-    // --- Other Methods (Roles, Departments, Modals, CRUD) ---
 
     async getAllRoles() {
       this.loading = true;
@@ -613,11 +610,7 @@ export default {
         let rolesData = [];
         if (result && result.status === 1 && Array.isArray(result.roles)) {
           rolesData = result.roles;
-        } else if (
-          result &&
-          result.status === 1 &&
-          Array.isArray(result.data)
-        ) {
+        } else if (result && result.status === 1 && Array.isArray(result.data)) {
           rolesData = result.data;
         } else if (Array.isArray(result)) {
           rolesData = result;
@@ -635,22 +628,15 @@ export default {
         this.loading = false;
       }
     },
+
     async getAllDepartments() {
       this.loading = true;
       try {
         const result = await getAllDepartment();
         let departmentsData = [];
-        if (
-          result &&
-          result.status === 1 &&
-          Array.isArray(result.departments)
-        ) {
+        if (result && result.status === 1 && Array.isArray(result.departments)) {
           departmentsData = result.departments;
-        } else if (
-          result &&
-          result.status === 1 &&
-          Array.isArray(result.data)
-        ) {
+        } else if (result && result.status === 1 && Array.isArray(result.data)) {
           departmentsData = result.data;
         } else if (Array.isArray(result)) {
           departmentsData = result;
@@ -673,6 +659,7 @@ export default {
         this.loading = false;
       }
     },
+
     async saveUser() {
       if (
         !this.form.first_name_kh ||
@@ -691,15 +678,18 @@ export default {
         this.alert('Please fill in all required fields.', 'error');
         return;
       }
+      if (this.isEditing && this.form.email.toLowerCase() === this.currentUserEmail.toLowerCase()) {
+        this.alert('Cannot update status for the logged-in user in edit mode.', 'error');
+        return;
+      }
       this.loading = true;
       try {
         if (this.isEditing) {
           const { id, password, ...formData } = this.form;
           const updatePayload = password ? this.form : formData;
-
           const updatedUser = await updateUser(this.form.id, updatePayload);
           if (updatedUser && updatedUser.status === 1) {
-            await this.getAllUsers(this.currentPage, this.searchQuery);
+            await this.getAllUsers(this.currentPage);
             this.alert('User updated successfully!');
           } else {
             this.alert('Failed to update user. Please try again.', 'error');
@@ -708,7 +698,7 @@ export default {
           const { id, ...formData } = this.form;
           const newUser = await createUser(formData);
           if (newUser && newUser.status === 1) {
-            await this.getAllUsers(1, this.searchQuery);
+            await this.getAllUsers(1);
             this.alert('User created successfully!');
           } else {
             this.alert('Failed to create user. Please try again.', 'error');
@@ -722,6 +712,7 @@ export default {
         this.loading = false;
       }
     },
+
     confirmDelete(id) {
       if (!id) {
         this.alert('Invalid user ID.', 'error');
@@ -730,6 +721,7 @@ export default {
       this.userToDeleteId = id;
       this.showDeleteModal = true;
     },
+
     async deleteUser() {
       if (!this.userToDeleteId) {
         this.alert('No user selected for deletion.', 'error');
@@ -739,7 +731,7 @@ export default {
       try {
         const result = await deleteUser(this.userToDeleteId);
         if (result && [1, 204].includes(result.status)) {
-          await this.getAllUsers(this.currentPage, this.searchQuery);
+          await this.getAllUsers(this.currentPage);
           this.alert('User deleted successfully!');
         } else {
           this.alert(
@@ -756,14 +748,17 @@ export default {
       }
     },
 
-    // Server-side filter/search trigger
     filterData() {
-      this.goToPage(1);
+      this.currentPage = 1; // Reset to first page on filter
+      this.totalUsers = this.filteredUsers.length;
+      this.users = this.paginatedUsers;
     },
-    // Server-side filter/search reset
+
     resetFilters() {
       this.searchQuery = '';
-      this.goToPage(1);
+      this.currentPage = 1;
+      this.totalUsers = this.allUsers.length;
+      this.users = this.paginatedUsers;
     },
 
     openCreateModal() {
@@ -790,6 +785,7 @@ export default {
       };
       this.showCreateModal = true;
     },
+
     openEditModal(user) {
       if (!user.id) {
         this.alert('Invalid user ID.', 'error');
@@ -818,6 +814,7 @@ export default {
       };
       this.showCreateModal = true;
     },
+
     openViewModal(user) {
       if (!user.id) {
         this.alert('Invalid user ID.', 'error');
@@ -826,6 +823,7 @@ export default {
       this.selectedUser = { ...user };
       this.showViewModal = true;
     },
+
     closeCreateModal() {
       this.showCreateModal = false;
       this.isEditing = false;
@@ -848,17 +846,20 @@ export default {
     },
 
     async toggleStatus(user) {
+      if (user.email.toLowerCase() === this.currentUserEmail.toLowerCase()) {
+        this.alert('Cannot toggle status for the currently logged-in user.', 'error');
+        return;
+      }
       const user_info = user;
-      console.log(user_info)
       const newStatus = user_info.status === 'Active' ? 'Inactive' : 'Active';
       const payload = {
         user_id: user_info.id,
         status: newStatus
-      }
+      };
       try {
         const res = await updateStatus(payload);
         if (res.status === 1) {
-          this.getAllUsers(this.currentPage, this.searchQuery);
+          await this.getAllUsers(this.currentPage);
           this.alert(`Status updated to ${newStatus}`);
         }
       } catch (err) {
@@ -871,33 +872,36 @@ export default {
       this.showViewModal = false;
       this.selectedUser = null;
     },
+
     closeDeleteModal() {
       this.showDeleteModal = false;
       this.userToDeleteId = null;
     },
-    // Server-side navigation method
+
     prevPage() {
       this.goToPage(this.currentPage - 1);
     },
-    // Server-side navigation method
+
     nextPage() {
       this.goToPage(this.currentPage + 1);
     },
-    // ⚠️ Central navigation method to fetch new data, passing the current search query
+
     goToPage(page) {
       if (page >= 1 && page <= this.totalPages) {
         this.currentPage = page;
-        this.getAllUsers(page, this.searchQuery);
+        this.users = this.paginatedUsers;
       }
     }
   },
+
   async mounted() {
+    this.currentUserEmail = this.getCurrentUserEmail();
     this.loading = true;
     try {
       await Promise.all([
         this.getAllRoles(),
         this.getAllDepartments(),
-        this.getAllUsers(1, this.searchQuery)
+        this.getAllUsers(1)
       ]);
     } catch (error) {
       console.error('Error during initial data fetch:', error);

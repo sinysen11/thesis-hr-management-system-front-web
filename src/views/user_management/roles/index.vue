@@ -16,7 +16,8 @@
     <div class="flex items-center justify-between mb-6">
       <h2 class="text-2xl font-extrabold tracking-tight text-green-700">
         Roles
-      </h2>      <button @click="openCreateModal" :disabled="loading"
+      </h2>
+      <button @click="openCreateModal" :disabled="loading"
         class="px-6 py-2 font-medium text-white transition duration-200 bg-indigo-600 rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed">
         Create
       </button>
@@ -179,7 +180,10 @@
               <div class="grid grid-cols-2 gap-4 mt-2">
                 <div v-for="perm in availablePermissions" :key="perm" class="flex items-center">
                   <input type="checkbox" :id="`perm-${perm}`" :value="perm" v-model="form.permissions"
-                    class="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500" />
+                    class="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                    :disabled="perm === 'SETTING' && isProtectedRole(form.name)"
+                    :title="perm === 'SETTING' && isProtectedRole(form.name) ? 'SETTING permission is required for this role' : ''"
+                    @change="ensureSettingForProtectedRole(perm)" />
                   <label :for="`perm-${perm}`" class="ml-2 text-sm text-gray-700">{{ permissionLabels[perm] }}</label>
                 </div>
               </div>
@@ -240,6 +244,7 @@ export default {
       selectedRole: null,
       roleToDeleteId: null,
       form: {
+        id: null,
         name: '',
         permissions: []
       },
@@ -293,6 +298,14 @@ export default {
     }
   },
   methods: {
+    isProtectedRole(roleName) {
+      return ['Super Admin', 'Manager', 'Admin'].includes(roleName);
+    },
+    ensureSettingForProtectedRole(perm) {
+      if (this.isProtectedRole(this.form.name) && perm === 'SETTING' && !this.form.permissions.includes('SETTING')) {
+        this.form.permissions.push('SETTING');
+      }
+    },
     alert(message, type = 'success') {
       if (type === 'success') {
         this.successMessage = message;
@@ -330,6 +343,11 @@ export default {
     async saveRole() {
       if (!this.form.name || this.form.permissions.length === 0) {
         this.alert('Please fill in all required fields (Name and Permissions).', 'error');
+        return;
+      }
+      if (this.isProtectedRole(this.form.name) && !this.form.permissions.includes('SETTING')) {
+        this.form.permissions.push('SETTING');
+        this.alert('SETTING permission is required for this role.', 'error');
         return;
       }
       this.loading = true;
@@ -405,6 +423,7 @@ export default {
     openCreateModal() {
       this.isEditing = false;
       this.form = {
+        id: null,
         name: '',
         permissions: []
       };
@@ -420,6 +439,7 @@ export default {
         ...role,
         permissions: [...role.permissions]
       };
+      this.ensureSettingForProtectedRole('SETTING');
       this.showCreateModal = true;
     },
     openViewModal(role) {
@@ -434,6 +454,7 @@ export default {
       this.showCreateModal = false;
       this.isEditing = false;
       this.form = {
+        id: null,
         name: '',
         permissions: []
       };
