@@ -61,6 +61,36 @@ export function getLeaveRequestsReport(params) {
   })
 }
 
+export function getLeaveSummaryAndAuditReport(params) {
+  return request({
+    url: `${leaveRequest.getLeaveSummary.url}`,
+    method: `${leaveRequest.getLeaveSummary.method}`,
+    params
+  })
+}
+
+export function getEmployeeLeaveHistory(employee_id) {
+  return request({
+    url: `${leaveRequest.getLeaveEmployye.url}/${employee_id}`,
+    method: `${leaveRequest.getLeaveEmployye.method}`
+  })
+}
+
+export function getLeaveBalanceAndLiabilityReport() {
+  return request({
+    url: `${leaveRequest.getLeaveBalance.url}`,
+    method: `${leaveRequest.getLeaveBalance.method}`
+  })
+}
+
+export function getDepartmentWiseLeaveReport(params) {
+  return request({
+    url: `${leaveRequest.getLeaveDepartment.url}`,
+    method: `${leaveRequest.getLeaveDepartment.method}`,
+    params
+  })
+}
+
 export function createLeaveRequest(data) {
   return request({
     url: `${leaveRequest.createLeaveRequest.url}`,

@@ -171,6 +171,22 @@ module.exports = {
         getLeaveReport: {
             url: 'leave/reports',
             method: 'get'
+        },
+        getLeaveSummary: {
+            url: 'leave/requests',
+            method: 'get'
+        },
+        getLeaveEmployye: {
+            url: 'leave/history',
+            method: 'get'
+        },
+        getLeaveBalance: {
+            url: 'leave/balances',
+            method: 'get'
+        },
+        getLeaveDepartment: {
+            url: 'leave/departmental',
+            method: 'get'
         }
     },
     activityLog: {
